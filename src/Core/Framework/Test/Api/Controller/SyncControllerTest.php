@@ -77,16 +77,20 @@ class SyncControllerTest extends TestCase
         static::assertSame(200, $response->getStatusCode(), $response->getContent());
 
         $this->getBrowser()->request('GET', '/api/product/' . $id1);
-        static::assertSame(Response::HTTP_OK, $this->getBrowser()->getResponse()->getStatusCode());
+        $response = $this->getBrowser()->getResponse();
+        static::assertSame(Response::HTTP_OK, $response->getStatusCode());
 
         $this->getBrowser()->request('GET', '/api/product/' . $id2);
-        static::assertSame(Response::HTTP_OK, $this->getBrowser()->getResponse()->getStatusCode());
+        $response = $this->getBrowser()->getResponse();
+        static::assertSame(Response::HTTP_OK, $response->getStatusCode());
 
         $this->getBrowser()->request('DELETE', '/api/product/' . $id1);
-        static::assertSame(Response::HTTP_NO_CONTENT, $this->getBrowser()->getResponse()->getStatusCode());
+        $response = $this->getBrowser()->getResponse();
+        static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
 
         $this->getBrowser()->request('DELETE', '/api/product/' . $id2);
-        static::assertSame(Response::HTTP_NO_CONTENT, $this->getBrowser()->getResponse()->getStatusCode());
+        $response = $this->getBrowser()->getResponse();
+        static::assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
     }
 
     public function testInsertAndUpdateSameEntity(): void

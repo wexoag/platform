@@ -22,6 +22,7 @@ use Shopware\Core\Framework\App\Payload\AppPayloadServiceHelper;
 use Shopware\Core\Framework\App\Payload\Source;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenEvent;
+use Shopware\Core\Framework\Update\Event\UpdatePostFinishEvent;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Webhook\Hookable\HookableEntityWrittenEvent;
 use Shopware\Core\Framework\Webhook\Hookable\HookableEventFactory;
@@ -71,8 +72,8 @@ class WebhookDispatcherTest extends TestCase
     {
         $event = new AppFlowActionEvent('foobar', ['foo' => 'bar'], ['foo' => 'bar']);
 
-        $webhookEntity = $this->getWebhookEntity($event->getName());
-        $this->prepareContainer($webhookEntity);
+        $webhookEntity = $this->getWebhookEntityWithApp($event->getName());
+        $this->prepareContainer([$webhookEntity]);
 
         $this->dispatcher->expects(static::once())->method('dispatch')->with($event, $event->getName())->willReturn($event);
         $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$event]);
@@ -124,9 +125,8 @@ class WebhookDispatcherTest extends TestCase
     {
         $event = new AppFlowActionEvent('foobar', ['foo' => 'bar'], ['foo' => 'bar']);
 
-        $webhookEntity = $this->getWebhookEntity($event->getName());
-        $this->prepareContainer($webhookEntity);
-        $this->container->set('webhook_event_log.repository', new StaticEntityRepository([]));
+        $webhookEntity = $this->getWebhookEntityWithApp($event->getName());
+        $this->prepareContainer([$webhookEntity]);
 
         $this->dispatcher->expects(static::once())->method('dispatch')->with($event, $event->getName())->willReturn($event);
         $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$event]);
@@ -167,12 +167,11 @@ class WebhookDispatcherTest extends TestCase
     {
         $event = new AppFlowActionEvent('foobar', ['foo' => 'bar'], ['foo' => 'bar']);
 
-        $webhookEntity = $this->getWebhookEntity($event->getName());
+        $webhookEntity = $this->getWebhookEntityWithApp($event->getName());
 
         $webhookEntity->setOnlyLiveVersion(true);
 
-        $this->prepareContainer($webhookEntity);
-        $this->container->set('webhook_event_log.repository', new StaticEntityRepository([]));
+        $this->prepareContainer([$webhookEntity]);
 
         $this->dispatcher->expects(static::once())->method('dispatch')->with($event, $event->getName())->willReturn($event);
         $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$event]);
@@ -203,11 +202,10 @@ class WebhookDispatcherTest extends TestCase
         $eventByEntityName = $event->getEventByEntityName('product');
         $hookableEvent = HookableEntityWrittenEvent::fromWrittenEvent($eventByEntityName);
 
-        $webhookEntity = $this->getWebhookEntity('product.written');
+        $webhookEntity = $this->getWebhookEntityWithApp('product.written');
         $webhookEntity->setOnlyLiveVersion(true);
 
-        $this->prepareContainer($webhookEntity);
-        $this->container->set('webhook_event_log.repository', new StaticEntityRepository([]));
+        $this->prepareContainer([$webhookEntity]);
 
         $this->dispatcher->expects(static::once())->method('dispatch')->with($event, 'product.written')->willReturn($event);
         $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$hookableEvent]);
@@ -249,12 +247,11 @@ class WebhookDispatcherTest extends TestCase
         $eventByEntityName = $event->getEventByEntityName('product');
         $hookableEvent = HookableEntityWrittenEvent::fromWrittenEvent($eventByEntityName);
 
-        $webhookEntity = $this->getWebhookEntity('product.written');
+        $webhookEntity = $this->getWebhookEntityWithApp('product.written');
         $webhookEntity->setOnlyLiveVersion(true);
 
         $this->container->set('webhook.repository', new StaticEntityRepository([new WebhookCollection([$webhookEntity])]));
         $this->container->set(AppLocaleProvider::class, $this->createMock(AppLocaleProvider::class));
-        $this->container->set('webhook_event_log.repository', new StaticEntityRepository([]));
 
         $this->dispatcher->expects(static::once())->method('dispatch')->with($event, 'product.written')->willReturn($event);
         $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$hookableEvent]);
@@ -280,11 +277,10 @@ class WebhookDispatcherTest extends TestCase
         $eventByEntityName = $event->getEventByEntityName('product');
         $hookableEvent = HookableEntityWrittenEvent::fromWrittenEvent($eventByEntityName);
 
-        $webhookEntity = $this->getWebhookEntity('product.written');
+        $webhookEntity = $this->getWebhookEntityWithApp('product.written');
         $webhookEntity->setOnlyLiveVersion(false);
 
-        $this->prepareContainer($webhookEntity);
-        $this->container->set('webhook_event_log.repository', new StaticEntityRepository([]));
+        $this->prepareContainer([$webhookEntity]);
 
         $this->dispatcher->expects(static::once())->method('dispatch')->with($event, 'product.written')->willReturn($event);
         $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$hookableEvent]);
@@ -331,11 +327,10 @@ class WebhookDispatcherTest extends TestCase
         $eventByEntityName = $event->getEventByEntityName('product');
         $hookableEvent = HookableEntityWrittenEvent::fromWrittenEvent($eventByEntityName);
 
-        $webhookEntity = $this->getWebhookEntity('product.written');
+        $webhookEntity = $this->getWebhookEntityWithApp('product.written');
         $webhookEntity->setOnlyLiveVersion(true);
 
-        $this->prepareContainer($webhookEntity);
-        $this->container->set('webhook_event_log.repository', new StaticEntityRepository([]));
+        $this->prepareContainer([$webhookEntity]);
 
         $this->dispatcher->expects(static::once())->method('dispatch')->with($event, 'product.written')->willReturn($event);
         $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$hookableEvent]);
@@ -388,11 +383,10 @@ class WebhookDispatcherTest extends TestCase
         $eventByEntityName = $event->getEventByEntityName('product');
         $hookableEvent = HookableEntityWrittenEvent::fromWrittenEvent($eventByEntityName);
 
-        $webhookEntity = $this->getWebhookEntity('product.written');
+        $webhookEntity = $this->getWebhookEntityWithApp('product.written');
         $webhookEntity->setOnlyLiveVersion(false);
 
-        $this->prepareContainer($webhookEntity);
-        $this->container->set('webhook_event_log.repository', new StaticEntityRepository([]));
+        $this->prepareContainer([$webhookEntity]);
 
         $this->dispatcher->expects(static::once())->method('dispatch')->with($event, 'product.written')->willReturn($event);
         $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$hookableEvent]);
@@ -424,6 +418,26 @@ class WebhookDispatcherTest extends TestCase
         static::assertStringContainsString($secondId, json_encode($payload));
     }
 
+    public function testDuplicateWebhooksAreFilteredOut(): void
+    {
+        $context = Context::createDefaultContext();
+
+        $wh1 = $this->getWebhookEntity('shopware.updated', 'https://services.shopware.io/hooks');
+        $wh2 = $this->getWebhookEntity('shopware.updated', 'https://services.shopware.io/hooks');
+
+        $this->prepareContainer([$wh1, $wh2]);
+
+        $event = new UpdatePostFinishEvent($context, '6.5.0.0', '6.6.0.0');
+        $this->dispatcher->expects(static::once())->method('dispatch')->with($event, null)->willReturn($event);
+        $this->eventFactory->expects(static::once())->method('createHookablesFor')->with($event)->willReturn([$event]);
+
+        $dispatcher = $this->getWebhookDispatcher(false);
+
+        $dispatcher->dispatch($event);
+
+        static::assertCount(1, $this->bus->getMessages());
+    }
+
     private function getWebhookDispatcher(bool $isAdminWorkerEnabled): WebhookDispatcher
     {
         return new WebhookDispatcher(
@@ -439,7 +453,7 @@ class WebhookDispatcherTest extends TestCase
         );
     }
 
-    private function getWebhookEntity(string $eventName): WebhookEntity
+    private function getWebhookEntityWithApp(string $eventName, ?string $url = null): WebhookEntity
     {
         $appEntity = new AppEntity();
         $appEntity->setId(Uuid::randomHex());
@@ -449,24 +463,36 @@ class WebhookDispatcherTest extends TestCase
         $appEntity->setVersion('0.0.0');
         $appEntity->setAppSecret('verysecret');
 
+        $webhookEntity = $this->getWebhookEntity($eventName, $url);
+        $webhookEntity->setApp($appEntity);
+
+        return $webhookEntity;
+    }
+
+    private function getWebhookEntity(string $eventName, ?string $url = null): WebhookEntity
+    {
         $webhookEntity = new WebhookEntity();
         $webhookEntity->setId(Uuid::randomHex());
         $webhookEntity->setName('Cool Webhook');
         $webhookEntity->setEventName($eventName);
-        $webhookEntity->setApp($appEntity);
-        $webhookEntity->setUrl('https://foo.bar');
+        $webhookEntity->setUrl($url ?? 'https://foo.bar');
         $webhookEntity->setOnlyLiveVersion(false);
 
         return $webhookEntity;
     }
 
-    private function prepareContainer(WebhookEntity $webhookEntity): void
+    /**
+     * @param array<WebhookEntity> $webhooks
+     */
+    private function prepareContainer(array $webhooks): void
     {
         $appPayloadServiceHelper = $this->createMock(AppPayloadServiceHelper::class);
-        $appPayloadServiceHelper->expects(static::once())->method('buildSource')->willReturn(new Source('https://example.com', 'foobar', '0.0.0'));
+        $appPayloadServiceHelper->expects(static::any())->method('buildSource')->willReturn(new Source('https://example.com', 'foobar', '0.0.0'));
 
-        $this->container->set('webhook.repository', new StaticEntityRepository([new WebhookCollection([$webhookEntity])]));
+        $this->container->set('webhook.repository', new StaticEntityRepository([new WebhookCollection($webhooks)]));
         $this->container->set(AppLocaleProvider::class, $this->createMock(AppLocaleProvider::class));
         $this->container->set(AppPayloadServiceHelper::class, $appPayloadServiceHelper);
+
+        $this->container->set('webhook_event_log.repository', new StaticEntityRepository([]));
     }
 }

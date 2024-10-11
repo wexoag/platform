@@ -35,6 +35,7 @@ class AppCheckoutGatewayPayloadServiceTest extends TestCase
         $shippingMethods = ['shippingMethod-1', 'shippingMethod-2'];
 
         $app = new AppEntity();
+        $app->setVersion('1.0.0');
         $app->setAppSecret('devsecret');
 
         $payload = new AppCheckoutGatewayPayload($context, $cart, $paymentMethods, $shippingMethods);
@@ -79,6 +80,7 @@ class AppCheckoutGatewayPayloadServiceTest extends TestCase
         $shippingMethods = ['shippingMethod-1', 'shippingMethod-2'];
 
         $app = new AppEntity();
+        $app->setVersion('1.0.0');
         $app->setAppSecret('devsecret');
 
         $payload = new AppCheckoutGatewayPayload($context, $cart, $paymentMethods, $shippingMethods);
@@ -116,6 +118,7 @@ class AppCheckoutGatewayPayloadServiceTest extends TestCase
 
         $app = new AppEntity();
         $app->setName('Foo');
+        $app->setVersion('1.0.0');
         $app->setAppSecret(null);
 
         $payload = new AppCheckoutGatewayPayload($context, $cart, $paymentMethods, $shippingMethods);

@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Framework\Api\Context\SystemSource;
 use Shopware\Core\Framework\Api\Serializer\JsonEntityEncoder;
-use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\Payload\AppPayloadServiceHelper;
 use Shopware\Core\Framework\App\Payload\Source;
 use Shopware\Core\Framework\App\ShopId\ShopIdProvider;
@@ -48,10 +47,7 @@ class AppPayloadServiceHelperTest extends TestCase
             'https://shopware.com'
         );
 
-        $app = new AppEntity();
-        $app->setVersion('1.0.0');
-
-        $source = $appPayloadServiceHelper->buildSource($app);
+        $source = $appPayloadServiceHelper->buildSource('1.0.0');
 
         static::assertSame('https://shopware.com', $source->getUrl());
         static::assertSame($this->ids->get('shop-id'), $source->getShopId());

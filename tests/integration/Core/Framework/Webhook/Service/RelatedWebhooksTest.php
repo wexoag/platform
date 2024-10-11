@@ -2,16 +2,15 @@
 
 namespace Shopware\Tests\Integration\Core\Framework\Webhook\Service;
 
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Checkout\Customer\Event\CustomerBeforeLoginEvent;
+use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Test\IdsCollection;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Webhook\Service\RelatedWebhooks;
-use Shopware\Core\Framework\Webhook\WebhookCollection;
-use Shopware\Core\Framework\Webhook\WebhookEntity;
 
 /**
  * @internal
@@ -22,42 +21,44 @@ class RelatedWebhooksTest extends TestCase
 
     private IdsCollection $ids;
 
-    /**
-     * @var EntityRepository<WebhookCollection>
-     */
-    private EntityRepository $webhookRepository;
+    private Connection $connection;
 
     protected function setUp(): void
     {
         $this->ids = new IdsCollection();
-        $this->webhookRepository = $this->getContainer()->get('webhook.repository');
+        $this->connection = $this->getContainer()->get(Connection::class);
 
-        $this->webhookRepository->upsert([
-            [
-                'id' => $this->ids->get('wh-1'),
-                'name' => 'hook1',
-                'eventName' => CustomerBeforeLoginEvent::EVENT_NAME,
-                'url' => 'https://test.com',
-            ],
-            [
-                'id' => $this->ids->get('wh-2'),
-                'name' => 'hook2',
-                'eventName' => CustomerBeforeLoginEvent::EVENT_NAME,
-                'url' => 'https://test.com',
-            ],
-            [
-                'id' => $this->ids->get('wh-3'),
-                'name' => 'hook3',
-                'eventName' => CustomerBeforeLoginEvent::EVENT_NAME,
-                'url' => 'https://test.com',
-            ],
-            [
-                'id' => $this->ids->get('wh-4'),
-                'name' => 'hook4',
-                'eventName' => CustomerBeforeLoginEvent::EVENT_NAME,
-                'url' => 'https://test2.com',
-            ],
-        ], Context::createDefaultContext());
+        $this->connection->insert('webhook', [
+            'id' => $this->ids->getBytes('wh-1'),
+            'name' => 'hook1',
+            'event_name' => CustomerBeforeLoginEvent::EVENT_NAME,
+            'url' => 'https://test.com',
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+        ]);
+
+        $this->connection->insert('webhook', [
+            'id' => $this->ids->getBytes('wh-2'),
+            'name' => 'hook2',
+            'event_name' => CustomerBeforeLoginEvent::EVENT_NAME,
+            'url' => 'https://test.com',
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+        ]);
+
+        $this->connection->insert('webhook', [
+            'id' => $this->ids->getBytes('wh-3'),
+            'name' => 'hook3',
+            'event_name' => CustomerBeforeLoginEvent::EVENT_NAME,
+            'url' => 'https://test.com',
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+        ]);
+
+        $this->connection->insert('webhook', [
+            'id' => $this->ids->getBytes('wh-4'),
+            'name' => 'hook4',
+            'event_name' => CustomerBeforeLoginEvent::EVENT_NAME,
+            'url' => 'https://test2.com',
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+        ]);
     }
 
     public function testUpdateRelated(): void
@@ -66,21 +67,17 @@ class RelatedWebhooksTest extends TestCase
 
         $context = Context::createDefaultContext();
         $relatedWebhooks->updateRelated($this->ids->get('wh-1'), [
-            'errorCount' => 2,
+            'error_count' => 2,
         ], $context);
 
-        $webhooks = $this->webhookRepository->search(
-            new Criteria(
-                [
-                    $this->ids->get('wh-1'),
-                    $this->ids->get('wh-2'),
-                    $this->ids->get('wh-3'),
-                ]
-            ),
-            $context
+        $counts = $this->connection->fetchFirstColumn(
+            'SELECT error_count FROM webhook WHERE id IN (:ids)',
+            [
+                'ids' => $this->ids->getByteList(['wh-1', 'wh-2', 'wh-3']),
+            ],
+            ['ids' => ArrayParameterType::STRING]
         );
 
-        $counts = array_values($webhooks->map(fn (WebhookEntity $entity) => $entity->getErrorCount()));
-        static::assertSame([2, 2, 2], $counts);
+        static::assertSame([2, 2, 2], array_map(intval(...), $counts));
     }
 }

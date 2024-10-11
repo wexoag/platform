@@ -44,6 +44,7 @@ class PaymentPayloadServiceTest extends TestCase
         $payload = $this->createMock(PaymentPayloadInterface::class);
         $app = new AppEntity();
         $app->setName('InsecureApp');
+        $app->setVersion('1.0.0');
         $app->setAppSecret('secret');
 
         $context = Context::createDefaultContext();
@@ -57,8 +58,8 @@ class PaymentPayloadServiceTest extends TestCase
         $this->helper
             ->expects(static::once())
             ->method('buildSource')
-            ->with($app)
-            ->willReturn(new Source('shopurl', 'shopid', '0.0.0'));
+            ->with('1.0.0')
+            ->willReturn(new Source('shopurl', 'shopid', '1.0.0'));
 
         $this->client
             ->expects(static::once())
@@ -93,6 +94,7 @@ class PaymentPayloadServiceTest extends TestCase
     {
         $app = new AppEntity();
         $app->setName('InsecureApp');
+        $app->setVersion('1.0.0');
         $app->setAppSecret(null);
 
         $this->expectException(AppException::class);

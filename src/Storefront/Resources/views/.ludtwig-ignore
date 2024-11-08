@@ -3,7 +3,7 @@
 # -------------------------------------------
 # Baseline (we should fix these in the future)
 # most of them have twig syntax which slices HTML.
-# this is an antipattern and not supported by ludtwig.
+# this is an anti-pattern and not supported by ludtwig.
 # ludtwig always needs complete html tags inside twig blocks, ...
 # -------------------------------------------
 /storefront/page/content/single-cms-page.html.twig

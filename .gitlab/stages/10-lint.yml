@@ -222,7 +222,6 @@ BC check MR:
 Twig lint (storefront):
   extends: .base-no-setup
   stage: lint
-  allow_failure: true
   image:
     name: maltejanz/ludtwig:0.9.0
   rules:

@@ -43,6 +43,10 @@
 /storefront/component/line-item/type/container.html.twig
 /storefront/component/product/card/box-standard.html.twig
 
+# break statement in for loop is not vanilla twig
+# this should be fixed with: https://shopware.atlassian.net/browse/NEXT-39634
+/storefront/section/cms-section-block-container.html.twig
+
 # -------------------------------------------
 # Ludtwig related parser errors below.
 # These are ignored until this syntax is supported in ludtwig

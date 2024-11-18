@@ -38,5 +38,8 @@ return [
         'The parameter $languageIdChain of \\\\Shopware\\\\Elasticsearch\\\\TokenQueryBuilder#build\(\) changed from array to array|Shopware\\\\Core\\\\Framework\\\\Context',
         'Parameter 3 of Shopware\\\\Elasticsearch\\\\TokenQueryBuilder#build\(\) changed name from languageIdChain to context',
         'Parameter context was added to Method build\(\) of class Shopware\\\\Elasticsearch\\\\TokenQueryBuilder',
+
+        // Changed SHOPWARE_FALLBACK_VERSION to comply with latest composer changes, see: https://github.com/composer/composer/commit/1b5b56f234ab52a9dcfc935228d49e2a5e262e39
+        'Value of constant Shopware\\\\Core\\\\Kernel::SHOPWARE_FALLBACK_VERSION changed from \'6.6.9999999.9999999-dev\' to \'6.6.9999999-dev\'',
     ],
 ];

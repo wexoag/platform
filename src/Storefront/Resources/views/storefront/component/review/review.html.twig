@@ -114,7 +114,7 @@
                                                                                 value="filter-language"
                                                                                 name="language"
                                                                                 {% if app.request.get('language') %}checked="checked"{% endif %}
-                                                                                {% if numberOfReviewsNotInCurrentLanguage is same as 0 and not app.request.get('language') %}disabled="disabled"{% endif %}>
+                                                                                {% if numberOfReviewsNotInCurrentLanguage is same as(0) and not app.request.get('language') %}disabled="disabled"{% endif %}>
                                                                             <label class="custom-control-label form-label"
                                                                                 for="showForeignReviews">
                                                                                 <small>{{ 'detail.reviewLanguageFilterLabel'|trans|sw_sanitize }}</small>

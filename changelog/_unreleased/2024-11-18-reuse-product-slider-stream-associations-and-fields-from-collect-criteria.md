@@ -1,6 +1,6 @@
 ---
 title: Reuse product slider stream associations and fields from collect criteria
-issue: NEXT-00000
+issue: NEXT-39483
 author: Elias Lackner
 author_email: lackner.elias@gmail.com
 author_github: @lacknere

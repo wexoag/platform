@@ -41,6 +41,7 @@
 /storefront/component/line-item/type/discount.html.twig
 /storefront/component/line-item/type/generic.html.twig
 /storefront/component/line-item/type/container.html.twig
+/storefront/component/product/card/box-standard.html.twig
 
 # -------------------------------------------
 # Ludtwig related parser errors below.

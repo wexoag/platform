@@ -6,4 +6,4 @@ author_email: moritz@momocode.de
 author_github: @momocode-de
 ---
 # Core
-* Changed method `getOrderCustomers` in `Shopware\Core\Checkout\Order\OrderCollection` class to return a `OrderCustomerCollection` instead of `CustomerCollection`
+* Changed method `getOrderCustomers` in `Shopware\Core\Checkout\Order\OrderCollection` class to return a `Shopware\Core\Checkout\Order\Aggregate\OrderCustomer\OrderCustomerCollection` instead of `Shopware\Core\Checkout\Customer\CustomerCollection`

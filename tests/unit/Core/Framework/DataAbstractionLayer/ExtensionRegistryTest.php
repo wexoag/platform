@@ -9,11 +9,15 @@ use Shopware\Core\Content\Product\ProductDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\AttributeEntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\BulkEntityExtension;
 use Shopware\Core\Framework\DataAbstractionLayer\Dbal\EntityWriteGateway;
+use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\ExtensionRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Extension;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToOneAssociationField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToOneAssociationField;
 use Shopware\Core\Framework\Log\Package;
+use Shopware\Core\System\SalesChannel\Entity\SalesChannelDefinitionInstanceRegistry;
 use Shopware\Core\Test\Stub\DataAbstractionLayer\StaticDefinitionInstanceRegistry;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -26,54 +30,72 @@ class ExtensionRegistryTest extends TestCase
 {
     public function testNoBulkRegistered(): void
     {
+        $definitionRegistry = $this->createMock(DefinitionInstanceRegistry::class);
+        $salesChannelDefinitionRegistry = $this->createMock(SalesChannelDefinitionInstanceRegistry::class);
+
+        $definitionRegistry->expects(static::never())->method('getByEntityName');
+        $definitionRegistry->expects(static::never())->method('get');
+        $definitionRegistry->expects(static::never())->method('getByEntityName');
+        $salesChannelDefinitionRegistry->expects(static::never())->method('getByEntityName');
+        $salesChannelDefinitionRegistry->expects(static::never())->method('get');
+
         $registry = new ExtensionRegistry([], []);
-
-        $bulks = $registry->buildBulkExtensions(
-            $this->registry([])
+        $registry->configureExtensions(
+            $definitionRegistry,
+            $salesChannelDefinitionRegistry
         );
-
-        static::assertEmpty($bulks);
     }
 
-    public function testUnkownDefinition(): void
+    public function testUnknownDefinitionIsIgnored(): void
     {
-        $registry = new ExtensionRegistry([], [new MyBulkExtension()]);
+        $salesChannelDefinitionRegistry = $this->createMock(SalesChannelDefinitionInstanceRegistry::class);
+        $definitionRegistry = $this->definitionRegistry([ProductDefinition::class]);
 
-        $bulks = $registry->buildBulkExtensions(
-            $this->registry([ProductDefinition::class])
+        $registry = new ExtensionRegistry([], [$this->getBulkExtension()]);
+        $registry->configureExtensions(
+            $definitionRegistry,
+            $salesChannelDefinitionRegistry
         );
 
-        static::assertCount(1, $bulks);
+        static::assertCount(2, $definitionRegistry->get(ProductDefinition::class)->getFields()->filterByFlag(Extension::class));
+        static::assertFalse($definitionRegistry->has(CategoryDefinition::class));
     }
 
     public function testAllDefinitionsFound(): void
     {
-        $registry = new ExtensionRegistry([], [new MyBulkExtension()]);
+        $definitionRegistry = $this->definitionRegistry([ProductDefinition::class, CategoryDefinition::class]);
+        $salesChannelDefinitionRegistry = $this->createMock(SalesChannelDefinitionInstanceRegistry::class);
 
-        $bulks = $registry->buildBulkExtensions(
-            $this->registry([ProductDefinition::class, CategoryDefinition::class])
+        $registry = new ExtensionRegistry([], [$this->getBulkExtension()]);
+        $registry->configureExtensions(
+            $definitionRegistry,
+            $salesChannelDefinitionRegistry
         );
 
-        static::assertCount(2, $bulks);
+        static::assertCount(2, $definitionRegistry->get(ProductDefinition::class)->getFields()->filterByFlag(Extension::class));
+        static::assertCount(2, $definitionRegistry->get(CategoryDefinition::class)->getFields()->filterByFlag(Extension::class));
     }
 
     public function testAttributeDefinition(): void
     {
-        $registry = new ExtensionRegistry([], [new MyBulkExtension()]);
+        $definitionRegistry = $this->definitionRegistry([
+            'product.definition' => new AttributeEntityDefinition(['entity_name' => 'product']),
+        ]);
+        $salesChannelDefinitionRegistry = $this->createMock(SalesChannelDefinitionInstanceRegistry::class);
 
-        $bulks = $registry->buildBulkExtensions(
-            $this->registry([
-                'product.definition' => new AttributeEntityDefinition(['entity_name' => 'product'])
-            ])
+        $registry = new ExtensionRegistry([], [$this->getBulkExtension()]);
+        $registry->configureExtensions(
+            $definitionRegistry,
+            $salesChannelDefinitionRegistry
         );
 
-        static::assertCount(1, $bulks);
+        static::assertCount(2, $definitionRegistry->getByEntityName('product')->getFields()->filterByFlag(Extension::class));
     }
 
     /**
      * @param array<int|string, class-string<EntityDefinition>|EntityDefinition> $definitions
      */
-    private function registry(array $definitions): StaticDefinitionInstanceRegistry
+    private function definitionRegistry(array $definitions): StaticDefinitionInstanceRegistry
     {
         return new StaticDefinitionInstanceRegistry(
             $definitions,
@@ -81,19 +103,22 @@ class ExtensionRegistryTest extends TestCase
             $this->createMock(EntityWriteGateway::class)
         );
     }
-}
 
-class MyBulkExtension extends BulkEntityExtension
-{
-    public function collect(): \Generator
+    private function getBulkExtension(): BulkEntityExtension
     {
-        yield 'product' => [
-            new FkField('main_category_id', 'mainCategoryId', CategoryDefinition::class),
-        ];
+        return new class extends BulkEntityExtension {
+            public function collect(): \Generator
+            {
+                yield 'product' => [
+                    new FkField('main_category_id', 'mainCategoryId', CategoryDefinition::class),
+                    new OneToOneAssociationField('category', 'main_category_id', 'id', CategoryDefinition::class),
+                ];
 
-        yield 'category' => [
-            new FkField('product_id', 'productId', ProductDefinition::class),
-            new ManyToOneAssociationField('product', 'product_id', ProductDefinition::class),
-        ];
+                yield 'category' => [
+                    new FkField('product_id', 'productId', ProductDefinition::class),
+                    new ManyToOneAssociationField('product', 'product_id', ProductDefinition::class),
+                ];
+            }
+        };
     }
 }

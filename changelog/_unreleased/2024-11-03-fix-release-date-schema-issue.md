@@ -8,4 +8,4 @@ author_github: @StefanPilzLtd
 
 # Storefront
 * Added a conditional check in `buy-widget.html.twig` to ensure the release date only appears if explicitly set.
-* Prevented the schema from defaulting to the current date when no release date is provided.
+* Changed the schema from defaulting to the current date when no release date is provided.

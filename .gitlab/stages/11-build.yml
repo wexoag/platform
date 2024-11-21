@@ -192,11 +192,6 @@ build image tagged:
     - if: !reference [.rules, scheduled, if]
       variables:
         EXTRA_TAGGED_BUILD_TAGS: "$SHOPWARE_CORE_VERSION"
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - src/WebInstaller/**/*
-        - tests/acceptance/tests/Update/**/*
-    - !reference [.rules, long-running]
   retry: 2
   before_script:
     - echo "Building image for version $SHOPWARE_CORE_VERSION"

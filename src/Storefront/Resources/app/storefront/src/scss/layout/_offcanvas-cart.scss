@@ -25,6 +25,13 @@ Extends the basic offcanvas component with additional cart styles.
 
 .offcanvas-cart-promotion-form {
     margin-bottom: $spacer;
+
+    .offcanvas-cart-promotion-button {
+        .icon-checkmark {
+            color: inherit;
+        }
+    }
+
 }
 
 .offcanvas-summary {

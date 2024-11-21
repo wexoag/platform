@@ -4,10 +4,13 @@ namespace Shopware\Tests\Unit\Core\Checkout\Promotion;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\Checkout\Promotion\Aggregate\PromotionDiscount\PromotionDiscountEntity;
 use Shopware\Core\Checkout\Promotion\Exception\InvalidCodePatternException;
 use Shopware\Core\Checkout\Promotion\Exception\PatternNotComplexEnoughException;
+use Shopware\Core\Checkout\Promotion\Exception\UnknownPromotionDiscountTypeException;
 use Shopware\Core\Checkout\Promotion\PromotionException;
 use Shopware\Core\Framework\Log\Package;
+use Shopware\Core\Test\Annotation\DisabledFeatures;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -87,5 +90,30 @@ class PromotionExceptionTest extends TestCase
         static::assertSame(PromotionException::PROMOTION_CODE_NOT_FOUND, $exception->getErrorCode());
         static::assertSame('Promotion code "code-123" has not been found!', $exception->getMessage());
         static::assertSame(['code' => 'code-123'], $exception->getParameters());
+    }
+
+    #[DisabledFeatures(['v6.7.0.0'])]
+    public function testUnknownPromotionDiscountTypeWithDisableFeature(): void
+    {
+        $promotion = new PromotionDiscountEntity();
+        $promotion->setType('test');
+
+        $exception = PromotionException::unknownPromotionDiscountType($promotion);
+
+        static::assertInstanceOf(UnknownPromotionDiscountTypeException::class, $exception);
+    }
+
+    public function testUnknownPromotionDiscountType(): void
+    {
+        $promotion = new PromotionDiscountEntity();
+        $promotion->setType('test');
+
+        $exception = PromotionException::unknownPromotionDiscountType($promotion);
+
+        static::assertInstanceOf(PromotionException::class, $exception);
+        static::assertSame(Response::HTTP_BAD_REQUEST, $exception->getStatusCode());
+        static::assertSame(PromotionException::CHECKOUT_UNKNOWN_PROMOTION_DISCOUNT_TYPE, $exception->getErrorCode());
+        static::assertSame('Unknown promotion discount type detected: test', $exception->getMessage());
+        static::assertSame(['type' => 'test'], $exception->getParameters());
     }
 }

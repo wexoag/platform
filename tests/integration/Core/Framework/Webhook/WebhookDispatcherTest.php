@@ -1086,7 +1086,9 @@ class WebhookDispatcherTest extends TestCase
 
         static::assertSame([
             'data' => [
-                'payload' => [],
+                'payload' => [
+                    'keepUserData' => false,
+                ],
                 'event' => AppDeletedEvent::NAME,
             ],
             'source' => [
@@ -1174,7 +1176,9 @@ class WebhookDispatcherTest extends TestCase
 
         static::assertSame([
             'data' => [
-                'payload' => [],
+                'payload' => [
+                    'keepUserData' => false,
+                ],
                 'event' => AppDeletedEvent::NAME,
             ],
             'source' => [
@@ -1259,7 +1263,9 @@ class WebhookDispatcherTest extends TestCase
 
         static::assertSame([
             'data' => [
-                'payload' => [],
+                'payload' => [
+                    'keepUserData' => false,
+                ],
                 'event' => AppDeletedEvent::NAME,
             ],
             'source' => [

@@ -15,6 +15,7 @@ use Shopware\Core\Framework\MessageQueue\LowPriorityMessageInterface;
 use Symfony\Component\Mailer\Messenger\SendEmailMessage;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
@@ -41,7 +42,10 @@ class MessageBusTest extends TestCase
 
         $envelope = $bus->dispatch($message, $providedStamps);
 
-        static::assertEquals(new Envelope($message, $expectedStamps), $envelope);
+        if (!$message instanceof Envelope) {
+            $message = new Envelope($message, $expectedStamps);
+        }
+        static::assertEquals($message, $envelope);
     }
 
     public function testOverwrite(): void
@@ -117,6 +121,30 @@ class MessageBusTest extends TestCase
                 new TransportNamesStamp(['async', 'low_priority']),
             ],
         ];
+
+        yield 'Default config, no stamps, message in envelope' => [
+            'message' => new Envelope(new AsyncMessage()),
+            'config' => [
+                AsyncMessageInterface::class => 'async',
+                LowPriorityMessageInterface::class => 'low_priority',
+                SendEmailMessage::class => 'async',
+            ],
+            'providedStamps' => [],
+            'expectedStamps' => [],
+        ];
+
+        yield 'Default config, no stamps, message in envelope, envelope with stamp' => [
+            'message' => (new Envelope(new AsyncMessage()))->with(new DelayStamp(5)),
+            'config' => [
+                AsyncMessageInterface::class => 'async',
+                LowPriorityMessageInterface::class => 'low_priority',
+                SendEmailMessage::class => 'async',
+            ],
+            'providedStamps' => [],
+            'expectedStamps' => [
+                new DelayStamp(5),
+            ],
+        ];
     }
 }
 
@@ -134,6 +162,10 @@ class Collector implements MessageBusInterface
 {
     public function dispatch(object $message, array $stamps = []): Envelope
     {
+        if ($message instanceof Envelope) {
+            return $message->with(...$stamps);
+        }
+
         return new Envelope($message, $stamps);
     }
 }

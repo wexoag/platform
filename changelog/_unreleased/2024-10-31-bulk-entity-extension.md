@@ -12,8 +12,8 @@ author_email: oliver@goblin-coders.de
 ___
 # Upgrade Information
 ## Deprecated EntityExtension::getDefinitionClass
-Since (app) custom entities and entities defined via PHP attributes do not have a definition class, the function `EntityExtension::getDefinitionClass` has been deprecated. 
-It is being replaced by `EntityExtension::getEntityName`, which simply needs to return the entity name. This can already be implemented now.
+Since (app) custom entities and entities defined via PHP attributes do not have a definition class, the method `EntityExtension::getDefinitionClass` has been deprecated. 
+It will be replaced by `EntityExtension::getEntityName`, which needs to return the entity name. This can already be implemented now.
 
 ```php
 <?php
@@ -32,7 +32,34 @@ class MyEntityExtension extends EntityExtension
     
     public function getEntityName() : string
     {
-        return 'product';
+        return ProductDefinition::ENTITY_NAME;
+    }
+}
+```
+___
+# Next Major Version Changes
+
+## Removed EntityExtension::getDefinitionClass 
+The method `EntityExtension::getDefinitionClass` has been removed. It is replaced by `EntityExtension::getEntityName`, which needs to return the entity name.
+
+```php
+<?php
+
+namespace Examples\Extension;
+
+use Shopware\Core\Content\Product\ProductDefinition;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityExtension;
+
+class MyEntityExtension extends EntityExtension
+{
+    public function getDefinitionClass(): string
+    { 
+        return ProductDefinition::class;
+    }
+    
+    public function getEntityName() : string
+    {
+        return ProductDefinition::ENTITY_NAME;
     }
 }
 ```
@@ -55,12 +82,12 @@ class MyEntityExtension extends BulkEntityExtension
 {
     public function collect(): \Generator
     {
-        yield 'product' => [
+        yield ProductDefinition::ENTITY_NAME => [
             new FkField('follow_up_id', 'followUp', ProductDefinition::class),
             new ManyToOneAssociationField('followUp', 'follow_up_id', ProductDefinition::class, 'id')
         ];
 
-        yield 'category' => [
+        yield CategoryDefinition::ENTITY_NAME => [
             new FkField('linked_category_id', 'linkedCategoryId', CategoryDefinition::class),
             new ManyToOneAssociationField('category', 'linked_category_id', CategoryDefinition::class, 'id')
         ];

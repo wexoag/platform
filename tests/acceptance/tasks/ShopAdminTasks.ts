@@ -25,10 +25,16 @@ import { CreateCustomField } from '@tasks/ShopAdmin/CustomField/CreateCustomFiel
  */
 import { CreateLandingPage } from '@tasks/ShopAdmin/Category/CreateLandingPage';
 
+/**
+ * Customers
+ */
+import { CustomerGroupActivation } from '@tasks/ShopAdmin/Customers/CustomerGroupActivation';
+
 export const test = mergeTests(
     GenerateVariants,
     UploadImage,
     FRWSalesChannelSelectionPossibility,
     CreateCustomField,
     CreateLandingPage,
+    CustomerGroupActivation,
 );

@@ -9,6 +9,7 @@ use Shopware\Core\Framework\Log\Package;
 use Shopware\Storefront\Theme\Event\ThemeAssignedEvent;
 use Shopware\Storefront\Theme\Event\ThemeConfigChangedEvent;
 use Shopware\Storefront\Theme\Event\ThemeConfigResetEvent;
+use Shopware\Storefront\Theme\StorefrontPluginConfiguration\FileCollection;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -34,6 +35,14 @@ class StaticFileConfigDumper implements EventSubscriberInterface
             ThemeAssignedEvent::class => 'dumpConfigFromEvent',
             ThemeConfigResetEvent::class => 'dumpConfigFromEvent',
         ];
+    }
+
+    /**
+     * @param array<string, FileCollection|string> $dump
+     */
+    public function prepareDump(string $filePath, array $dump): void
+    {
+        $this->filesystem->write($filePath, \json_encode($dump, \JSON_PRETTY_PRINT | \JSON_THROW_ON_ERROR));
     }
 
     public function dumpConfig(Context $context): void

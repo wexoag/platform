@@ -195,7 +195,8 @@
                                                                                         {{ 'component.cms.imageGallery.clickMove'|trans|striptags }}
                                                                                     </span>
                                                                                     {% if image.config.spatial.arReady ?? defaultEnableAugmentedReality %}
-                                                                                        <div class="ar-button button position-absolute d-inline-flex justify-content-center align-items-center text-center py-0 px-2 w-auto"
+                                                                                        <button class="ar-button button position-absolute d-inline-flex justify-content-center align-items-center text-center py-0 px-2 w-auto"
+                                                                                             aria-label="{{ 'spatial.openArViewDescription'|trans|striptags }}"
                                                                                              data-spatial-ar-viewer
                                                                                              data-spatial-ar-viewer-options='{ "spatialArId": "{{ image.id }}", "modelUrl": "{{ image.url }}" }'>
 
@@ -204,7 +205,7 @@
                                                                                                 } %}
                                                                                                 <span>{{ 'spatial.openArView'|trans|striptags }}</span>
 
-                                                                                        </div>
+                                                                                        </button>
                                                                                         {% sw_include '@Storefront/storefront/utilities/ar-overlay.html.twig' %}
                                                                                     {% endif %}
                                                                                 </div>
@@ -330,7 +331,8 @@
                                                                     {{ 'component.cms.imageGallery.clickMove'|trans|striptags }}
                                                                     </span>
                                                                     {% if image.config.spatial.arReady ?? defaultEnableAugmentedReality %}
-                                                                        <div class="ar-button button position-absolute d-inline-flex justify-content-center align-items-center text-center py-0 px-2 w-auto"
+                                                                        <button class="ar-button button position-absolute d-inline-flex justify-content-center align-items-center text-center py-0 px-2 w-auto"
+                                                                             aria-label="{{ 'spatial.openArViewDescription'|trans|striptags }}"
                                                                              data-spatial-ar-viewer
                                                                              data-spatial-ar-viewer-options='{ "spatialArId": "{{ image.id }}", "modelUrl": "{{ image.url }}" }'>
 
@@ -339,7 +341,7 @@
                                                                                 } %}
                                                                                 <span>{{ 'spatial.openArView'|trans|striptags }}</span>
 
-                                                                        </div>
+                                                                        </button>
                                                                         {% sw_include '@Storefront/storefront/utilities/ar-overlay.html.twig' %}
                                                                     {% endif %}
                                                                 </div>
@@ -665,7 +667,8 @@
                                                                                                         {{ 'component.cms.imageGallery.clickMove'|trans|striptags }}
                                                                                                         </span>
                                                                                                         {% if image.config.spatial.arReady ?? defaultEnableAugmentedReality %}
-                                                                                                            <div class="ar-button button mb-2 position-absolute d-inline-flex justify-content-center align-items-center text-center py-0 px-2 w-auto"
+                                                                                                            <button class="ar-button button mb-2 position-absolute d-inline-flex justify-content-center align-items-center text-center py-0 px-2 w-auto"
+                                                                                                                 aria-label="{{ 'spatial.openArViewDescription'|trans|striptags }}"
                                                                                                                  data-spatial-ar-viewer
                                                                                                                  data-spatial-ar-viewer-options='{ "spatialArId": "{{ image.id }}", "modelUrl": "{{ image.url }}" }'>
 
@@ -674,7 +677,7 @@
                                                                                                                     } %}
                                                                                                                     <span>{{ 'spatial.openArView'|trans|striptags }}</span>
 
-                                                                                                            </div>
+                                                                                                            </button>
                                                                                                             {% sw_include '@Storefront/storefront/utilities/ar-overlay.html.twig' %}
                                                                                                         {% endif %}
                                                                                                     </div>

@@ -15,6 +15,8 @@ ___
 Since (app) custom entities and entities defined via PHP attributes do not have a definition class, the method `EntityExtension::getDefinitionClass` has been deprecated. 
 It will be replaced by `EntityExtension::getEntityName`, which needs to return the entity name. This can already be implemented now.
 
+Before:
+
 ```php
 <?php
 
@@ -29,18 +31,35 @@ class MyEntityExtension extends EntityExtension
     { 
         return ProductDefinition::class;
     }
-    
+}
+```
+
+After:
+
+```php
+<?php
+
+namespace Examples\Extension;
+
+use Shopware\Core\Content\Product\ProductDefinition;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityExtension;
+
+class MyEntityExtension extends EntityExtension
+{
     public function getEntityName() : string
     {
         return ProductDefinition::ENTITY_NAME;
     }
 }
 ```
+
 ___
 # Next Major Version Changes
 
 ## Removed EntityExtension::getDefinitionClass 
 The method `EntityExtension::getDefinitionClass` has been removed. It is replaced by `EntityExtension::getEntityName`, which needs to return the entity name.
+
+Before:
 
 ```php
 <?php
@@ -56,7 +75,21 @@ class MyEntityExtension extends EntityExtension
     { 
         return ProductDefinition::class;
     }
-    
+}
+```
+
+After:
+
+```php
+<?php
+
+namespace Examples\Extension;
+
+use Shopware\Core\Content\Product\ProductDefinition;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityExtension;
+
+class MyEntityExtension extends EntityExtension
+{
     public function getEntityName() : string
     {
         return ProductDefinition::ENTITY_NAME;

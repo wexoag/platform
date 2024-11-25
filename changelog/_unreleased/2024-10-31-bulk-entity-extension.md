@@ -53,6 +53,42 @@ class MyEntityExtension extends EntityExtension
 }
 ```
 
+## Feature: Bulk entity extension
+The new `BulkEntityExtension` allows to define fields for different entities within one class. It removes the overhead of creating multiple classes for each entity and allows to define the fields in one place.
+
+```php
+<?php
+
+namespace Examples\Extension;
+
+use Shopware\Core\Content\Category\CategoryDefinition;
+use Shopware\Core\Content\Product\ProductDefinition;
+use Shopware\Core\Framework\DataAbstractionLayer\BulkEntityExtension;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToOneAssociationField;
+
+class MyEntityExtension extends BulkEntityExtension
+{
+    public function collect(): \Generator
+    {
+        yield ProductDefinition::ENTITY_NAME => [
+            new FkField('follow_up_id', 'followUp', ProductDefinition::class),
+            new ManyToOneAssociationField('followUp', 'follow_up_id', ProductDefinition::class, 'id')
+        ];
+
+        yield CategoryDefinition::ENTITY_NAME => [
+            new FkField('linked_category_id', 'linkedCategoryId', CategoryDefinition::class),
+            new ManyToOneAssociationField('category', 'linked_category_id', CategoryDefinition::class, 'id')
+        ];
+    }
+}
+```
+
+```xml
+<service id="Examples\Extension\MyEntityExtension">
+    <tag name="shopware.bulk.entity.extension"/>
+</service>
+```
 ___
 # Next Major Version Changes
 
@@ -95,41 +131,4 @@ class MyEntityExtension extends EntityExtension
         return ProductDefinition::ENTITY_NAME;
     }
 }
-```
-
-## Feature: Bulk entity extension
-The new `BulkEntityExtension` allows to define fields for different entities within one class. It removes the overhead of creating multiple classes for each entity and allows to define the fields in one place.
-
-```php
-<?php
-
-namespace Examples\Extension;
-
-use Shopware\Core\Content\Category\CategoryDefinition;
-use Shopware\Core\Content\Product\ProductDefinition;
-use Shopware\Core\Framework\DataAbstractionLayer\BulkEntityExtension;
-use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
-use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToOneAssociationField;
-
-class MyEntityExtension extends BulkEntityExtension
-{
-    public function collect(): \Generator
-    {
-        yield ProductDefinition::ENTITY_NAME => [
-            new FkField('follow_up_id', 'followUp', ProductDefinition::class),
-            new ManyToOneAssociationField('followUp', 'follow_up_id', ProductDefinition::class, 'id')
-        ];
-
-        yield CategoryDefinition::ENTITY_NAME => [
-            new FkField('linked_category_id', 'linkedCategoryId', CategoryDefinition::class),
-            new ManyToOneAssociationField('category', 'linked_category_id', CategoryDefinition::class, 'id')
-        ];
-    }
-}
-```
-
-```xml
-<service id="Examples\Extension\MyEntityExtension">
-    <tag name="shopware.bulk.entity.extension"/>
-</service>
 ```

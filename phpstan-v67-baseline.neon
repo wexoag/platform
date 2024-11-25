@@ -8,7 +8,6 @@ parameters:
         - # @deprecated tag:v6.7.0 Using autoload === true on associations is deprecated and must be refactored. See NEXT-25334 and child tasks
             message: '#^[a-zA-Z_]+\.[a-zA-Z_]+ association has a configured autoload\=\=\=true, this is forbidden for platform integrations$#'
             paths:
-                - src/Core/Content/Product/ProductDefinition.php
                 - src/Core/Content/Product/Aggregate/ProductMedia/ProductMediaDefinition.php
 
         - # @deprecated tag:v6.7.0 Breaking changes in classes, but quite complex, so there are two classes in one file

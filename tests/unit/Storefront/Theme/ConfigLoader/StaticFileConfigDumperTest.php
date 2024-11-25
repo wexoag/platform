@@ -48,6 +48,22 @@ class StaticFileConfigDumperTest extends TestCase
         static::assertEquals('{"test":"test"}', $fs->read($location));
     }
 
+    public function testPrepareDump(): void
+    {
+        $fs = new Filesystem(new InMemoryFilesystemAdapter());
+        $dumper = new StaticFileConfigDumper(
+            $this->createMock(DatabaseConfigLoader::class),
+            $this->createMock(DatabaseAvailableThemeProvider::class),
+            $fs,
+        );
+
+        $location = __DIR__ . '../fixtures/var/theme-files.json';
+        $dump = ['test' => '123'];
+
+        $dumper->prepareDump($location, $dump);
+        static::assertJsonStringEqualsJsonString('{"test": "123"}', $fs->read($location));
+    }
+
     public function testgetSubscribedEvents(): void
     {
         static::assertEquals(

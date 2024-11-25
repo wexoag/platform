@@ -22,7 +22,7 @@
             class="js-address-editor"
         >
             {% block component_address_editor_modal_title %}
-                <div class="address-editor-title h2 mb-4">
+                <div class="address-editor-title js-pseudo-modal-template-title-element">
                     {% if changeBilling %}
                         {{ 'account.addressTitleChangeBillingAddress'|trans|sw_sanitize }}
                     {% else %}
@@ -204,7 +204,7 @@
                                             <div class="card-body">
                                                 {# @deprecated tag:v6.7.0 - Block will be removed. Use `component_address_editor_modal_accordion_overview_billing_card_title` instead. #}
                                                 {% block component_address_address_editor_modal_accordion_overview_billing_card_title %}
-                                                    <div class="card-title">
+                                                    <div class="card-title js-pseudo-modal-template-title-element">
                                                         {# @deprecated tag:v6.7.0 - Block will be removed. Use `component_address_editor_modal_accordion_overview_billing_card_title_text` instead. #}
                                                         {% block component_address_address_editor_modal_accordion_overview_billing_card_title_text %}
                                                             {{ 'account.addressesTitleCurrentBillingAddress'|trans|sw_sanitize }}
@@ -236,7 +236,7 @@
                                             <div class="card-body">
                                                 {# @deprecated tag:v6.7.0 - Block will be removed. Use `component_address_editor_modal_accordion_overview_shipping_card_title` instead. #}
                                                 {% block component_address_address_editor_modal_accordion_overview_shipping_card_title %}
-                                                    <div class="card-title">
+                                                    <div class="card-title js-pseudo-modal-template-title-element">
                                                         {# @deprecated tag:v6.7.0 - Block will be removed. Use `component_address_editor_modal_accordion_overview_shipping_card_title_text` instead. #}
                                                         {% block component_address_address_editor_modal_accordion_overview_shipping_card_title_text %}
                                                             {{ 'account.addressesTitleCurrentShippingAddress'|trans|sw_sanitize }}

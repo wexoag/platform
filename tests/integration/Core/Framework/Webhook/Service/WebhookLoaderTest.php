@@ -149,6 +149,8 @@ class WebhookLoaderTest extends TestCase
             ],
             $webhooks
         );
+
+        $this->removeApp(__DIR__ . '/../../App/Manifest/_fixtures/minimal');
     }
 
     public function testDuplicateWebhooksAreFilteredOut(): void

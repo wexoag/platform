@@ -86,6 +86,7 @@ class ServiceClientFactoryTest extends TestCase
         $app = new AppEntity();
         $app->setSelfManaged(true);
         $app->setAppSecret('app_secret');
+        $app->setVersion('1.0.0');
         $context = Context::createDefaultContext();
 
         $serviceClientRegistry = static::createMock(ServiceRegistryClient::class);
@@ -111,6 +112,7 @@ class ServiceClientFactoryTest extends TestCase
         $app->setId(Uuid::randomHex());
         $app->setSelfManaged(true);
         $app->setAppSecret(null);
+        $app->setVersion('1.0.0');
 
         $context = Context::createDefaultContext();
 
@@ -126,6 +128,7 @@ class ServiceClientFactoryTest extends TestCase
         $app = new AppEntity();
         $app->setSelfManaged(true);
         $app->setAppSecret('app_secret');
+        $app->setVersion('1.0.0');
 
         $context = Context::createDefaultContext();
 

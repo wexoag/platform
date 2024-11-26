@@ -4,6 +4,8 @@ namespace Shopware\Tests\Unit\Core\Framework\Webhook;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\Framework\App\AppEntity;
+use Shopware\Core\Framework\Webhook\Hookable;
 use Shopware\Core\Framework\Webhook\Service\WebhookManager;
 use Shopware\Core\Framework\Webhook\WebhookDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -17,12 +19,13 @@ class WebhookDispatcherTest extends TestCase
 {
     public function testDispatchDispatchesToInnerAndManager(): void
     {
-        $e = new \stdClass();
+        $e = new TestEvent();
 
         $eventDispatcher = $this->createMock(EventDispatcher::class);
         $eventDispatcher->expects(static::once())
             ->method('dispatch')
-            ->with($e, 'event');
+            ->with($e, 'event')
+            ->willReturnArgument(0);
 
         $webhookManager = $this->createMock(WebhookManager::class);
         $webhookManager->expects(static::once())->method('dispatch')->with($e);
@@ -37,13 +40,13 @@ class WebhookDispatcherTest extends TestCase
 
     public function testDispatchReturnsSameEventAsDispatched(): void
     {
-        $e = new \stdClass();
+        $e = new TestEvent();
 
         $eventDispatcher = $this->createMock(EventDispatcher::class);
         $eventDispatcher->expects(static::once())
             ->method('dispatch')
             ->with($e, 'event')
-            ->willReturn($e);
+            ->willReturnArgument(0);
 
         $webhookManager = $this->createMock(WebhookManager::class);
         $webhookManager->expects(static::once())->method('dispatch')->with($e);
@@ -210,5 +213,26 @@ class WebhookDispatcherTest extends TestCase
         );
 
         $webhookDispatcher->hasListeners('event');
+    }
+}
+
+/**
+ * @internal
+ */
+class TestEvent implements Hookable
+{
+    public function getName(): string
+    {
+        return 'test';
+    }
+
+    public function getWebhookPayload(?AppEntity $app = null): array
+    {
+        return [];
+    }
+
+    public function isAllowed(string $appId, \Shopware\Core\Framework\Webhook\AclPrivilegeCollection $permissions): bool
+    {
+        return true;
     }
 }

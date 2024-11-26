@@ -43,6 +43,7 @@
                     required: true,
                     additionalClass: 'col-12',
                     label: 'newsletter.labelMail',
+                    labelPrefix:  element.config.title.value ? element.config.title.value : 'newsletter.headline'|trans, 
                     placeholder: 'newsletter.placeholderMail'
                 }
                 %}
@@ -55,7 +56,8 @@
                     {% block cms_form_newsletter_select_salutation %}
                         {% sw_include '@Storefront/storefront/element/cms-element-form/form-components/cms-element-form-select-salutation.html.twig'
                             with {
-                            additionalClass: 'col-md-4'
+                            additionalClass: 'col-md-4',
+                            labelPrefix:  element.config.title.value ? element.config.title.value : 'newsletter.headline'|trans
                         }
                         %}
                     {% endblock %}
@@ -67,6 +69,7 @@
                             autocomplete: 'section-personal given-name',
                             additionalClass: 'col-md-4',
                             label: 'newsletter.labelFirstName',
+                            labelPrefix:  element.config.title.value ? element.config.title.value : 'newsletter.headline'|trans,
                             placeholder: 'newsletter.placeholderFirstName'
                         }
                         %}
@@ -79,6 +82,7 @@
                             autocomplete: 'section-personal family-name',
                             additionalClass: 'col-md-4',
                             label: 'newsletter.labelLastName',
+                            labelPrefix:  element.config.title.value ? element.config.title.value : 'newsletter.headline'|trans,
                             placeholder: 'newsletter.placeholderLastName'
                         }
                         %}

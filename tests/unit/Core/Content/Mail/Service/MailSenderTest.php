@@ -25,7 +25,7 @@ class MailSenderTest extends TestCase
         $messageBus = $this->createMock(MessageBusInterface::class);
         $fileSystem = $this->createMock(FilesystemOperator::class);
         $configService = $this->createMock(SystemConfigService::class);
-        $configService->method('get')->with(MailSender::DISABLE_MAIL_DELIVERY)->willReturn(false);
+        $configService->expects(static::once())->method('get')->with(MailSender::DISABLE_MAIL_DELIVERY)->willReturn(false);
         $mailSender = new MailSender($messageBus, $fileSystem, $configService, 0);
         $mail = new Email();
 
@@ -36,7 +36,7 @@ class MailSenderTest extends TestCase
             ->method('write')
             ->willReturnCallback(function ($path, $content) use ($mail, $testStruct): void {
                 static::assertStringStartsWith('mail-data/', $path);
-                static::assertEquals(serialize($mail), $content);
+                static::assertSame(serialize($mail), $content);
                 $testStruct->set('mailDataPath', $path);
             });
 
@@ -45,7 +45,7 @@ class MailSenderTest extends TestCase
             ->method('dispatch')
             ->willReturnCallback(function ($message) use ($testStruct): Envelope {
                 static::assertInstanceOf(SendMailMessage::class, $message);
-                static::assertEquals($testStruct->get('mailDataPath'), $message->getMailDataPath());
+                static::assertSame($testStruct->get('mailDataPath'), $message->mailDataPath);
 
                 return new Envelope($message);
             });

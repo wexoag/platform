@@ -12,7 +12,9 @@ use Shopware\Core\Framework\App\Exception\AppUrlChangeDetectedException;
 use Shopware\Core\Framework\App\ShopId\ShopIdProvider;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Routing\Event\SalesChannelContextResolvedEvent;
+use Shopware\Core\Framework\Routing\Exception\CustomerNotLoggedInRoutingException;
 use Shopware\Core\Framework\Routing\KernelListenerPriorities;
+use Shopware\Core\Framework\Routing\RoutingException;
 use Shopware\Core\Framework\Util\Random;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\SalesChannelRequest;
@@ -28,7 +30,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -170,7 +171,7 @@ class StorefrontSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if (!$event->getThrowable() instanceof CustomerNotLoggedInException) {
+        if (!$this->shouldRedirectLoginPage($event->getThrowable())) {
             return;
         }
 
@@ -225,7 +226,7 @@ class StorefrontSubscriber implements EventSubscriberInterface
             return;
         }
 
-        throw new AccessDeniedHttpException('PageController can\'t be requested via XmlHttpRequest.');
+        throw RoutingException::accessDeniedForXmlHttpRequest();
     }
 
     // used to switch session token - when the context token expired
@@ -312,6 +313,19 @@ class StorefrontSubscriber implements EventSubscriberInterface
 
         if ($this->systemConfigService->get('core.systemWideLoginRegistration.isCustomerBoundToSalesChannel')) {
             return $session->get(PlatformRequest::ATTRIBUTE_SALES_CHANNEL_ID) !== $salesChannelId;
+        }
+
+        return false;
+    }
+
+    private function shouldRedirectLoginPage(\Throwable $ex): bool
+    {
+        if ($ex instanceof CustomerNotLoggedInRoutingException) {
+            return true;
+        }
+
+        if ($ex instanceof CustomerNotLoggedInException) {
+            return true;
         }
 
         return false;

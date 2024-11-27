@@ -680,6 +680,7 @@
     "moveTheDeviceToStart": "Move the device to start",
     "tapToPlaceTheObject": "Tap to place the object",
     "openAugmentedRealityView": "Open Augmented Reality View",
+    "augmentedRealityView": "Augmented Reality View",
     "openArView": "Open AR View",
     "openArViewDescription": "Open Augmented Reality View"
   },
@@ -782,6 +783,7 @@
         "acceptButtonLabel": "Accept"
       },
       "imageGallery": {
+        "ariaLabel": "Image Gallery",
         "touchMove": "Touch and drag",
         "clickMove": "Click and move",
         "sliderDotLabel": "Show image %index% of %total%"

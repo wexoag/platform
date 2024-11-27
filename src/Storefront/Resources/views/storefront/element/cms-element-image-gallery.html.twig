@@ -536,10 +536,12 @@
                                          data-bs-backdrop="false"
                                          data-image-zoom-modal="true"
                                          tabindex="-1"
-                                         role="dialog">
+                                         role="dialog"
+                                         aria-modal="true"
+                                         aria-hidden="true"
+                                         aria-label="{{ 'component.cms.imageGallery.ariaLabel'|trans|striptags }}">
                                         {% block element_image_gallery_inner_zoom_modal_dialog %}
-                                            <div class="modal-dialog"
-                                                 role="document">
+                                            <div class="modal-dialog">
                                                 {% block element_image_gallery_inner_zoom_modal_content %}
                                                     <div class="modal-content"{% if imageCount > 1 %} data-modal-gallery-slider="true" data-gallery-slider-options='{{ galleryZoomSliderOptions|json_encode }}' {% endif %}>
                                                         {% block element_image_gallery_inner_zoom_modal_close_button %}

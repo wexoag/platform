@@ -1,6 +1,6 @@
 ---
 title: Bulk entity extension
-issue: 
+issue: NEXT-39734
 author: Oliver Skroblin
 author_email: oliver@goblin-coders.de
 ---

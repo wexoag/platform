@@ -7,7 +7,8 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "act": "npx playwright test --ui"
   },
   "keywords": [],
   "author": "shopware AG",

@@ -151,6 +151,7 @@
     "loginPasswordLabel": "Ihr Passwort",
     "loginPasswordPlaceholder": "Passwort eingeben ...",
     "loginPasswordRecover": "Ich habe mein Passwort vergessen.",
+    "loginRegistrationHeader": "Anmelden oder Konto erstellen",
     "loginSubmit": "Anmelden",
     "loginBadCredentials": "Es konnte kein Account mit den angegebenen Zugangsdaten gefunden werden.",
     "loginThrottled": "Zu viele Anmeldeversuche. Bitte warten Sie %seconds% Sekunden, bevor Sie erneut versuchen, sich anzumelden.",

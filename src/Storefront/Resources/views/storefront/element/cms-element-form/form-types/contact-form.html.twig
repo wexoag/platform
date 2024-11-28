@@ -4,14 +4,14 @@
           method="post"
           data-form-validation="true"
           data-form-preserver="true"
-          id="{{ formPrefix }}">
+          id="{{ formPrefix }}"
+          aria-label="{{ element.config.title.value ? element.config.title.value : 'contact.headline'|trans }}">
         <div class="form-content">
         <div class="row g-2">
             {% block cms_form_contact_select_salutation %}
                 {% sw_include '@Storefront/storefront/element/cms-element-form/form-components/cms-element-form-select-salutation.html.twig'
                     with {
                     additionalClass: 'col-md-4',
-                    labelPrefix:  element.config.title.value ? element.config.title.value : 'contact.headline'|trans,
                     required: true
                 }
                 %}
@@ -26,7 +26,6 @@
                     required: firstNameFieldRequired,
                     additionalClass: 'col-md-4',
                     label: 'account.personalFirstNameLabel',
-                    labelPrefix:  element.config.title.value ? element.config.title.value : 'contact.headline'|trans,
                     placeholder: 'account.personalFirstNamePlaceholder'
                 }
                 %}
@@ -41,7 +40,6 @@
                     required: lastNameFieldRequired,
                     additionalClass: 'col-md-4',
                     label: 'account.personalLastNameLabel',
-                    labelPrefix:  element.config.title.value ? element.config.title.value : 'contact.headline'|trans,
                     placeholder: 'account.personalLastNamePlaceholder'
                 }
                 %}
@@ -58,7 +56,6 @@
                     required: true,
                     additionalClass: 'col-md-6',
                     label: 'account.loginMailLabel',
-                    labelPrefix:  element.config.title.value ? element.config.title.value : 'contact.headline'|trans,
                     placeholder: 'account.loginMailPlaceholder'
                 }
                 %}
@@ -75,7 +72,6 @@
                         required: phoneNumberFieldRequired,
                         additionalClass: 'col-md-6',
                         label: 'account.personalPhoneLabel',
-                        labelPrefix:  element.config.title.value ? element.config.title.value : 'contact.headline'|trans,
                         placeholder: 'account.personalPhonePlaceholder'
                     }
                     %}
@@ -91,7 +87,6 @@
                     fieldName: 'subject',
                     additionalClass: 'col-12',
                     label: 'contact.subjectLabel',
-                    labelPrefix:  element.config.title.value ? element.config.title.value : 'contact.headline'|trans,
                     placeholder: 'contact.subjectPlaceholder'
                 }
                 %}
@@ -107,7 +102,6 @@
                     fieldName: 'comment',
                     additionalClass: 'col-12',
                     label: 'contact.commentLabel',
-                    labelPrefix:  element.config.title.value ? element.config.title.value : 'contact.headline'|trans,
                     placeholder: 'contact.commentPlaceholder'
                 }
                 %}

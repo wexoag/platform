@@ -162,6 +162,7 @@
             <argument type="service" id="Shopware\Storefront\Theme\ConfigLoader\DatabaseConfigLoader"/>
             <argument type="service" id="Shopware\Storefront\Theme\ConfigLoader\DatabaseAvailableThemeProvider"/>
             <argument type="service" id="shopware.filesystem.private"/>
+            <argument type="service" id="shopware.filesystem.temp"/>
             <tag name="kernel.event_subscriber"/>
         </service>
 

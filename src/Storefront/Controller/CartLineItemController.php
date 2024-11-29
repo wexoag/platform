@@ -368,7 +368,7 @@ class CartLineItemController extends StorefrontController
 
         $lineItemArray = $lineItemData->all();
         if ($defaultValues !== null) {
-            $lineItemArray += $defaultValues;
+            $lineItemArray = array_replace($defaultValues, $lineItemArray);
         }
 
         if (isset($lineItemArray['quantity'])) {

@@ -115,6 +115,8 @@ class SendMailHandlerTest extends TestCase
             ->method('error')
             ->with('The mail data file does not contain a valid email object. Mail could not be sent.', ['mailDataPath' => 'mail-data/test']);
 
+        $this->transport->expects(static::never())->method('send');
+
         $this->handler->__invoke($message);
     }
 

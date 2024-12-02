@@ -56,7 +56,7 @@ class AppActionLoaderTest extends TestCase
                 'url' => getenv('APP_URL'),
                 'appVersion' => $app->getVersion(),
                 'shopId' => $shopIdProvider->getShopId(),
-                'inAppPurchases' => [],
+                'inAppPurchases' => null,
             ],
             'data' => [
                 'ids' => $ids,

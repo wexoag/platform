@@ -525,7 +525,7 @@
     "checkout-gateway-error": "%reason%"
   },
   "listing": {
-    "filterTitleText": "Filter",
+    "filterTitleText": "Filter products",
     "showResults": "Show results",
     "boxUnitLabel": "Content:",
     "boxLabelTopseller": "Tip",

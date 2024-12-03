@@ -188,7 +188,7 @@
         "phpstan/phpstan-deprecation-rules": "1.2.1",
         "phpstan/phpstan-phpunit": "1.4.1",
         "phpstan/phpstan-symfony": "1.4.12",
-        "phpunit/phpunit": "^10.5",
+        "phpunit/phpunit": "^10.5.38",
         "predis/predis": "^2.2",
         "rector/type-perfect": "1.0.0",
         "shopware/dev-tools": "^1.3",

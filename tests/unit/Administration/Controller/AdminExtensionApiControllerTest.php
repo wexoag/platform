@@ -144,7 +144,7 @@ class AdminExtensionApiControllerTest extends TestCase
         $entity = $this->buildAppEntity('test-app', 'test-secrets', ['foo.bar']);
         $this->assertEntityRepositoryWithEntity($entity);
 
-        $this->appPayloadServiceHelper->expects(static::once())->method('buildSource')->with('1.0.0', $entity->getId());
+        $this->appPayloadServiceHelper->expects(static::once())->method('buildSource')->with('1.0.0', $entity->getName());
         $this->executor->expects(static::once())->method('execute');
 
         $this->controller->runAction(

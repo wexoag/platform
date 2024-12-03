@@ -85,7 +85,7 @@ class WebhookManagerTest extends TestCase
                     'appVersion' => $webhook['appVersion'],
                     'shopId' => 'foobar',
                     'action' => $event->getName(),
-                    'inAppPurchases' => [],
+                    'inAppPurchases' => null,
                 ],
             ], \JSON_THROW_ON_ERROR)
         );
@@ -138,7 +138,7 @@ class WebhookManagerTest extends TestCase
                 'appVersion' => $webhook['appVersion'],
                 'shopId' => 'foobar',
                 'action' => $event->getName(),
-                'inAppPurchases' => [],
+                'inAppPurchases' => null,
             ],
         ], $payload);
 

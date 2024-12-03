@@ -4,7 +4,6 @@ namespace Shopware\Tests\Unit\Storefront\Framework\Routing;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Checkout\Cart\Exception\CustomerNotLoggedInException;
 use Shopware\Core\Checkout\Customer\Event\CustomerLoginEvent;
@@ -254,44 +253,6 @@ class StorefrontSubscriberTest extends TestCase
 
         yield 'XMLHttpRequest, but a storefront request and allowed' => [
             'request' => new Request([], [], [PlatformRequest::ATTRIBUTE_ROUTE_SCOPE => [StorefrontRouteScope::ID], 'XmlHttpRequest' => true], [], [], ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']),
-            'expected' => false,
-        ];
-    }
-
-    #[DoesNotPerformAssertions]
-    #[DataProvider('dataProviderStartSession')]
-    public function testStartSessionNoRequest(?Request $request): void
-    {
-        $requestStack = new RequestStack();
-
-        if ($request) {
-            $requestStack->push($request);
-        }
-
-        $subscriber = new StorefrontSubscriber(
-            $requestStack,
-            $this->createMock(RouterInterface::class),
-            $this->createMock(MaintenanceModeResolver::class),
-            new StaticSystemConfigService(),
-        );
-
-        $subscriber->startSession();
-    }
-
-    public static function dataProviderStartSession(): \Generator
-    {
-        yield 'no request' => [
-            'request' => null,
-            'expected' => false,
-        ];
-
-        yield 'generic request' => [
-            'request' => new Request(),
-            'expected' => false,
-        ];
-
-        yield 'storefront request without session' => [
-            'request' => new Request([], [], [PlatformRequest::ATTRIBUTE_ROUTE_SCOPE => [StorefrontRouteScope::ID]]),
             'expected' => false,
         ];
     }

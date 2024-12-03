@@ -144,7 +144,11 @@
                     {% if imageCount > 1 %}
                         data-gallery-slider="true"
                         data-gallery-slider-options='{{ gallerySliderOptions|json_encode }}'
-                    {% endif %}>
+                    {% endif %}
+                     role="region"
+                     aria-label="{{ 'component.cms.imageGallery.ariaLabel'|trans({ '%total%': imageCount })|sw_sanitize }}"
+                     tabindex="0"
+                >
                     {% block element_image_gallery_inner_col %}
                         <div class="gallery-slider-col{% if galleryPosition == "left" %} col order-1 order-md-2{% elseif galleryPosition == "underneath" %} col-12 order-1{% endif %}"
                              {% if zoomModal %}data-zoom-modal="true"{% endif %}>

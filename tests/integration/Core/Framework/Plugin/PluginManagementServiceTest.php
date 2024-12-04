@@ -195,6 +195,7 @@ class PluginManagementServiceTest extends TestCase
         return new CacheClearer(
             [],
             $this->getContainer()->get('cache_clearer'),
+            null,
             $this->getContainer()->get(CacheInvalidator::class),
             $this->filesystem,
             $this->cacheDir,

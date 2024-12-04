@@ -607,7 +607,7 @@
   },
   "search": {
     "headline": "{0} 0 products found for \"%searchTerm%\" | {1} One product found for \"%searchTerm%\" | ]1,Inf[ %count% products found for \"%searchTerm%\"",
-    "metaTitle": "Searchresult"
+    "metaTitle": "Search results"
   },
   "detail": {
     "ordernumberLabel": "Product number:",

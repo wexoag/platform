@@ -784,7 +784,7 @@
         "acceptButtonLabel": "Accept"
       },
       "imageGallery": {
-        "ariaLabel": "Image gallery",
+        "ariaLabel": "Image Gallery",
         "touchMove": "Touch and drag",
         "clickMove": "Click and move",
         "sliderDotLabel": "Show image %index% of %total%",

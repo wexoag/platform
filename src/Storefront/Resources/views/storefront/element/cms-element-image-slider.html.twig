@@ -1,17 +1,19 @@
 {% block element_image_slider %}
     {% set sliderConfig = element.fieldConfig.elements %}
+    {% set visibleValues = ['inside', 'outside'] %}
 
     <div class="cms-element-{{ element.type }}{% if sliderConfig.displayMode.value == "standard" and sliderConfig.verticalAlign.value %} has-vertical-alignment{% endif %}">
         {% set baseSliderOptions = {
             slider: {
+                controls: sliderConfig.navigationArrows.value in visibleValues,
+                nav: sliderConfig.navigationDots.value in visibleValues,
                 navPosition: 'bottom',
-                speed: sliderConfig.speed.value,
-                autoplayTimeout: sliderConfig.autoplayTimeout.value,
+                mouseDrag: true,
                 autoplay: sliderConfig.autoSlide.value,
-                ariaLive: sliderConfig.autoSlide.value ? false : true,
                 autoplayButtonOutput: false,
-                nav: sliderConfig.navigationDots.value ? true : false,
-                controls: sliderConfig.navigationArrows.value ? true : false,
+                autoplayTimeout: sliderConfig.autoplayTimeout.value,
+                speed: sliderConfig.speed.value,
+                ariaLive: sliderConfig.autoSlide.value ? false : true,
                 autoHeight: (sliderConfig.displayMode.value == "standard") ? true : false
             }
         } %}
@@ -57,7 +59,8 @@
                                         {% if image.url %}
                                             <a href="{{ image.url }}"
                                                class="image-slider-link"
-                                               {% if image.newTab %}target="_blank" rel="noopener"{% endif %}>
+                                               {% if image.newTab %}target="_blank" rel="noopener"{% endif %}
+                                            >
                                                 {{ imageElement }}
                                             </a>
                                         {% else %}
@@ -69,7 +72,7 @@
                         </div>
 
                         {% block element_image_slider_controls %}
-                            {% if sliderConfig.navigationArrows.value %}
+                            {% if sliderConfig.navigationArrows.value !== 'none' %}
                                 <div class="image-slider-controls-container">
                                     <div class="base-slider-controls"
                                         data-base-slider-controls="true">

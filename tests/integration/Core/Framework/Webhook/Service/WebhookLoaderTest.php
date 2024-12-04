@@ -51,7 +51,7 @@ class WebhookLoaderTest extends TestCase
 
         $webhookLoader = $this->getContainer()->get(WebhookLoader::class);
 
-        $webhooks = $webhookLoader->getWebhooksForEvent(CustomerBeforeLoginEvent::EVENT_NAME);
+        $webhooks = $webhookLoader->getWebhooks();
 
         static::assertSame(
             [
@@ -116,7 +116,7 @@ class WebhookLoaderTest extends TestCase
 
         $webhookLoader = $this->getContainer()->get(WebhookLoader::class);
 
-        $webhooks = $webhookLoader->getWebhooksForEvent(CustomerBeforeLoginEvent::EVENT_NAME);
+        $webhooks = $webhookLoader->getWebhooks();
 
         static::assertSame(
             [
@@ -189,7 +189,7 @@ class WebhookLoaderTest extends TestCase
 
         $webhookLoader = $this->getContainer()->get(WebhookLoader::class);
 
-        $webhooks = $webhookLoader->getWebhooksForEvent(CustomerBeforeLoginEvent::EVENT_NAME);
+        $webhooks = $webhookLoader->getWebhooks();
 
         static::assertCount(2, $webhooks);
     }

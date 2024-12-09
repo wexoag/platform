@@ -1,6 +1,6 @@
 ---
 title: Identify themes installed via plugin by technical name
-issue: NEXT-00000
+issue: NEXT-39982
 author: Elias Lackner
 author_email: lackner.elias@gmail.com
 author_github: @lacknere

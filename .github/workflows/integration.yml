@@ -26,6 +26,14 @@ jobs:
       BLUE_GREEN_DEPLOYMENT: 1
       COMPOSER_ROOT_VERSION: 6.6.9999999-dev
     services:
+      database:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: shopware
+        ports:
+          - "3306:3306"
+        options: --health-cmd="mysqladmin ping"
       redis: # Redis is required since cache rework
         image: ${{ matrix.major == 'major' && 'redis:alpine' || '' }}
         ports:
@@ -40,10 +48,12 @@ jobs:
           echo "FEATURE_ALL=major" >> $GITHUB_ENV
           echo "DISABLE_VUE_COMPAT=0" >> $GITHUB_ENV
           echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
+          echo "ADMIN_VITE=1" >> $GITHUB_ENV
 
       - name: Setup Shopware
         uses: shopware/setup-shopware@main
         with:
+          mysql-version: 'skip'
           shopware-version: ${{ github.ref }}
           shopware-repository: ${{ github.repository }}
           install: ${{ matrix.name != 'Install' }} # When testing the installation routine of Shopware, don't execute the installation automatically

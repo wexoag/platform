@@ -1,6 +1,7 @@
 {% block element_image_slider %}
     {% set sliderConfig = element.fieldConfig.elements %}
     {% set visibleValues = ['inside', 'outside'] %}
+    {% set blockId = block.id %}
 
     <div class="cms-element-{{ element.type }}{% if sliderConfig.displayMode.value == "standard" and sliderConfig.verticalAlign.value %} has-vertical-alignment{% endif %}">
         {% set baseSliderOptions = {
@@ -31,6 +32,13 @@
                 >
 
                     {% block element_image_slider_inner %}
+                        {% block element_image_slider_skip_slider %}
+                            {% sw_include '@Storefront/storefront/component/skip-target.html.twig' with {
+                                targetId: blockId,
+                                snippet: 'component.cms.imageGallery.skipImageGallery',
+                            } %}
+                        {% endblock %}
+
                         <div class="image-slider-container"
                              data-base-slider-container="true">
                             {% for image in element.data.sliderItems %}
@@ -107,4 +115,8 @@
             {% endif %}
         {% endblock %}
     </div>
+
+    {% block element_image_slider_target_after_slider %}
+        <div id="content-after-target-{{ blockId }}"></div>
+    {% endblock %}
 {% endblock %}

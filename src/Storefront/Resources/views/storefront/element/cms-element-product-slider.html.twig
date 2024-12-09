@@ -5,6 +5,8 @@
 
     {% set visibleValues = ['inside', 'outside'] %}
 
+    {% set blockId = block.id %}
+
     {% if element.data.products.elements %}
         <div
             class="cms-element-{{ element.type }}{% if sliderConfig.displayMode.value == "standard" and sliderConfig.verticalAlign.value %} has-vertical-alignment{% endif %}">
@@ -46,6 +48,13 @@
                         aria-label="{{ 'component.cms.productGallery.ariaLabel'|trans({ '%total%': element.data.products.elements|length })|sw_sanitize }}"
                         tabindex="0"
                     >
+
+                        {% block element_product_slider_skip_slider %}
+                            {% sw_include '@Storefront/storefront/component/skip-target.html.twig' with {
+                                targetId: blockId,
+                                snippet: 'component.cms.productGallery.skipProductGallery',
+                            } %}
+                        {% endblock %}
 
                         {% block element_product_slider_title %}
                             {% if sliderConfig.title.value %}
@@ -110,4 +119,8 @@
             {% endblock %}
         </div>
     {% endif %}
+
+    {% block element_product_slider_target_after_slider %}
+        <div id="content-after-target-{{ blockId }}"></div>
+    {% endblock %}
 {% endblock %}

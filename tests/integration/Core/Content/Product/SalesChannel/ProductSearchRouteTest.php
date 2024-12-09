@@ -48,8 +48,8 @@ class ProductSearchRouteTest extends TestCase
     protected function setUp(): void
     {
         $this->ids = new IdsCollection();
-        $this->searchKeywordUpdater = $this->getContainer()->get(SearchKeywordUpdater::class);
-        $this->productSearchConfigRepository = $this->getContainer()->get('product_search_config.repository');
+        $this->searchKeywordUpdater = static::getContainer()->get(SearchKeywordUpdater::class);
+        $this->productSearchConfigRepository = static::getContainer()->get('product_search_config.repository');
         $this->productSearchConfigId = $this->getProductSearchConfigId();
     }
 
@@ -301,7 +301,7 @@ class ProductSearchRouteTest extends TestCase
     {
         [$browser, $ids] = $services;
 
-        $productRepository = $this->getContainer()->get('product.repository');
+        $productRepository = static::getContainer()->get('product.repository');
 
         $this->productSearchConfigRepository->update([
             ['id' => $this->productSearchConfigId, 'andLogic' => false],
@@ -377,10 +377,10 @@ class ProductSearchRouteTest extends TestCase
             $languageId = $this->getDeDeLanguageId();
         }
 
-        $searchRoute = $this->getContainer()->get(ProductSearchRoute::class);
-        $suggestRoute = $this->getContainer()->get(ProductSuggestRoute::class);
+        $searchRoute = static::getContainer()->get(ProductSearchRoute::class);
+        $suggestRoute = static::getContainer()->get(ProductSuggestRoute::class);
 
-        $salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)->create(
+        $salesChannelContext = static::getContainer()->get(SalesChannelContextFactory::class)->create(
             'token',
             $ids->get('sales-channel'),
             [
@@ -701,14 +701,14 @@ class ProductSearchRouteTest extends TestCase
             'name' => 'Test',
         ];
 
-        $this->getContainer()->get('category.repository')
+        static::getContainer()->get('category.repository')
             ->create([$data], Context::createDefaultContext());
     }
 
     private function setupProductsForImplementSearch(): void
     {
         /** @var EntityRepository $productRepository */
-        $productRepository = $this->getContainer()->get('product.repository');
+        $productRepository = static::getContainer()->get('product.repository');
         $productIds = [];
         $productsNames = [
             'Rustic Copper Drastic Plastic' => '123123123',
@@ -861,7 +861,7 @@ class ProductSearchRouteTest extends TestCase
 
     private function createGermanSalesChannelDomain(): void
     {
-        $this->getContainer()->get('language.repository')->upsert([
+        static::getContainer()->get('language.repository')->upsert([
             [
                 'id' => $this->getDeDeLanguageId(),
                 'salesChannelDomains' => [

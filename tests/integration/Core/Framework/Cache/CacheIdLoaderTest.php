@@ -22,7 +22,7 @@ class CacheIdLoaderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->loader = $this->getContainer()->get(CacheIdLoader::class);
+        $this->loader = static::getContainer()->get(CacheIdLoader::class);
         unset($_SERVER['SHOPWARE_CACHE_ID']);
     }
 
@@ -34,7 +34,7 @@ class CacheIdLoaderTest extends TestCase
 
         $new = Uuid::randomHex();
 
-        $this->getContainer()->get(AbstractKeyValueStorage::class)->set('cache-id', $new);
+        static::getContainer()->get(AbstractKeyValueStorage::class)->set('cache-id', $new);
 
         static::assertSame($new, $this->loader->load());
 

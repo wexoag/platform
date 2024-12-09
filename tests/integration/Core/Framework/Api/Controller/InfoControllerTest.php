@@ -389,9 +389,9 @@ class InfoControllerTest extends TestCase
             static::getContainer()->get(AppUrlVerifier::class),
             static::getContainer()->get('router'),
             $eventCollector,
-            $this->getContainer()->get(SystemConfigService::class),
-            $this->getContainer()->get(ApiRouteInfoResolver::class),
-            $this->getContainer()->get(InAppPurchase::class),
+            static::getContainer()->get(SystemConfigService::class),
+            static::getContainer()->get(ApiRouteInfoResolver::class),
+            static::getContainer()->get(InAppPurchase::class),
         );
 
         $infoController->setContainer($this->createMock(Container::class));
@@ -454,9 +454,9 @@ class InfoControllerTest extends TestCase
             static::getContainer()->get(AppUrlVerifier::class),
             static::getContainer()->get('router'),
             $eventCollector,
-            $this->getContainer()->get(SystemConfigService::class),
-            $this->getContainer()->get(ApiRouteInfoResolver::class),
-            $this->getContainer()->get(InAppPurchase::class),
+            static::getContainer()->get(SystemConfigService::class),
+            static::getContainer()->get(ApiRouteInfoResolver::class),
+            static::getContainer()->get(InAppPurchase::class),
         );
 
         $infoController->setContainer($this->createMock(Container::class));
@@ -533,9 +533,9 @@ class InfoControllerTest extends TestCase
             static::getContainer()->get(AppUrlVerifier::class),
             static::getContainer()->get('router'),
             $eventCollector,
-            $this->getContainer()->get(SystemConfigService::class),
-            $this->getContainer()->get(ApiRouteInfoResolver::class),
-            $this->getContainer()->get(InAppPurchase::class),
+            static::getContainer()->get(SystemConfigService::class),
+            static::getContainer()->get(ApiRouteInfoResolver::class),
+            static::getContainer()->get(InAppPurchase::class),
         );
 
         $infoController->setContainer($this->createMock(Container::class));

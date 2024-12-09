@@ -50,7 +50,7 @@ class PromotionRedemptionUpdaterTest extends TestCase
     protected function setUp(): void
     {
         $this->ids = new IdsCollection();
-        $this->connection = $this->getContainer()->get(Connection::class);
+        $this->connection = static::getContainer()->get(Connection::class);
         $this->salesChannelContext = $this->createSalesChannelContext();
     }
 
@@ -58,7 +58,7 @@ class PromotionRedemptionUpdaterTest extends TestCase
     {
         $this->createPromotionsAndOrder();
 
-        $updater = $this->getContainer()->get(PromotionRedemptionUpdater::class);
+        $updater = static::getContainer()->get(PromotionRedemptionUpdater::class);
         $updater->update(
             [
                 $this->ids->get('voucherA'),
@@ -79,14 +79,14 @@ class PromotionRedemptionUpdaterTest extends TestCase
         $criteria->addAssociation('lineItems');
 
         /** @var OrderEntity|null $order */
-        $order = $this->getContainer()
+        $order = static::getContainer()
             ->get('order.repository')
             ->search($criteria, $this->salesChannelContext->getContext())
             ->first();
 
         static::assertNotNull($order);
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = static::getContainer()->get('event_dispatcher');
         $dispatcher->dispatch(new CheckoutOrderPlacedEvent(
             $this->salesChannelContext->getContext(),
             $order,
@@ -102,7 +102,7 @@ class PromotionRedemptionUpdaterTest extends TestCase
 
         $voucherA = $this->ids->get('voucherA');
 
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         // field is write protected - use plain sql here
         $connection->executeStatement(
@@ -114,7 +114,7 @@ class PromotionRedemptionUpdaterTest extends TestCase
         $criteria->addAssociation('lineItems');
 
         /** @var OrderEntity|null $order */
-        $order = $this->getContainer()
+        $order = static::getContainer()
             ->get('order.repository')
             ->search($criteria, Context::createDefaultContext())
             ->first();
@@ -127,7 +127,7 @@ class PromotionRedemptionUpdaterTest extends TestCase
             Defaults::SALES_CHANNEL_TYPE_STOREFRONT
         );
 
-        $updater = $this->getContainer()->get(PromotionRedemptionUpdater::class);
+        $updater = static::getContainer()->get(PromotionRedemptionUpdater::class);
         $updater->orderPlaced($event);
 
         $promotions = $connection->fetchAllAssociative(
@@ -151,13 +151,13 @@ class PromotionRedemptionUpdaterTest extends TestCase
 
         $voucherD = $this->ids->get('voucherD');
 
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $criteria = new Criteria([$this->ids->create('order')]);
         $criteria->addAssociation('lineItems');
 
         /** @var OrderEntity|null $order */
-        $order = $this->getContainer()
+        $order = static::getContainer()
             ->get('order.repository')
             ->search($criteria, Context::createDefaultContext())
             ->first();
@@ -170,7 +170,7 @@ class PromotionRedemptionUpdaterTest extends TestCase
             Defaults::SALES_CHANNEL_TYPE_STOREFRONT
         );
 
-        $updater = $this->getContainer()->get(PromotionIndividualCodeRedeemer::class);
+        $updater = static::getContainer()->get(PromotionIndividualCodeRedeemer::class);
         $updater->onOrderPlaced($event);
 
         $promotionIndividualCode = $connection->fetchAllAssociative(
@@ -199,10 +199,10 @@ class PromotionRedemptionUpdaterTest extends TestCase
     private function createPromotionsAndOrder(): void
     {
         /** @var EntityRepository $promotionRepository */
-        $promotionRepository = $this->getContainer()->get('promotion.repository');
+        $promotionRepository = static::getContainer()->get('promotion.repository');
 
         /** @var EntityRepository $promotionRepository */
-        $promotionIndividualCodeRepository = $this->getContainer()->get('promotion_individual_code.repository');
+        $promotionIndividualCodeRepository = static::getContainer()->get('promotion_individual_code.repository');
 
         $voucherA = $this->ids->create('voucherA');
         $voucherB = $this->ids->create('voucherB');
@@ -271,7 +271,7 @@ class PromotionRedemptionUpdaterTest extends TestCase
      */
     private function createSalesChannelContext(array $options = []): SalesChannelContext
     {
-        $salesChannelContextFactory = $this->getContainer()->get(SalesChannelContextFactory::class);
+        $salesChannelContextFactory = static::getContainer()->get(SalesChannelContextFactory::class);
 
         $token = Uuid::randomHex();
 
@@ -280,7 +280,7 @@ class PromotionRedemptionUpdaterTest extends TestCase
 
     private function createOrder(string $customerId): void
     {
-        $this->getContainer()->get('order.repository')->create(
+        static::getContainer()->get('order.repository')->create(
             [[
                 'id' => $this->ids->create('order'),
                 'itemRounding' => json_decode(json_encode(new CashRoundingConfig(2, 0.01, true), \JSON_THROW_ON_ERROR), true, 512, \JSON_THROW_ON_ERROR),

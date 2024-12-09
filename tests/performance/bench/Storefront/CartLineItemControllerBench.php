@@ -39,7 +39,7 @@ class CartLineItemControllerBench extends AbstractBenchCase
             throw new \Exception('Customer not logged in for bench tests which require it!');
         }
 
-        $this->getContainer()->get(Connection::class)->beginTransaction();
+        static::getContainer()->get(Connection::class)->beginTransaction();
 
         $product = [
             'id' => $this->ids->get('product-state-physical-0'),
@@ -62,7 +62,7 @@ class CartLineItemControllerBench extends AbstractBenchCase
         ];
 
         $this->context->getContext()->scope(Context::SYSTEM_SCOPE, function (Context $context) use ($product): void {
-            $this->getContainer()->get('product.repository')->create([$product], $context);
+            static::getContainer()->get('product.repository')->create([$product], $context);
         });
 
         $this->cart = new Cart($this->context->getToken());
@@ -76,7 +76,7 @@ class CartLineItemControllerBench extends AbstractBenchCase
         $lineItem = (new LineItem(Uuid::randomHex(), LineItem::PRODUCT_LINE_ITEM_TYPE, $productId, 5000))
             ->setStackable(true);
         $this->cart->add($lineItem);
-        $this->getContainer()->get(ProductCartProcessor::class)->collect($this->cart->getData(), $this->cart, $this->context, new CartBehavior());
+        static::getContainer()->get(ProductCartProcessor::class)->collect($this->cart->getData(), $this->cart, $this->context, new CartBehavior());
 
         // Create a promotion with a set-group of 2 items
         $promotionId = Uuid::randomHex();
@@ -115,7 +115,7 @@ class CartLineItemControllerBench extends AbstractBenchCase
             ],
         ];
         $this->context->getContext()->scope(Context::SYSTEM_SCOPE, function (Context $context) use ($promotion): void {
-            $this->getContainer()->get('promotion.repository')->create([$promotion], $context);
+            static::getContainer()->get('promotion.repository')->create([$promotion], $context);
         });
 
         $requestDataBag = new RequestDataBag(['code' => $promotionId]);
@@ -126,9 +126,9 @@ class CartLineItemControllerBench extends AbstractBenchCase
         $request->setSession($session);
 
         // Set the session in the RequestStack
-        $requestStack = $this->getContainer()->get(RequestStack::class);
+        $requestStack = static::getContainer()->get(RequestStack::class);
         $requestStack->push($request);
 
-        $this->getContainer()->get(CartLineItemController::class)->addPromotion($this->cart, $request, $this->context);
+        static::getContainer()->get(CartLineItemController::class)->addPromotion($this->cart, $request, $this->context);
     }
 }

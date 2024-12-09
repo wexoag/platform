@@ -46,7 +46,7 @@ class CacheInvalidationSubscriberTest extends TestCase
         $this->cacheInvalidatorMock = $this->createMock(CacheInvalidator::class);
         $this->cacheInvalidationSubscriber = new CacheInvalidationSubscriber(
             $this->cacheInvalidatorMock,
-            $this->getContainer()->get(Connection::class),
+            static::getContainer()->get(Connection::class),
             false,
             false,
             true
@@ -131,7 +131,7 @@ class CacheInvalidationSubscriberTest extends TestCase
     {
         $this->insertDefaultPropertyGroup();
 
-        $groupRepository = $this->getContainer()->get('property_group.repository');
+        $groupRepository = static::getContainer()->get('property_group.repository');
         $event = $groupRepository->update([
             [
                 'id' => $this->ids->get('group1'),
@@ -150,7 +150,7 @@ class CacheInvalidationSubscriberTest extends TestCase
     {
         $this->insertDefaultPropertyGroup();
 
-        $groupRepository = $this->getContainer()->get('property_group.repository');
+        $groupRepository = static::getContainer()->get('property_group.repository');
         $event = $groupRepository->update([
             [
                 'id' => $this->ids->get('group1'),
@@ -169,7 +169,7 @@ class CacheInvalidationSubscriberTest extends TestCase
     {
         $this->insertDefaultPropertyGroup();
 
-        $groupRepository = $this->getContainer()->get('property_group.repository');
+        $groupRepository = static::getContainer()->get('property_group.repository');
         $event = $groupRepository->update([
             [
                 'id' => $this->ids->get('group1'),
@@ -193,7 +193,7 @@ class CacheInvalidationSubscriberTest extends TestCase
     {
         $this->insertDefaultPropertyGroup();
 
-        $optionRepository = $this->getContainer()->get('property_group_option.repository');
+        $optionRepository = static::getContainer()->get('property_group_option.repository');
         $event = $optionRepository->update([
             [
                 'id' => $this->ids->get('property-assigned'),
@@ -212,7 +212,7 @@ class CacheInvalidationSubscriberTest extends TestCase
     {
         $this->insertDefaultPropertyGroup();
 
-        $optionRepository = $this->getContainer()->get('property_group_option.repository');
+        $optionRepository = static::getContainer()->get('property_group_option.repository');
         $event = $optionRepository->update([
             [
                 'id' => $this->ids->get('property-unassigned'),
@@ -231,7 +231,7 @@ class CacheInvalidationSubscriberTest extends TestCase
     {
         $this->insertDefaultPropertyGroup();
 
-        $optionRepository = $this->getContainer()->get('property_group_option.repository');
+        $optionRepository = static::getContainer()->get('property_group_option.repository');
         $event = $optionRepository->update([
             [
                 'id' => $this->ids->get('property-assigned'),
@@ -250,7 +250,7 @@ class CacheInvalidationSubscriberTest extends TestCase
     {
         $this->insertDefaultPropertyGroup();
 
-        $optionRepository = $this->getContainer()->get('property_group_option.repository');
+        $optionRepository = static::getContainer()->get('property_group_option.repository');
         $event = $optionRepository->update([
             [
                 'id' => $this->ids->get('property-unassigned'),
@@ -273,7 +273,7 @@ class CacheInvalidationSubscriberTest extends TestCase
         $builder->price(10)
             ->property('property-assigned', '');
 
-        $event = $this->getContainer()->get('product.repository')->create([$builder->build()], Context::createDefaultContext());
+        $event = static::getContainer()->get('product.repository')->create([$builder->build()], Context::createDefaultContext());
 
         $this->cacheInvalidatorMock->expects(static::once())
             ->method('invalidate')
@@ -353,7 +353,7 @@ class CacheInvalidationSubscriberTest extends TestCase
 
     private function insertDefaultPropertyGroup(): void
     {
-        $groupRepository = $this->getContainer()->get('property_group.repository');
+        $groupRepository = static::getContainer()->get('property_group.repository');
 
         $data = [
             'id' => $this->ids->get('group1'),
@@ -378,7 +378,7 @@ class CacheInvalidationSubscriberTest extends TestCase
         $builder->price(10)
             ->property('property-assigned', '');
 
-        $this->getContainer()->get('product.repository')->create([$builder->build()], Context::createDefaultContext());
+        static::getContainer()->get('product.repository')->create([$builder->build()], Context::createDefaultContext());
     }
 
     private function createProduct(string $id, ?string $parentId = null): void

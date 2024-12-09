@@ -23,7 +23,7 @@ class ScriptPersisterTest extends TestCase
 
         static::assertSame(6, $this->fetchAppScriptCount());
 
-        $scriptPersister = $this->getContainer()->get(ScriptPersister::class);
+        $scriptPersister = static::getContainer()->get(ScriptPersister::class);
 
         $scriptPersister->refresh();
 
@@ -33,7 +33,7 @@ class ScriptPersisterTest extends TestCase
 
     private function fetchAppScriptCount(): int
     {
-        return (int) $this->getContainer()->get(Connection::class)->fetchOne(
+        return (int) static::getContainer()->get(Connection::class)->fetchOne(
             'SELECT COUNT(id) FROM script'
         );
     }

@@ -73,7 +73,7 @@ class Migration1732608755MigrateNavigationSettingsForProductSliderTest extends T
      */
     public function getActualConfig(string $affectedSlotId): array
     {
-        $cmsSlotRepository = $this->getContainer()->get('cms_slot.repository');
+        $cmsSlotRepository = static::getContainer()->get('cms_slot.repository');
         $criteria = new Criteria();
         $criteria->setIds([$affectedSlotId]);
 
@@ -93,7 +93,7 @@ class Migration1732608755MigrateNavigationSettingsForProductSliderTest extends T
     {
         $id = Uuid::randomHex();
 
-        $cmsPageRepository = $this->getContainer()->get('cms_page.repository');
+        $cmsPageRepository = static::getContainer()->get('cms_page.repository');
         $cmsPageRepository->create(
             [[
                 'id' => $id,

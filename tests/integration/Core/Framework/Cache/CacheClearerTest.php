@@ -72,7 +72,7 @@ class CacheClearerTest extends TestCase
 
         static::assertNotContains($second->getCacheDir(), $oldCacheDirs);
 
-        $this->getContainer()->get(CacheClearer::class)->clear();
+        static::getContainer()->get(CacheClearer::class)->clear();
 
         foreach ($oldCacheDirs as $oldCacheDir) {
             static::assertFileDoesNotExist($oldCacheDir);
@@ -92,7 +92,7 @@ class CacheClearerTest extends TestCase
             true,
             KernelLifecycleManager::getClassLoader(),
             new StaticKernelPluginLoader(KernelLifecycleManager::getClassLoader()),
-            $this->getContainer()->get(Connection::class)
+            static::getContainer()->get(Connection::class)
         );
 
         // reset kernel class for further tests
@@ -111,18 +111,18 @@ class CacheClearerTest extends TestCase
 
         static::assertCount(1, $containerCaches);
 
-        $filesystem = $this->getContainer()->get('filesystem');
+        $filesystem = static::getContainer()->get('filesystem');
         $cacheClearer = new CacheClearer(
             [],
-            $this->getContainer()->get('cache_clearer'),
+            static::getContainer()->get('cache_clearer'),
             null,
-            $this->getContainer()->get(CacheInvalidator::class),
+            static::getContainer()->get(CacheInvalidator::class),
             $filesystem,
             $cacheDir,
             'test',
             false,
-            $this->getContainer()->get('messenger.bus.shopware'),
-            $this->getContainer()->get('logger')
+            static::getContainer()->get('messenger.bus.shopware'),
+            static::getContainer()->get('logger')
         );
 
         $cacheClearer->clearContainerCache();
@@ -136,7 +136,7 @@ class CacheClearerTest extends TestCase
 
     public function testUrlGeneratorCacheGetsCleared(): void
     {
-        $cacheClearer = $this->getContainer()->get(CacheClearer::class);
+        $cacheClearer = static::getContainer()->get(CacheClearer::class);
 
         touch(\sprintf('%s%sUrlGenerator.php', $this->getKernel()->getCacheDir(), \DIRECTORY_SEPARATOR));
         touch(\sprintf('%s%sUrlGenerator.php.meta', $this->getKernel()->getCacheDir(), \DIRECTORY_SEPARATOR));
@@ -156,15 +156,15 @@ class CacheClearerTest extends TestCase
     {
         $cacheClearer = new CacheClearer(
             [],
-            $this->getContainer()->get('cache_clearer'),
+            static::getContainer()->get('cache_clearer'),
             null,
-            $this->getContainer()->get(CacheInvalidator::class),
-            $this->getContainer()->get('filesystem'),
+            static::getContainer()->get(CacheInvalidator::class),
+            static::getContainer()->get('filesystem'),
             $this->getKernel()->getCacheDir(),
             'test',
             true,
-            $this->getContainer()->get('messenger.bus.shopware'),
-            $this->getContainer()->get('logger')
+            static::getContainer()->get('messenger.bus.shopware'),
+            static::getContainer()->get('logger')
         );
 
         touch(\sprintf('%s%sUrlGenerator.php', $this->getKernel()->getCacheDir(), \DIRECTORY_SEPARATOR));

@@ -28,7 +28,7 @@ class WebhookLoaderTest extends TestCase
     protected function setUp(): void
     {
         $this->ids = new IdsCollection();
-        $this->connection = $this->getContainer()->get(Connection::class);
+        $this->connection = static::getContainer()->get(Connection::class);
     }
 
     public function testGetWebhooksForEvent(): void
@@ -49,7 +49,7 @@ class WebhookLoaderTest extends TestCase
             'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
         ]);
 
-        $webhookLoader = $this->getContainer()->get(WebhookLoader::class);
+        $webhookLoader = static::getContainer()->get(WebhookLoader::class);
 
         $webhooks = $webhookLoader->getWebhooks();
 
@@ -114,7 +114,7 @@ class WebhookLoaderTest extends TestCase
             'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
         ]);
 
-        $webhookLoader = $this->getContainer()->get(WebhookLoader::class);
+        $webhookLoader = static::getContainer()->get(WebhookLoader::class);
 
         $webhooks = $webhookLoader->getWebhooks();
 
@@ -187,7 +187,7 @@ class WebhookLoaderTest extends TestCase
             'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
         ]);
 
-        $webhookLoader = $this->getContainer()->get(WebhookLoader::class);
+        $webhookLoader = static::getContainer()->get(WebhookLoader::class);
 
         $webhooks = $webhookLoader->getWebhooks();
 
@@ -208,7 +208,7 @@ class WebhookLoaderTest extends TestCase
             ]
         );
 
-        $webhookLoader = $this->getContainer()->get(WebhookLoader::class);
+        $webhookLoader = static::getContainer()->get(WebhookLoader::class);
 
         $permissions = $webhookLoader->getPrivilegesForRoles([$aclRoleId]);
 

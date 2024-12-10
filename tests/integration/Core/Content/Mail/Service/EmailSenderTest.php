@@ -33,7 +33,9 @@ class EmailSenderTest extends TestCase
 
     private function doRunTest(): void
     {
-        $container = $this->getContainer();
+        // other tests might have already booted the kernel...
+        KernelLifecycleManager::ensureKernelShutdown();
+        $container = static::getContainer();
         $transport = $this->createMock(TransportInterface::class);
         $container->set('mailer.transports', $transport);
         $mailFactory = $container->get(MailFactory::class);

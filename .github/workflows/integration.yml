@@ -15,10 +15,10 @@ jobs:
           - 'Platform'
           - 'Install'
         major:
-          - 'false'
+          - ''
         include:
           - name: 'Platform'
-            major: ${{ contains(github.workflow_ref, 'nightly') && 'true' || 'false' }}
+            major: ${{ contains(github.workflow_ref, 'nightly') && 'major' || '' }}
     continue-on-error: ${{ matrix.major == 'true' }}
     env:
       SHOPWARE_HTTP_CACHE_ENABLED: 0
@@ -27,19 +27,19 @@ jobs:
       COMPOSER_ROOT_VERSION: 6.6.9999999-dev
     services:
       redis: # Redis is required since cache rework
-        image: ${{ matrix.major == 'true' && 'redis:alpine' || '' }}
+        image: ${{ matrix.major == 'major' && 'redis:alpine' || '' }}
         ports:
           - "6379:6379"
     steps:
       - name: Define environment for major testing
         shell: bash
+        if: ${{ matrix.major == 'major' }}
         run: |
           echo "Workflow Ref: ${{ github.workflow_ref }}"
           echo "V6_7_0_0=1" >> $GITHUB_ENV
           echo "FEATURE_ALL=major" >> $GITHUB_ENV
           echo "DISABLE_VUE_COMPAT=0" >> $GITHUB_ENV
           echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
-        if: ${{ matrix.major == 'true' }}
 
       - name: Setup Shopware
         uses: shopware/setup-shopware@main
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report-${{ matrix.name }}${{ matrix.major == 'true' && '-major' || '' }}
+          name: playwright-report-${{ matrix.name }}${{ matrix.major == 'major' && '-major' || '' }}
           path: tests/acceptance/test-results/
           retention-days: 3
 

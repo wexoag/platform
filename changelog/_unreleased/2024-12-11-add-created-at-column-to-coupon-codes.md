@@ -1,9 +1,9 @@
 ---
 title: Allow duplicate promotion
-issue: NEXT-00000
+issue: NEXT-40011
 author: Alexander Menk
 author_email: a.menk@imi.de
 author_github: amenk
 ---
 # Administration
-* Added column created at in the list of manually generated coupon codes
+* Added `createdAt` column in the list of manually generated coupon codes

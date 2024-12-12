@@ -38,13 +38,12 @@ class GenericPageLoader implements GenericPageLoaderInterface
         return Profiler::trace('generic-page-loader', function () use ($request, $context) {
             $page = new Page();
 
-            $salesChannelId = $context->getSalesChannel()->getId();
             $page->setMetaInformation((new MetaInformation())->assign([
                 'revisit' => '15 days',
                 'robots' => 'index,follow',
                 'xmlLang' => $request->attributes->get(SalesChannelRequest::ATTRIBUTE_DOMAIN_LOCALE) ?? '',
-                'metaTitle' => $this->getSystemConfig('core.basicInformation.shopName', $salesChannelId),
-                'author' => $this->getSystemConfig('core.basicInformation.metaAuthor', $salesChannelId),
+                // @deprecated tag:v6.7.0 - move the metaTitle to meta.html.twig and remove $systemConfigService dependency
+                'metaTitle' => $this->systemConfigService->getString('core.basicInformation.shopName', $context->getSalesChannel()->getId()),
             ]));
 
             if ($request->isXmlHttpRequest() || $request->attributes->get('_esi', false)) {
@@ -92,10 +91,5 @@ class GenericPageLoader implements GenericPageLoaderInterface
 
             return $page;
         });
-    }
-
-    private function getSystemConfig(string $config, string $salesChannelId): string
-    {
-        return $this->systemConfigService->getString($config, $salesChannelId);
     }
 }

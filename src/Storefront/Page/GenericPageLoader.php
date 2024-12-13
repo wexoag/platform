@@ -42,8 +42,7 @@ class GenericPageLoader implements GenericPageLoaderInterface
                 'revisit' => '15 days',
                 'robots' => 'index,follow',
                 'xmlLang' => $request->attributes->get(SalesChannelRequest::ATTRIBUTE_DOMAIN_LOCALE) ?? '',
-                // @deprecated tag:v6.7.0 - remove metaTitle and systemConfigService dependency here, afterwards update meta.html.twig template
-                'metaTitle' => $this->systemConfigService->getString('core.basicInformation.shopName', $context->getSalesChannel()->getId()),
+                'metaTitle' => $this->systemConfigService->getString('core.basicInformation.shopName', $context->getSalesChannelId()),
             ]));
 
             if ($request->isXmlHttpRequest() || $request->attributes->get('_esi', false)) {

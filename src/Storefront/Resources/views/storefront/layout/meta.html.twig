@@ -3,8 +3,11 @@
     {% set basicConfig = config('core.basicInformation') %}
     {% set maxLength = config('seo.descriptionMaxLength') %}
     {% set metaDescription = metaInformation.metaDescription|striptags|trim|u.truncate(maxLength ?? 255, '…') %}
-    {# @deprecated tag:v6.7.0 - Get the metaTitle from config('core.basicInformation.shopName') #}
-    {% set metaTitle = metaInformation.metaTitle|striptags|trim %}
+    {% if feature('v6.7.0.0') %}
+        {% set metaTitle = config('core.basicInformation.shopName')|striptags|trim %}
+    {% else %}
+        {% set metaTitle = metaInformation.metaTitle|striptags|trim %}
+    {% endif %}
     {% set metaKeywords = metaInformation.metaKeywords|striptags|trim %}
     {% set metaAuthor = (metaInformation.author != '') ? metaInformation.author : config('core.basicInformation.metaAuthor') %}
 

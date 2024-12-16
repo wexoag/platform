@@ -23,8 +23,15 @@ test('As a customer, I must be able to change email via account.', { tag: '@Acco
     await StorefrontAccountProfile.emailAddressConfirmInput.fill(changedEmail.email);
     await StorefrontAccountProfile.emailConfirmPasswordInput.fill(customer.password);
     await StorefrontAccountProfile.saveEmailAddressButton.click();
-    //await ShopCustomer.expects(StorefrontAccountProfile.updateMessage).toBeVisible(); //Your email address has been updated.
-    //await ShopCustomer.expects(StorefrontAccountProfile.loginDataEmail).toContain(changedEmail.email);
+    await ShopCustomer.expects(StorefrontAccountProfile.emailUpdateMessage).toBeVisible();
+    await ShopCustomer.expects(StorefrontAccountProfile.loginDataEmailAddress).toContainText(changedEmail.email);
+
+    await StorefrontAccountLogin.logoutLink.click();
+    await ShopCustomer.expects(StorefrontAccountLogin.successAlert).toBeVisible();
+    await StorefrontAccountLogin.emailInput.fill(changedEmail.email);
+    await StorefrontAccountLogin.passwordInput.fill(customer.password);
+    await StorefrontAccountLogin.loginButton.click();
+    await ShopCustomer.expects(StorefrontAccount.personalDataCardTitle).toBeVisible();
 });
 
 
@@ -49,8 +56,14 @@ test('As a customer, I must be able to change password via account.', { tag: '@A
     await ShopCustomer.expects(StorefrontAccountProfile.newPasswordInput).toBeVisible();
     await StorefrontAccountProfile.newPasswordInput.fill(changedPassword.password);
     await StorefrontAccountProfile.newPasswordConfirmInput.fill(changedPassword.password);
-    await StorefrontAccountProfile.emailConfirmPasswordInput.fill(customer.password);
+    await StorefrontAccountProfile.currentPasswordInput.fill(customer.password);
     await StorefrontAccountProfile.saveNewPasswordButton.click();
-    //await ShopCustomer.expects(StorefrontAccountProfile.updateMessage).toBeVisible(); //Your password has been updated.
-    //await ShopCustomer.expects(StorefrontAccountProfile.loginDataEmail).toContain(changedEmail.email);
+    await ShopCustomer.expects(StorefrontAccountProfile.passwordUpdateMessage).toBeVisible();
+
+    await StorefrontAccountLogin.logoutLink.click();
+    await ShopCustomer.expects(StorefrontAccountLogin.successAlert).toBeVisible();
+    await StorefrontAccountLogin.emailInput.fill(customer.email);
+    await StorefrontAccountLogin.passwordInput.fill(changedPassword.password);
+    await StorefrontAccountLogin.loginButton.click();
+    await ShopCustomer.expects(StorefrontAccount.personalDataCardTitle).toBeVisible();
 });

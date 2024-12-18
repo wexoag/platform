@@ -1,6 +1,6 @@
 import { test } from '@fixtures/AcceptanceTest';
 
-test('As a customer, I must be able to change email via account.', { tag: '@Account' }, async ({
+test('As a customer, I must be able to change my email via account.', { tag: '@Account' }, async ({
     ShopCustomer,
     StorefrontAccountLogin,
     StorefrontAccount,
@@ -12,7 +12,7 @@ test('As a customer, I must be able to change email via account.', { tag: '@Acco
 
     const customer = { email: IdProvider.getIdPair().uuid + '@test.com' , password: IdProvider.getIdPair().uuid };
     const invalidEmail = 'invalidEmailWithoutAtSymbol';
-    const changedEmail = { email: IdProvider.getIdPair().uuid + '@test.com' };
+    const newEmail = IdProvider.getIdPair().uuid + '@test.com' ;
 
     await test.step('Register a valid account', async () => {
         await ShopCustomer.goesTo(StorefrontAccountLogin.url());
@@ -31,7 +31,7 @@ test('As a customer, I must be able to change email via account.', { tag: '@Acco
         await ShopCustomer.expects(StorefrontAccountProfile.emailValidationAlert).toBeVisible();
     });
 
-    await test.step('Attempt to change email to same address', async () => {
+    await test.step('Attempt to change email to the same address', async () => {
         await ShopCustomer.goesTo(StorefrontAccountProfile.url());
         await StorefrontAccountProfile.changeEmailButton.click();
         await StorefrontAccountProfile.emailAddressInput.fill(customer.email);
@@ -41,18 +41,18 @@ test('As a customer, I must be able to change email via account.', { tag: '@Acco
         await ShopCustomer.expects(StorefrontAccountProfile.emailUpdateFailureAlert).toBeVisible();
     });
 
-    await test.step('Attempt to change email to a new valid address', async () => {
+    await test.step('Change email to a new valid address', async () => {
         await ShopCustomer.goesTo(StorefrontAccountProfile.url());
         await StorefrontAccountProfile.changeEmailButton.click();
-        await StorefrontAccountProfile.emailAddressInput.fill(changedEmail.email);
-        await StorefrontAccountProfile.emailAddressConfirmInput.fill(changedEmail.email);
+        await StorefrontAccountProfile.emailAddressInput.fill(newEmail);
+        await StorefrontAccountProfile.emailAddressConfirmInput.fill(newEmail);
         await StorefrontAccountProfile.emailConfirmPasswordInput.fill(customer.password);
         await StorefrontAccountProfile.saveEmailAddressButton.click();
         await ShopCustomer.expects(StorefrontAccountProfile.emailUpdateMessage).toBeVisible();
-        await ShopCustomer.expects(StorefrontAccountProfile.loginDataEmailAddress).toContainText(changedEmail.email);
+        await ShopCustomer.expects(StorefrontAccountProfile.loginDataEmailAddress).toContainText(newEmail);
     });
 
-    await test.step('Try to login with the old email address', async () => {
+    await test.step('Verify login with old email fails', async () => {
         await StorefrontAccountLogin.logoutLink.click();
         await ShopCustomer.expects(StorefrontAccountLogin.successAlert).toBeVisible();
         await StorefrontAccountLogin.emailInput.fill(customer.email);
@@ -61,15 +61,15 @@ test('As a customer, I must be able to change email via account.', { tag: '@Acco
         await ShopCustomer.expects(StorefrontAccountLogin.invalidCredentialsAlert).toBeVisible();
     });
     
-    await test.step('Verify login with the new email address', async () => {
-        await StorefrontAccountLogin.emailInput.fill(changedEmail.email);
+    await test.step('Verify login with new email', async () => {
+        await StorefrontAccountLogin.emailInput.fill(newEmail);
         await StorefrontAccountLogin.passwordInput.fill(customer.password);
         await StorefrontAccountLogin.loginButton.click();
         await ShopCustomer.expects(StorefrontAccount.personalDataCardTitle).toBeVisible();
     });
 });
 
-test('As a customer, I must be able to change password via account.', { tag: '@Account' }, async ({
+test('As a customer, I must be able to change my password via account.', { tag: '@Account' }, async ({
     ShopCustomer,
     StorefrontAccountLogin,
     StorefrontAccount,
@@ -81,7 +81,7 @@ test('As a customer, I must be able to change password via account.', { tag: '@A
 
     const customer = { email: IdProvider.getIdPair().uuid + '@test.com' , password: IdProvider.getIdPair().uuid };
     const invalidPassword = { password: 'short' }; // Invalid: less than 8 characters
-    const changedPassword = { password: IdProvider.getIdPair().uuid };
+    const newPassword = IdProvider.getIdPair().uuid ;
 
     await test.step('Register a new account', async () => {
         await ShopCustomer.goesTo(StorefrontAccountLogin.url());
@@ -104,14 +104,14 @@ test('As a customer, I must be able to change password via account.', { tag: '@A
         await ShopCustomer.goesTo(StorefrontAccountProfile.url());
         await StorefrontAccountProfile.changePasswordButton.click();
         await ShopCustomer.expects(StorefrontAccountProfile.newPasswordInput).toBeVisible();
-        await StorefrontAccountProfile.newPasswordInput.fill(changedPassword.password);
-        await StorefrontAccountProfile.newPasswordConfirmInput.fill(changedPassword.password);
+        await StorefrontAccountProfile.newPasswordInput.fill(newPassword);
+        await StorefrontAccountProfile.newPasswordConfirmInput.fill(newPassword);
         await StorefrontAccountProfile.currentPasswordInput.fill(customer.password);
         await StorefrontAccountProfile.saveNewPasswordButton.click();
         await ShopCustomer.expects(StorefrontAccountProfile.passwordUpdateMessage).toBeVisible();
     });
 
-    await test.step('Try to login with old password', async () => {
+    await test.step('Verify login with old password fails', async () => {
         await StorefrontAccountLogin.logoutLink.click();
         await ShopCustomer.expects(StorefrontAccountLogin.successAlert).toBeVisible();
         await StorefrontAccountLogin.emailInput.fill(customer.email);
@@ -120,10 +120,10 @@ test('As a customer, I must be able to change password via account.', { tag: '@A
         await ShopCustomer.expects(StorefrontAccountLogin.invalidCredentialsAlert).toBeVisible();
     });
 
-    await test.step('Login with changed password to verify', async () => {
+    await test.step('Verify login with new password', async () => {
         await ShopCustomer.goesTo(StorefrontAccountLogin.url());
         await StorefrontAccountLogin.emailInput.fill(customer.email);
-        await StorefrontAccountLogin.passwordInput.fill(changedPassword.password);
+        await StorefrontAccountLogin.passwordInput.fill(newPassword);
         await StorefrontAccountLogin.loginButton.click();
         await ShopCustomer.expects(StorefrontAccount.personalDataCardTitle).toBeVisible();
     });

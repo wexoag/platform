@@ -8,8 +8,12 @@ test('As a merchant, I want to perform bulk edits on products information.', { t
     BulkEditProducts,
     DefaultSalesChannel,
     IdProvider,
+    InstanceMeta,
 }) => {
+
     test.slow();
+
+    test.skip(InstanceMeta.features['V6_7_0_0'], 'This test is incompatible with V6_7_0_0. Ticket: https://shopware.atlassian.net/browse/NEXT-40155');
 
     const originalStock = 200;
     const originalRestockTime = 10;

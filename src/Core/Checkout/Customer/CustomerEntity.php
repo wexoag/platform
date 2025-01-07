@@ -112,16 +112,6 @@ class CustomerEntity extends Entity implements \Stringable
     protected int $reviewCount;
 
     /**
-     * @var \DateTimeInterface|null
-     */
-    protected $createdAt;
-
-    /**
-     * @var \DateTimeInterface|null
-     */
-    protected $updatedAt;
-
-    /**
      * @internal
      */
     protected ?string $legacyEncoder = null;
@@ -667,11 +657,7 @@ class CustomerEntity extends Entity implements \Stringable
 
     public function getActiveBillingAddress(): ?CustomerAddressEntity
     {
-        if (!$this->activeBillingAddress) {
-            return $this->defaultBillingAddress;
-        }
-
-        return $this->activeBillingAddress;
+        return $this->activeBillingAddress ?? $this->defaultBillingAddress;
     }
 
     public function setActiveBillingAddress(CustomerAddressEntity $activeBillingAddress): void
@@ -681,11 +667,7 @@ class CustomerEntity extends Entity implements \Stringable
 
     public function getActiveShippingAddress(): ?CustomerAddressEntity
     {
-        if (!$this->activeShippingAddress) {
-            return $this->defaultShippingAddress;
-        }
-
-        return $this->activeShippingAddress;
+        return $this->activeShippingAddress ?? $this->defaultShippingAddress;
     }
 
     public function setActiveShippingAddress(CustomerAddressEntity $activeShippingAddress): void

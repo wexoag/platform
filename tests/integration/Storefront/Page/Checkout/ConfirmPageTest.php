@@ -15,7 +15,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPage;
 use Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPageLoadedEvent;
 use Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPageLoader;
-use Shopware\Tests\Integration\Storefront\Page\StorefrontPageTestBehaviour;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Shopware\Tests\Integration\Storefront\Page\StorefrontPageTestConstants;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -52,7 +52,7 @@ class ConfirmPageTest extends TestCase
         $context = $this->createSalesChannelContextWithLoggedInCustomerAndWithNavigation();
 
         /** @var EntityRepository<ShippingMethodCollection> $shippingMethodRepository */
-        $shippingMethodRepository = $this->getContainer()->get('shipping_method.repository');
+        $shippingMethodRepository = static::getContainer()->get('shipping_method.repository');
         $shippingMethods = $shippingMethodRepository->search(new Criteria(), $context->getContext())->getEntities();
 
         $updates = [];
@@ -84,7 +84,7 @@ class ConfirmPageTest extends TestCase
         $context = $this->createSalesChannelContextWithLoggedInCustomerAndWithNavigation();
 
         /** @var EntityRepository<PaymentMethodCollection> $paymentMethodRepository */
-        $paymentMethodRepository = $this->getContainer()->get('payment_method.repository');
+        $paymentMethodRepository = static::getContainer()->get('payment_method.repository');
         $criteria = (new Criteria())->addFilter(new EqualsFilter('active', true));
         $paymentMethod = $paymentMethodRepository->search($criteria, $context->getContext())->getEntities()->first();
         static::assertNotNull($paymentMethod);
@@ -142,6 +142,6 @@ class ConfirmPageTest extends TestCase
 
     protected function getPageLoader(): CheckoutConfirmPageLoader
     {
-        return $this->getContainer()->get(CheckoutConfirmPageLoader::class);
+        return static::getContainer()->get(CheckoutConfirmPageLoader::class);
     }
 }

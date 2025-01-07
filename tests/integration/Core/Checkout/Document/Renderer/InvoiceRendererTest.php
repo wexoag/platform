@@ -29,16 +29,16 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\TaxFreeConfig;
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Framework\Test\IdsCollection;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Country\CountryEntity;
 use Shopware\Core\System\Currency\CurrencyFormatter;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextService;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\Test\AppSystemTestBehaviour;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Core\Test\TestDefaults;
 use Shopware\Tests\Integration\Core\Checkout\Document\DocumentTrait;
-use Shopware\Tests\Integration\Core\Framework\App\AppSystemTestBehaviour;
 
 /**
  * @internal
@@ -69,7 +69,7 @@ class InvoiceRendererTest extends TestCase
 
         $priceRuleId = Uuid::randomHex();
 
-        $this->salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)->create(
+        $this->salesChannelContext = static::getContainer()->get(SalesChannelContextFactory::class)->create(
             Uuid::randomHex(),
             TestDefaults::SALES_CHANNEL,
             [
@@ -78,16 +78,16 @@ class InvoiceRendererTest extends TestCase
         );
 
         $this->salesChannelContext->setRuleIds([$priceRuleId]);
-        $this->productRepository = $this->getContainer()->get('product.repository');
-        $this->invoiceRenderer = $this->getContainer()->get(InvoiceRenderer::class);
-        $this->cartService = $this->getContainer()->get(CartService::class);
+        $this->productRepository = static::getContainer()->get('product.repository');
+        $this->invoiceRenderer = static::getContainer()->get(InvoiceRenderer::class);
+        $this->cartService = static::getContainer()->get(CartService::class);
         self::$deLanguageId = $this->getDeDeLanguageId();
     }
 
     protected function tearDown(): void
     {
         if (self::$callback instanceof \Closure) {
-            $this->getContainer()->get('event_dispatcher')->removeListener(DocumentTemplateRendererParameterEvent::class, self::$callback);
+            static::getContainer()->get('event_dispatcher')->removeListener(DocumentTemplateRendererParameterEvent::class, self::$callback);
         }
     }
 
@@ -104,13 +104,13 @@ class InvoiceRendererTest extends TestCase
 
         $caughtEvent = null;
 
-        $this->getContainer()->get('event_dispatcher')
+        static::getContainer()->get('event_dispatcher')
             ->addListener(InvoiceOrdersEvent::class, function (InvoiceOrdersEvent $event) use (&$caughtEvent): void {
                 $caughtEvent = $event;
             });
 
         if ($beforeRenderHook instanceof \Closure) {
-            $beforeRenderHook($operationInvoice, $this->getContainer());
+            $beforeRenderHook($operationInvoice, static::getContainer());
         }
 
         $processedTemplate = $this->invoiceRenderer->render(
@@ -140,7 +140,7 @@ class InvoiceRendererTest extends TestCase
             static::assertStringContainsString($firstLineItem->getLabel(), $rendered->getHtml());
             static::assertStringContainsString($lastLineItem->getLabel(), $rendered->getHtml());
 
-            $assertionCallback($rendered, $order, $this->getContainer());
+            $assertionCallback($rendered, $order, static::getContainer());
         } else {
             $assertionCallback($order->getId(), $processedTemplate->getErrors());
         }
@@ -161,7 +161,7 @@ class InvoiceRendererTest extends TestCase
                     ],
                 ]);
             },
-            function (RenderedDocument $rendered, OrderEntity $order, ContainerInterface $container): void {
+            function (RenderedDocument $rendered, OrderEntity $order, ContainerInterface $container) use ($documentDate): void {
                 static::assertNotNull($order->getCurrency());
 
                 static::assertStringContainsString(
@@ -177,7 +177,7 @@ class InvoiceRendererTest extends TestCase
                 static::assertNotNull($order->getLanguage());
                 static::assertNotNull($locale = $order->getLanguage()->getLocale());
                 $formatter = new \IntlDateFormatter($locale->getCode(), \IntlDateFormatter::MEDIUM, \IntlDateFormatter::NONE);
-                $formattedDate = $formatter->format(new \DateTime());
+                $formattedDate = $formatter->format($documentDate);
 
                 static::assertNotFalse($formattedDate);
                 static::assertStringContainsString(
@@ -222,7 +222,7 @@ class InvoiceRendererTest extends TestCase
                     ],
                 ]);
             },
-            function (RenderedDocument $rendered, OrderEntity $order, ContainerInterface $container): void {
+            function (RenderedDocument $rendered, OrderEntity $order, ContainerInterface $container) use ($documentDate): void {
                 static::assertNotNull($order->getCurrency());
 
                 static::assertStringContainsString(
@@ -239,7 +239,7 @@ class InvoiceRendererTest extends TestCase
                 static::assertNotNull($order->getLanguage());
                 static::assertNotNull($locale = $order->getLanguage()->getLocale());
                 $formatter = new \IntlDateFormatter($locale->getCode(), \IntlDateFormatter::MEDIUM, \IntlDateFormatter::NONE);
-                $formattedDate = $formatter->format(new \DateTime());
+                $formattedDate = $formatter->format($documentDate);
 
                 static::assertNotFalse($formattedDate);
                 static::assertStringContainsString(
@@ -580,7 +580,7 @@ class InvoiceRendererTest extends TestCase
 
         $criteria = OrderDocumentCriteriaFactory::create([$orderId]);
 
-        $order = $this->getContainer()->get('order.repository')
+        $order = static::getContainer()->get('order.repository')
             ->search($criteria, Context::createDefaultContext())->get($orderId);
         static::assertInstanceOf(OrderEntity::class, $order);
 
@@ -605,7 +605,6 @@ class InvoiceRendererTest extends TestCase
 
         $data = $rendered->getSuccess();
         static::assertNotEmpty($data);
-        static::assertInstanceOf(RenderedDocument::class, $data[$orderId]);
 
         if ($expectedOutput) {
             static::assertStringContainsString('Intra-community delivery (EU)', $data[$orderId]->getHtml());
@@ -707,7 +706,7 @@ class InvoiceRendererTest extends TestCase
      */
     private function updateCustomer(OrderEntity $order, array $config): void
     {
-        $this->getContainer()->get('customer.repository')->update([[
+        static::getContainer()->get('customer.repository')->update([[
             'id' => $order->getOrderCustomer()?->getCustomerId(),
             'accountType' => $config['accountType'],
         ]], Context::createDefaultContext());
@@ -727,7 +726,7 @@ class InvoiceRendererTest extends TestCase
 
     private function updateCountryMemberState(OrderEntity $order, bool $isEu): void
     {
-        $this->getContainer()->get('country.repository')->upsert([[
+        static::getContainer()->get('country.repository')->upsert([[
             'id' => $order->getAddresses()?->get($order->getBillingAddressId())?->getCountry()?->getId(),
             'isEu' => $isEu,
         ]], Context::createDefaultContext());
@@ -735,7 +734,7 @@ class InvoiceRendererTest extends TestCase
 
     private function updateCountrySettings(OrderEntity $order): void
     {
-        $this->getContainer()->get('country.repository')->upsert([[
+        static::getContainer()->get('country.repository')->upsert([[
             'id' => $order->getAddresses()?->get($order->getBillingAddressId())?->getCountry()?->getId(),
             'companyTax' => ['amount' => 0, 'enabled' => true, 'currencyId' => Context::createDefaultContext()->getCurrencyId()],
         ]], Context::createDefaultContext());

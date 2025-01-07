@@ -1,5 +1,5 @@
 /**
- * @package buyers-experience
+ * @package checkout
  */
 import template from './sw-promotion-v2-sales-channel-select.html.twig';
 
@@ -84,11 +84,9 @@ export default {
 
     methods: {
         createdComponent() {
-            this.salesChannelRepository
-                .search(this.salesChannelCriteria)
-                .then(searchresult => {
-                    this.salesChannels = searchresult;
-                });
+            this.salesChannelRepository.search(this.salesChannelCriteria).then((searchresult) => {
+                this.salesChannels = searchresult;
+            });
         },
 
         getChangeset(salesChannelsIds) {

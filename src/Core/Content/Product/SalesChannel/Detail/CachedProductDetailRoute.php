@@ -11,7 +11,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\RuleAreas;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Framework\Util\Json;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -79,7 +79,7 @@ class CachedProductDetailRoute extends AbstractProductDetailRoute
 
     public static function buildName(string $parentId): string
     {
-        return ProductDetailRoute::buildName($parentId);
+        return 'product-detail-route-' . $parentId;
     }
 
     private function generateKey(string $productId, Request $request, SalesChannelContext $context, Criteria $criteria): ?string
@@ -96,7 +96,7 @@ class CachedProductDetailRoute extends AbstractProductDetailRoute
             return null;
         }
 
-        return self::buildName($productId) . '-' . md5(Json::encode($event->getParts()));
+        return self::buildName($productId) . '-' . Hasher::hash($event->getParts());
     }
 
     /**

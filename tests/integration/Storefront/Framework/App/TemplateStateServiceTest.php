@@ -10,7 +10,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
-use Shopware\Tests\Integration\Core\Framework\App\AppSystemTestBehaviour;
+use Shopware\Core\Test\AppSystemTestBehaviour;
 
 /**
  * @internal
@@ -28,9 +28,9 @@ class TemplateStateServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->templateRepo = $this->getContainer()->get('app_template.repository');
-        $this->appRepo = $this->getContainer()->get('app.repository');
-        $this->templateStateService = $this->getContainer()->get(TemplateStateService::class);
+        $this->templateRepo = static::getContainer()->get('app_template.repository');
+        $this->appRepo = static::getContainer()->get('app.repository');
+        $this->templateStateService = static::getContainer()->get(TemplateStateService::class);
     }
 
     public function testActivateApp(): void

@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -15,7 +14,14 @@ describe('components/base/sw-empty-state', () => {
                     'sw-icon': true,
                 },
                 mocks: {
-                    $route: { meta: { $module: { icon: 'default-symbol-content', description: 'Foo bar' } } },
+                    $route: {
+                        meta: {
+                            $module: {
+                                icon: 'default-symbol-content',
+                                description: 'Foo bar',
+                            },
+                        },
+                    },
                 },
             },
             props: {

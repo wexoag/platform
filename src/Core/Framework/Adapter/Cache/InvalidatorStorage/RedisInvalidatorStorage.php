@@ -14,8 +14,10 @@ class RedisInvalidatorStorage extends AbstractInvalidatorStorage
      *
      * @param \Redis|\RedisCluster $redis
      */
-    public function __construct(private $redis)
-    {
+    public function __construct(
+        /** @phpstan-ignore shopware.propertyNativeType (Cannot type natively, as Symfony might change the implementation in the future) */
+        private $redis
+    ) {
     }
 
     public function store(array $tags): void
@@ -29,8 +31,8 @@ class RedisInvalidatorStorage extends AbstractInvalidatorStorage
         $values = $this
             ->redis
             ->multi()
-                ->sMembers(self::KEY)
-                ->del(self::KEY)
+            ->sMembers(self::KEY)
+            ->del(self::KEY)
             ->exec();
 
         return $values[0];

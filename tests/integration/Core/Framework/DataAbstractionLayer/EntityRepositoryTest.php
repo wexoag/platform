@@ -12,8 +12,6 @@ use Shopware\Core\Checkout\Customer\Aggregate\CustomerAddress\CustomerAddressDef
 use Shopware\Core\Checkout\Customer\Aggregate\CustomerAddress\CustomerAddressEntity;
 use Shopware\Core\Checkout\Customer\CustomerDefinition;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
-use Shopware\Core\Checkout\Shipping\ShippingMethodDefinition;
-use Shopware\Core\Checkout\Shipping\ShippingMethodEntity;
 use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Content\Category\CategoryDefinition;
 use Shopware\Core\Content\Category\CategoryEntity;
@@ -47,17 +45,15 @@ use Shopware\Core\Framework\DataAbstractionLayer\Write\CloneBehavior;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\WriteException;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Rule\Container\AndRule;
-use Shopware\Core\Framework\Test\IdsCollection;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseHelper\CallableClass;
-use Shopware\Core\Framework\Test\TestDataCollection;
 use Shopware\Core\Framework\Util\Random;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Currency\CurrencyDefinition;
-use Shopware\Core\System\DeliveryTime\DeliveryTimeEntity;
 use Shopware\Core\System\Locale\LocaleDefinition;
 use Shopware\Core\System\Locale\LocaleEntity;
 use Shopware\Core\System\Snippet\SnippetDefinition;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Core\Test\TestDefaults;
 
 /**
@@ -82,12 +78,12 @@ class EntityRepositoryTest extends TestCase
     {
         parent::tearDown();
 
-        $this->getContainer()->get(Connection::class)->executeQuery('SET FOREIGN_KEY_CHECKS=1;');
+        static::getContainer()->get(Connection::class)->executeQuery('SET FOREIGN_KEY_CHECKS=1;');
     }
 
     public function testReverseVersionJoin(): void
     {
-        $repository = $this->getContainer()->get('product_visibility.repository');
+        $repository = static::getContainer()->get('product_visibility.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('product.orderLineItems.order.id', Uuid::randomHex()));
@@ -105,10 +101,10 @@ class EntityRepositoryTest extends TestCase
     #[DataProvider('productPropertiesQueryProvider')]
     public function testProductPropertiesQueries(array $products, Criteria $criteria, array $expected): void
     {
-        $this->getContainer()->get('product.repository')
+        static::getContainer()->get('product.repository')
             ->create($products, Context::createDefaultContext());
 
-        $found = $this->getContainer()
+        $found = static::getContainer()
             ->get('product.repository')
             ->searchIds($criteria, Context::createDefaultContext());
 
@@ -292,11 +288,11 @@ class EntityRepositoryTest extends TestCase
     #[DataProvider('orderTransactionsProvider')]
     public function testOrderTransactionsQueries(array $transactions, Criteria $criteria, bool $match): void
     {
-        $this->getContainer()->get(Connection::class)->executeQuery('SET FOREIGN_KEY_CHECKS=0;');
+        static::getContainer()->get(Connection::class)->executeQuery('SET FOREIGN_KEY_CHECKS=0;');
 
         $ids = new IdsCollection();
 
-        $queue = new MultiInsertQueryQueue($this->getContainer()->get(Connection::class));
+        $queue = new MultiInsertQueryQueue(static::getContainer()->get(Connection::class));
 
         $queue->addInsert('order', self::order($ids->get('order-id')));
 
@@ -309,7 +305,7 @@ class EntityRepositoryTest extends TestCase
 
         $queue->execute();
 
-        $found = $this->getContainer()
+        $found = static::getContainer()
             ->get('order.repository')
             ->searchIds($criteria, Context::createDefaultContext());
 
@@ -421,73 +417,6 @@ class EntityRepositoryTest extends TestCase
         ];
     }
 
-    /**
-     * @param array<string, string> $properties
-     *
-     * @return array<string, mixed>
-     */
-    private static function product(IdsCollection $ids, string $key, array $properties): array
-    {
-        $builder = new ProductBuilder($ids, $key);
-        $builder->price(100);
-        foreach ($properties as $value => $group) {
-            $builder->property($value, $group);
-        }
-        $builder->active(false);
-
-        return $builder->build();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private static function order(string $id): array
-    {
-        return [
-            'id' => Uuid::fromHexToBytes($id),
-            'currency_factor' => 1.0,
-            'order_date_time' => '2020-01-01 00:00:00.000000',
-            'version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
-            'price' => json_encode([
-                'netPrice' => 100,
-                'taxStatus' => 'gross',
-                'totalPrice' => 100,
-                'positionPrice' => 1,
-            ]),
-            'currency_id' => Uuid::fromHexToBytes(Defaults::CURRENCY),
-            'state_id' => Uuid::randomBytes(),
-            'language_id' => Uuid::fromHexToBytes(Defaults::LANGUAGE_SYSTEM),
-            'sales_channel_id' => Uuid::fromHexToBytes(TestDefaults::SALES_CHANNEL),
-            'billing_address_id' => Uuid::randomBytes(),
-            'billing_address_version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
-            'shipping_costs' => '{}',
-            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function transaction(string $orderId, string $payment, string $state): array
-    {
-        $machineId = $this->getContainer()->get(Connection::class)
-            ->fetchOne('SELECT id FROM state_machine WHERE technical_name = :state', ['state' => 'order_transaction.state']);
-
-        $stateId = $this->getContainer()->get(Connection::class)
-            ->fetchOne('SELECT id FROM state_machine_state WHERE technical_name = :state AND state_machine_id = :machineId', ['state' => $state, 'machineId' => $machineId]);
-
-        return [
-            'id' => Uuid::randomBytes(),
-            'version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
-            'order_version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
-            'order_id' => Uuid::fromHexToBytes($orderId),
-            'payment_method_id' => Uuid::fromHexToBytes($payment),
-            'state_id' => $stateId,
-            'amount' => json_encode(['unitPrice' => 100]),
-            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
-        ];
-    }
-
     public function testWrite(): void
     {
         $repository = $this->createRepository(LocaleDefinition::class);
@@ -538,7 +467,7 @@ class EntityRepositoryTest extends TestCase
         $criteria->addAssociation('footerCategory');
         $criteria->addAssociation('serviceCategory');
 
-        $data = $this->getContainer()->get('sales_channel.repository')
+        $data = static::getContainer()->get('sales_channel.repository')
             ->search($criteria, $context);
 
         static::assertInstanceOf(EntitySearchResult::class, $data);
@@ -552,7 +481,7 @@ class EntityRepositoryTest extends TestCase
 
         $id = Uuid::randomHex();
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = static::getContainer()->get('event_dispatcher');
 
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
         $listener->expects(static::once())->method('__invoke');
@@ -620,7 +549,7 @@ class EntityRepositoryTest extends TestCase
             $context
         );
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = static::getContainer()->get('event_dispatcher');
 
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
         $listener->expects(static::once())->method('__invoke');
@@ -678,7 +607,7 @@ class EntityRepositoryTest extends TestCase
             $context
         );
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = static::getContainer()->get('event_dispatcher');
 
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
         $listener->expects(static::once())->method('__invoke');
@@ -687,10 +616,6 @@ class EntityRepositoryTest extends TestCase
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
         $listener->expects(static::once())->method('__invoke');
         $this->addEventListener($dispatcher, 'product_manufacturer.loaded', $listener);
-
-        $listener = $this->getMockBuilder(CallableClass::class)->getMock();
-        $listener->expects(static::once())->method('__invoke');
-        $this->addEventListener($dispatcher, 'tax.loaded', $listener);
 
         $criteria = new Criteria([$id, $id2]);
         $criteria->addAssociation('manufacturer');
@@ -731,7 +656,7 @@ class EntityRepositoryTest extends TestCase
         $id = Uuid::randomHex();
         $id2 = Uuid::randomHex();
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = static::getContainer()->get('event_dispatcher');
 
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
         $listener->expects(static::once())->method('__invoke');
@@ -822,10 +747,6 @@ class EntityRepositoryTest extends TestCase
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
         $listener->expects(static::once())->method('__invoke');
         $this->addEventListener($dispatcher, 'product_manufacturer.loaded', $listener);
-
-        $listener = $this->getMockBuilder(CallableClass::class)->getMock();
-        $listener->expects(static::once())->method('__invoke');
-        $this->addEventListener($dispatcher, 'tax.loaded', $listener);
 
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
         $listener->expects(static::once())->method('__invoke');
@@ -1149,87 +1070,6 @@ class EntityRepositoryTest extends TestCase
         }
     }
 
-    public function testCloneWithManyToMany(): void
-    {
-        static::markTestSkipped('ManyToMany are currently intendedly not cloned - to be discussed');
-        $recordA = Uuid::randomHex();
-        $data = [
-            'id' => $recordA,
-            'bindShippingfree' => false,
-            'name' => 'test',
-            'availabilityRule' => [
-                'id' => Uuid::randomHex(),
-                'name' => 'asd',
-                'priority' => 2,
-            ],
-            'deliveryTime' => [
-                'id' => Uuid::randomHex(),
-                'name' => 'testDeliveryTime',
-                'min' => 1,
-                'max' => 90,
-                'unit' => DeliveryTimeEntity::DELIVERY_TIME_DAY,
-            ],
-            'tags' => [
-                [
-                    'name' => 'tag1',
-                ],
-                [
-                    'name' => 'tag2',
-                ],
-            ],
-        ];
-
-        $repository = $this->createRepository(ShippingMethodDefinition::class);
-        $context = Context::createDefaultContext();
-
-        $result = $repository->create([$data], $context);
-        $newId = Uuid::randomHex();
-
-        $written = $result->getEventByEntityName(ShippingMethodDefinition::ENTITY_NAME);
-        static::assertNotNull($written);
-        static::assertCount(1, $written->getIds());
-
-        $result = $repository->clone($recordA, $context, $newId);
-        static::assertInstanceOf(EntityWrittenContainerEvent::class, $result);
-
-        $written = $result->getEventByEntityName(ShippingMethodDefinition::ENTITY_NAME);
-        static::assertNotNull($written);
-        static::assertCount(1, $written->getIds());
-
-        $criteria = new Criteria([$recordA, $newId]);
-        $criteria->addAssociation('tags');
-        $entities = $repository->search($criteria, $context);
-        static::assertEquals([$recordA, $newId], $criteria->getIds());
-        static::assertEmpty($criteria->getSorting());
-        static::assertEmpty($criteria->getFilters());
-        static::assertEmpty($criteria->getPostFilters());
-        static::assertEmpty($criteria->getAggregations());
-        static::assertNull($criteria->getLimit());
-        static::assertNull($criteria->getOffset());
-        static::assertCount(1, $criteria->getAssociations());
-        static::assertNotNull($criteria->getAssociation('tags'));
-        static::assertEmpty($criteria->getAssociation('tags')->getSorting());
-        static::assertEmpty($criteria->getAssociation('tags')->getFilters());
-        static::assertEmpty($criteria->getAssociation('tags')->getPostFilters());
-        static::assertEmpty($criteria->getAssociation('tags')->getAggregations());
-        static::assertEmpty($criteria->getAssociation('tags')->getAssociations());
-        static::assertNull($criteria->getAssociation('tags')->getLimit());
-        static::assertNull($criteria->getAssociation('tags')->getOffset());
-
-        static::assertCount(2, $entities);
-        static::assertTrue($entities->has($recordA));
-        static::assertTrue($entities->has($newId));
-
-        $old = $entities->get($recordA);
-        $new = $entities->get($newId);
-
-        static::assertInstanceOf(ShippingMethodEntity::class, $old);
-        static::assertInstanceOf(ShippingMethodEntity::class, $new);
-
-        static::assertCount(2, $old->getTags());
-        static::assertCount(2, $new->getTags());
-    }
-
     public function testCloneWithChildren(): void
     {
         $id = Uuid::randomHex();
@@ -1246,7 +1086,7 @@ class EntityRepositoryTest extends TestCase
         ];
 
         /** @var EntityRepository<CategoryCollection> $repo */
-        $repo = $this->getContainer()->get('category.repository');
+        $repo = static::getContainer()->get('category.repository');
 
         $context = Context::createDefaultContext();
 
@@ -1256,7 +1096,7 @@ class EntityRepositoryTest extends TestCase
 
         $repo->clone($id, $context, $newId);
 
-        $childrenIds = $this->getContainer()->get(Connection::class)
+        $childrenIds = static::getContainer()->get(Connection::class)
             ->fetchAllAssociative(
                 'SELECT id FROM category WHERE parent_id IN (:ids)',
                 ['ids' => [Uuid::fromHexToBytes($id), Uuid::fromHexToBytes($newId)]],
@@ -1340,13 +1180,13 @@ class EntityRepositoryTest extends TestCase
             ],
         ];
 
-        $repo = $this->getContainer()->get('rule.repository');
+        $repo = static::getContainer()->get('rule.repository');
 
         $context = Context::createDefaultContext();
         $repo->create([$data], $context);
 
         // check count of conditions
-        $conditions = $this->getContainer()->get(Connection::class)->fetchAllAssociative(
+        $conditions = static::getContainer()->get(Connection::class)->fetchAllAssociative(
             'SELECT id, parent_id FROM rule_condition WHERE rule_id = :id',
             ['id' => Uuid::fromHexToBytes($id)]
         );
@@ -1358,7 +1198,7 @@ class EntityRepositoryTest extends TestCase
         $repo->clone($id, $context, $newId);
 
         // check that existing rule conditions are not touched
-        $conditions = $this->getContainer()->get(Connection::class)->fetchAllAssociative(
+        $conditions = static::getContainer()->get(Connection::class)->fetchAllAssociative(
             'SELECT id, parent_id FROM rule_condition WHERE rule_id = :id',
             ['id' => Uuid::fromHexToBytes($id)]
         );
@@ -1375,7 +1215,7 @@ class EntityRepositoryTest extends TestCase
         static::assertCount(7, $conditions);
 
         // check that existing rule conditions are not touched
-        $newConditions = $this->getContainer()->get(Connection::class)->fetchAllAssociative(
+        $newConditions = static::getContainer()->get(Connection::class)->fetchAllAssociative(
             'SELECT id, parent_id FROM rule_condition WHERE rule_id = :id',
             ['id' => Uuid::fromHexToBytes($newId)]
         );
@@ -1428,7 +1268,7 @@ class EntityRepositoryTest extends TestCase
             'price' => [['currencyId' => Defaults::CURRENCY, 'gross' => 10, 'net' => 5, 'linked' => false]],
         ];
 
-        $repository = $this->getContainer()->get('product.repository');
+        $repository = static::getContainer()->get('product.repository');
         $context = Context::createDefaultContext();
 
         $repository->create([$data], $context);
@@ -1462,7 +1302,7 @@ class EntityRepositoryTest extends TestCase
 
     public function testCloneWithoutChildren(): void
     {
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
 
         $data = [
             'id' => $ids->create('parent'),
@@ -1473,21 +1313,21 @@ class EntityRepositoryTest extends TestCase
             ],
         ];
 
-        $this->getContainer()->get('category.repository')
+        static::getContainer()->get('category.repository')
             ->create([$data], Context::createDefaultContext());
 
-        $this->getContainer()->get('category.repository')
+        static::getContainer()->get('category.repository')
             ->clone($ids->get('parent'), Context::createDefaultContext(), $ids->create('parent-new'), new CloneBehavior([], false));
 
-        $children = $this->getContainer()->get(Connection::class)
+        $children = static::getContainer()->get(Connection::class)
             ->fetchAllAssociative('SELECT * FROM category WHERE parent_id = :parent', ['parent' => Uuid::fromHexToBytes($ids->get('parent-new'))]);
 
         static::assertCount(0, $children);
 
-        $this->getContainer()->get('category.repository')
+        static::getContainer()->get('category.repository')
             ->clone($ids->get('parent'), Context::createDefaultContext(), $ids->create('parent-new-2'), new CloneBehavior([], true));
 
-        $children = $this->getContainer()->get(Connection::class)
+        $children = static::getContainer()->get(Connection::class)
             ->fetchAllAssociative('SELECT * FROM category WHERE parent_id = :parent', ['parent' => Uuid::fromHexToBytes($ids->get('parent-new-2'))]);
 
         static::assertCount(2, $children);
@@ -1495,9 +1335,9 @@ class EntityRepositoryTest extends TestCase
 
     public function testDuplicateWrittenEvents(): void
     {
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
 
-        $this->getContainer()->get('property_group.repository')
+        static::getContainer()->get('property_group.repository')
             ->create([
                 [
                     'name' => 'color',
@@ -1509,7 +1349,7 @@ class EntityRepositoryTest extends TestCase
                 ],
             ], Context::createDefaultContext());
 
-        $this->getContainer()->get('category.repository')
+        static::getContainer()->get('category.repository')
             ->create([
                 ['id' => $ids->create('cat-1'), 'name' => 'test'],
                 ['id' => $ids->create('cat-2'), 'name' => 'test'],
@@ -1543,7 +1383,7 @@ class EntityRepositoryTest extends TestCase
         }
 
         /** @var EntityRepository<ProductCollection> $repository */
-        $repository = $this->getContainer()->get('product.repository');
+        $repository = static::getContainer()->get('product.repository');
         $result = $repository->create($data, Context::createDefaultContext());
 
         $products = $result->getEventByEntityName('product');
@@ -1590,7 +1430,7 @@ class EntityRepositoryTest extends TestCase
 
         $context = Context::createDefaultContext();
         /** @var EntityRepository<MediaFolderCollection> $repository */
-        $repository = $this->getContainer()->get('media_folder.repository');
+        $repository = static::getContainer()->get('media_folder.repository');
 
         $event = $repository->create([$data], $context)->getEventByEntityName(MediaFolderDefinition::ENTITY_NAME);
         static::assertInstanceOf(EntityWrittenEvent::class, $event);
@@ -1713,17 +1553,17 @@ class EntityRepositoryTest extends TestCase
             ->method('search');
 
         $repository = new EntityRepository(
-            $this->getContainer()->get(CurrencyDefinition::class),
-            $this->getContainer()->get(EntityReaderInterface::class),
-            $this->getContainer()->get(VersionManager::class),
+            static::getContainer()->get(CurrencyDefinition::class),
+            static::getContainer()->get(EntityReaderInterface::class),
+            static::getContainer()->get(VersionManager::class),
             $searcherMock,
-            $this->getContainer()->get(EntityAggregatorInterface::class),
-            $this->getContainer()->get('event_dispatcher'),
-            $this->getContainer()->get(EntityLoadedEventFactory::class)
+            static::getContainer()->get(EntityAggregatorInterface::class),
+            static::getContainer()->get('event_dispatcher'),
+            static::getContainer()->get(EntityLoadedEventFactory::class)
         );
 
         $result = $repository->search(new Criteria(), Context::createDefaultContext());
-        $currencyCount = (int) $this->getContainer()->get(Connection::class)->fetchOne('SELECT COUNT(`id`) FROM `currency`');
+        $currencyCount = (int) static::getContainer()->get(Connection::class)->fetchOne('SELECT COUNT(`id`) FROM `currency`');
 
         static::assertEquals(
             $currencyCount,
@@ -1748,23 +1588,90 @@ class EntityRepositoryTest extends TestCase
     }
 
     /**
+     * @param array<string, string> $properties
+     *
+     * @return array<string, mixed>
+     */
+    private static function product(IdsCollection $ids, string $key, array $properties): array
+    {
+        $builder = new ProductBuilder($ids, $key);
+        $builder->price(100);
+        foreach ($properties as $value => $group) {
+            $builder->property($value, $group);
+        }
+        $builder->active(false);
+
+        return $builder->build();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function order(string $id): array
+    {
+        return [
+            'id' => Uuid::fromHexToBytes($id),
+            'currency_factor' => 1.0,
+            'order_date_time' => '2020-01-01 00:00:00.000000',
+            'version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+            'price' => json_encode([
+                'netPrice' => 100,
+                'taxStatus' => 'gross',
+                'totalPrice' => 100,
+                'positionPrice' => 1,
+            ]),
+            'currency_id' => Uuid::fromHexToBytes(Defaults::CURRENCY),
+            'state_id' => Uuid::randomBytes(),
+            'language_id' => Uuid::fromHexToBytes(Defaults::LANGUAGE_SYSTEM),
+            'sales_channel_id' => Uuid::fromHexToBytes(TestDefaults::SALES_CHANNEL),
+            'billing_address_id' => Uuid::randomBytes(),
+            'billing_address_version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+            'shipping_costs' => '{}',
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function transaction(string $orderId, string $payment, string $state): array
+    {
+        $machineId = static::getContainer()->get(Connection::class)
+            ->fetchOne('SELECT id FROM state_machine WHERE technical_name = :state', ['state' => 'order_transaction.state']);
+
+        $stateId = static::getContainer()->get(Connection::class)
+            ->fetchOne('SELECT id FROM state_machine_state WHERE technical_name = :state AND state_machine_id = :machineId', ['state' => $state, 'machineId' => $machineId]);
+
+        return [
+            'id' => Uuid::randomBytes(),
+            'version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+            'order_version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+            'order_id' => Uuid::fromHexToBytes($orderId),
+            'payment_method_id' => Uuid::fromHexToBytes($payment),
+            'state_id' => $stateId,
+            'amount' => json_encode(['unitPrice' => 100]),
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+        ];
+    }
+
+    /**
      * @param class-string<EntityDefinition> $definitionClass
      */
     private function createRepository(
         string $definitionClass,
         ?EntityLoadedEventFactory $eventFactory = null
     ): EntityRepository {
-        $definition = $this->getContainer()->get($definitionClass);
+        $definition = static::getContainer()->get($definitionClass);
         static::assertInstanceOf(EntityDefinition::class, $definition);
 
         return new EntityRepository(
             $definition,
-            $this->getContainer()->get(EntityReaderInterface::class),
-            $this->getContainer()->get(VersionManager::class),
-            $this->getContainer()->get(EntitySearcherInterface::class),
-            $this->getContainer()->get(EntityAggregatorInterface::class),
-            $this->getContainer()->get('event_dispatcher'),
-            $eventFactory ?: $this->getContainer()->get(EntityLoadedEventFactory::class)
+            static::getContainer()->get(EntityReaderInterface::class),
+            static::getContainer()->get(VersionManager::class),
+            static::getContainer()->get(EntitySearcherInterface::class),
+            static::getContainer()->get(EntityAggregatorInterface::class),
+            static::getContainer()->get('event_dispatcher'),
+            $eventFactory ?: static::getContainer()->get(EntityLoadedEventFactory::class)
         );
     }
 }

@@ -13,6 +13,7 @@ use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Test\DataAbstractionLayer\Field\DataAbstractionLayerFieldTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelLifecycleManager;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Storefront\Theme\ThemeDefinition;
 
 /**
@@ -26,10 +27,7 @@ class ApiAwareTest extends TestCase
 
     public function testApiAware(): void
     {
-        $cacheId = hash_file('md5', __DIR__ . '/fixtures/api-aware-fields.json');
-        if (!\is_string($cacheId)) {
-            static::fail(__DIR__ . '/fixtures/api-aware-fields.json could not be hashed');
-        }
+        $cacheId = Hasher::hashFile(__DIR__ . '/fixtures/api-aware-fields.json');
 
         $kernel = KernelLifecycleManager::createKernel(
             null,
@@ -66,7 +64,7 @@ class ApiAwareTest extends TestCase
         }
         $expected = \json_decode($expected, true, \JSON_THROW_ON_ERROR, \JSON_THROW_ON_ERROR);
 
-        if ($this->getContainer()->has(ThemeDefinition::class)) {
+        if (static::getContainer()->has(ThemeDefinition::class)) {
             $expected = array_merge(
                 $expected,
                 [
@@ -99,7 +97,7 @@ class ApiAwareTest extends TestCase
             );
         }
 
-        if ($this->getContainer()->has(NotificationDefinition::class)) {
+        if (static::getContainer()->has(NotificationDefinition::class)) {
             $expected = array_merge(
                 $expected,
                 [
@@ -109,7 +107,7 @@ class ApiAwareTest extends TestCase
             );
         }
 
-        if ($this->getContainer()->has(AppAdministrationSnippetDefinition::class)) {
+        if (static::getContainer()->has(AppAdministrationSnippetDefinition::class)) {
             $expected = array_merge(
                 $expected,
                 [

@@ -10,6 +10,7 @@ use Shopware\Core\Framework\Api\Util\AccessKeyHelper;
 use Shopware\Core\Framework\App\AppCollection;
 use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\Exception\AppRegistrationException;
+use Shopware\Core\Framework\App\Exception\AppUrlChangeDetectedException;
 use Shopware\Core\Framework\App\Hmac\Guzzle\AuthMiddleware;
 use Shopware\Core\Framework\App\Lifecycle\Persister\PermissionPersister;
 use Shopware\Core\Framework\App\Lifecycle\Registration\AppRegistrationService;
@@ -47,10 +48,10 @@ class AppRegistrationServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->appRepository = $this->getContainer()->get('app.repository');
-        $this->registrator = $this->getContainer()->get(AppRegistrationService::class);
+        $this->appRepository = static::getContainer()->get('app.repository');
+        $this->registrator = static::getContainer()->get(AppRegistrationService::class);
         $this->shopUrl = (string) EnvironmentHelper::getVariable('APP_URL');
-        $this->shopIdProvider = $this->getContainer()->get(ShopIdProvider::class);
+        $this->shopIdProvider = static::getContainer()->get(ShopIdProvider::class);
     }
 
     public function testRegisterPrivateApp(): void
@@ -191,7 +192,7 @@ class AppRegistrationServiceTest extends TestCase
 
         $this->appendNewResponse(new Response(200, [], $appResponseBody));
 
-        $systemConfigService = $this->getContainer()->get(SystemConfigService::class);
+        $systemConfigService = static::getContainer()->get(SystemConfigService::class);
         $systemConfigService->set(ShopIdProvider::SHOP_ID_SYSTEM_CONFIG_KEY, [
             'app_url' => 'https://test.com',
             'value' => $shopId,
@@ -205,16 +206,21 @@ class AppRegistrationServiceTest extends TestCase
         $handshakeFactory = new HandshakeFactory(
             $this->shopUrl,
             $shopIdProviderMock,
-            $this->getContainer()->get(StoreClient::class),
+            static::getContainer()->get(StoreClient::class),
             Kernel::SHOPWARE_FALLBACK_VERSION
         );
 
+        $shopIdMock = $this->createMock(ShopIdProvider::class);
+        $shopIdMock->expects(static::once())
+            ->method('getShopId')
+            ->willThrowException(new AppUrlChangeDetectedException('https://test.com', 'https://new.com', $shopId));
+
         $registrator = new AppRegistrationService(
             $handshakeFactory,
-            $this->getContainer()->get('shopware.app_system.guzzle'),
-            $this->getContainer()->get('app.repository'),
+            static::getContainer()->get('shopware.app_system.guzzle'),
+            static::getContainer()->get('app.repository'),
             $this->shopUrl,
-            $this->getContainer()->get(ShopIdProvider::class),
+            $shopIdMock,
             Kernel::SHOPWARE_FALLBACK_VERSION
         );
 
@@ -302,7 +308,7 @@ class AppRegistrationServiceTest extends TestCase
             ],
         ]], Context::createDefaultContext());
 
-        $permissionPersister = $this->getContainer()->get(PermissionPersister::class);
+        $permissionPersister = static::getContainer()->get(PermissionPersister::class);
         $permissions = Permissions::fromArray([
             'permissions' => [
                 'product' => ['update'],

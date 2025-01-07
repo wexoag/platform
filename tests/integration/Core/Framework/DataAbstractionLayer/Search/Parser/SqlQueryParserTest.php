@@ -18,9 +18,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\NandFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\PrefixFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\SuffixFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Parser\SqlQueryParser;
-use Shopware\Core\Framework\Test\IdsCollection;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 
 /**
  * @internal
@@ -40,10 +40,10 @@ class SqlQueryParserTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->manufacturerRepository = $this->getContainer()->get('product_manufacturer.repository');
+        $this->manufacturerRepository = static::getContainer()->get('product_manufacturer.repository');
 
         $this->context = Context::createDefaultContext();
-        $this->repository = $this->getContainer()->get('product.repository');
+        $this->repository = static::getContainer()->get('product.repository');
 
         $this->ids = new IdsCollection();
 
@@ -84,9 +84,9 @@ class SqlQueryParserTest extends TestCase
     #[DataProvider('whenToUseNullSafeOperatorProvider')]
     public function testWhenToUseNullSafeOperator(Filter $filter, bool $expected): void
     {
-        $parser = $this->getContainer()->get(SqlQueryParser::class);
+        $parser = static::getContainer()->get(SqlQueryParser::class);
 
-        $definition = $this->getContainer()->get(ProductDefinition::class);
+        $definition = static::getContainer()->get(ProductDefinition::class);
 
         $parsed = $parser->parse($filter, $definition, Context::createDefaultContext(), 'product');
 
@@ -248,6 +248,6 @@ class SqlQueryParserTest extends TestCase
                 ->build(),
         ];
 
-        $this->getContainer()->get('product.repository')->create($products, Context::createDefaultContext());
+        static::getContainer()->get('product.repository')->create($products, Context::createDefaultContext());
     }
 }

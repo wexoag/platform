@@ -1,3 +1,6 @@
+/**
+ * @package services-settings
+ */
 import template from './sw-settings-basic-information.html.twig';
 
 const { Mixin } = Shopware;
@@ -11,7 +14,6 @@ export default {
     mixins: [
         Mixin.getByName('notification'),
     ],
-
 
     data() {
         return {
@@ -35,15 +37,18 @@ export default {
             this.isSaveSuccessful = false;
             this.isLoading = true;
 
-            this.$refs.systemConfig.saveAll().then(() => {
-                this.isLoading = false;
-                this.isSaveSuccessful = true;
-            }).catch((err) => {
-                this.isLoading = false;
-                this.createNotificationError({
-                    message: err,
+            this.$refs.systemConfig
+                .saveAll()
+                .then(() => {
+                    this.isLoading = false;
+                    this.isSaveSuccessful = true;
+                })
+                .catch((err) => {
+                    this.isLoading = false;
+                    this.createNotificationError({
+                        message: err,
+                    });
                 });
-            });
         },
 
         onLoadingChanged(loading) {

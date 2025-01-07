@@ -1,8 +1,7 @@
 import { mount } from '@vue/test-utils';
 
 /**
- * @package customer-order
- * @group disabledCompat
+ * @package checkout
  */
 
 const cart = {
@@ -43,8 +42,7 @@ async function createWrapper() {
             isLoading: false,
         },
         global: {
-            provide: {
-            },
+            provide: {},
             stubs: {
                 'sw-order-state-select-v2': true,
                 'sw-entity-tag-select': true,

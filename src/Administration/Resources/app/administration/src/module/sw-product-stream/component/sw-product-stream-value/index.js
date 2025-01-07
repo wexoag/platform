@@ -12,6 +12,8 @@ const { Criteria } = Shopware.Data;
 export default {
     template,
 
+    compatConfig: Shopware.compatConfig,
+
     inject: [
         'repositoryFactory',
         'conditionDataProviderService',
@@ -20,7 +22,11 @@ export default {
         'feature',
     ],
 
-    emits: ['empty-change', 'type-change', 'boolean-change'],
+    emits: [
+        'empty-change',
+        'type-change',
+        'boolean-change',
+    ],
 
     props: {
         condition: {
@@ -90,9 +96,11 @@ export default {
         },
 
         isMultiSelectValue() {
-            return this.actualCondition.type === 'equalsAny' ||
+            return (
+                this.actualCondition.type === 'equalsAny' ||
                 this.actualCondition.type === 'equalsAll' ||
-                this.actualCondition.type === 'notEqualsAll';
+                this.actualCondition.type === 'notEqualsAll'
+            );
         },
 
         filterType: {
@@ -137,14 +145,12 @@ export default {
             if (this.fieldType === null) {
                 return [];
             }
-            return this.conditionDataProviderService
-                .getOperatorSet(this.fieldType)
-                .map((operator) => {
-                    return {
-                        label: this.$tc(operator.label),
-                        value: operator.identifier,
-                    };
-                });
+            return this.conditionDataProviderService.getOperatorSet(this.fieldType).map((operator) => {
+                return {
+                    label: this.$tc(operator.label),
+                    value: operator.identifier,
+                };
+            });
         },
 
         relativeTimeOperators() {
@@ -162,8 +168,14 @@ export default {
 
         productStateOptions() {
             return [
-                { label: this.$tc('sw-product-stream.filter.values.productStates.physical'), value: 'is-physical' },
-                { label: this.$tc('sw-product-stream.filter.values.productStates.digital'), value: 'is-download' },
+                {
+                    label: this.$tc('sw-product-stream.filter.values.productStates.physical'),
+                    value: 'is-physical',
+                },
+                {
+                    label: this.$tc('sw-product-stream.filter.values.productStates.digital'),
+                    value: 'is-download',
+                },
             ];
         },
 
@@ -181,9 +193,12 @@ export default {
             }
 
             if (this.fieldDefinition.type === 'uuid') {
-                const isManyToOneFkField = Object.keys(this.definition.filterProperties((field) => {
-                    return field.localField === this.fieldName && field.relation === 'many_to_one';
-                })).length > 0;
+                const isManyToOneFkField =
+                    Object.keys(
+                        this.definition.filterProperties((field) => {
+                            return field.localField === this.fieldName && field.relation === 'many_to_one';
+                        }),
+                    ).length > 0;
 
                 if (isManyToOneFkField) {
                     return 'empty';
@@ -249,22 +264,32 @@ export default {
         },
 
         gte: {
-            get() { return this.actualCondition.parameters ? this.actualCondition.parameters.gte : null; },
-            set(value) { this.actualCondition.parameters.gte = value; },
+            get() {
+                return this.actualCondition.parameters ? this.actualCondition.parameters.gte : null;
+            },
+            set(value) {
+                this.actualCondition.parameters.gte = value;
+            },
         },
 
         lte: {
-            get() { return this.actualCondition.parameters ? this.actualCondition.parameters.lte : null; },
-            set(value) { this.actualCondition.parameters.lte = value; },
+            get() {
+                return this.actualCondition.parameters ? this.actualCondition.parameters.lte : null;
+            },
+            set(value) {
+                this.actualCondition.parameters.lte = value;
+            },
         },
 
         operator: {
             get() {
-                return this.actualCondition.parameters ?
-                    this.getParameterType(this.actualCondition.parameters.operator) :
-                    null;
+                return this.actualCondition.parameters
+                    ? this.getParameterType(this.actualCondition.parameters.operator)
+                    : null;
             },
-            set(value) { this.actualCondition.parameters.operator = this.getParameterName(value); },
+            set(value) {
+                this.actualCondition.parameters.operator = this.getParameterName(value);
+            },
         },
 
         emptyValue: {
@@ -278,13 +303,20 @@ export default {
                     return;
                 }
 
-                this.$emit('empty-change', { type: value ? 'equals' : 'notEquals' });
+                this.$emit('empty-change', {
+                    type: value ? 'equals' : 'notEquals',
+                });
             },
         },
 
         stringValue: {
             get() {
-                if (['int', 'float'].includes(this.fieldType)) {
+                if (
+                    [
+                        'int',
+                        'float',
+                    ].includes(this.fieldType)
+                ) {
                     return Number.parseFloat(this.actualCondition.value);
                 }
                 if (typeof this.actualCondition.value !== 'string') {
@@ -383,7 +415,12 @@ export default {
     },
 
     mounted() {
-        this.childComponents = this.$children;
+        if (this.isCompatEnabled('INSTANCE_CHILDREN')) {
+            this.childComponents = this.$children;
+            return;
+        }
+
+        this.childComponents = this.$refs;
     },
 
     methods: {
@@ -484,7 +521,10 @@ export default {
         },
 
         setBooleanValue(value) {
-            this.$emit('boolean-change', { type: +value ? 'equals' : 'notEquals', value });
+            this.$emit('boolean-change', {
+                type: +value ? 'equals' : 'notEquals',
+                value,
+            });
         },
 
         setSearchTerm(value) {

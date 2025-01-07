@@ -1,6 +1,6 @@
 import template from './sw-flow-affiliate-and-campaign-code-modal.html.twig';
 
-const { Component, Mixin, Service } = Shopware;
+const { Component, Mixin } = Shopware;
 const { ShopwareError } = Shopware.Classes;
 const { mapState } = Component.getComponentHelper();
 
@@ -13,7 +13,12 @@ export default {
 
     compatConfig: Shopware.compatConfig,
 
-    emits: ['process-finish', 'modal-close'],
+    inject: ['flowBuilderService'],
+
+    emits: [
+        'process-finish',
+        'modal-close',
+    ],
 
     mixins: [
         Mixin.getByName('placeholder'),
@@ -56,10 +61,13 @@ export default {
             const allowedAware = this.triggerEvent.aware ?? [];
             const properties = [];
             // eslint-disable-next-line max-len
-            return Service('flowBuilderService').getAvailableEntities(this.action, this.triggerActions, allowedAware, properties);
+            return this.flowBuilderService.getAvailableEntities(this.action, this.triggerActions, allowedAware, properties);
         },
 
-        ...mapState('swFlowState', ['triggerEvent', 'triggerActions']),
+        ...mapState('swFlowState', [
+            'triggerEvent',
+            'triggerActions',
+        ]),
     },
 
     watch: {
@@ -76,8 +84,11 @@ export default {
 
     methods: {
         createdComponent() {
+            const entityName = this.flowBuilderService.getEntityNameByAction(this.action);
+
             if (this.entityOptions.length) {
-                this.entity = this.entityOptions[0].value;
+                this.entity =
+                    this.entityOptions.find((option) => option.value === entityName)?.value || this.entityOptions[0].value;
             }
 
             if (!this.sequence.config) {

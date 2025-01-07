@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -41,7 +40,9 @@ async function createWrapper() {
                 },
             },
             stubs: {
-                'sw-data-grid': await wrapTestComponent('sw-data-grid', { sync: true }),
+                'sw-data-grid': await wrapTestComponent('sw-data-grid', {
+                    sync: true,
+                }),
                 'sw-inheritance-switch': await wrapTestComponent('sw-inheritance-switch', { sync: true }),
                 'sw-icon': {
                     inheritAttrs: false,

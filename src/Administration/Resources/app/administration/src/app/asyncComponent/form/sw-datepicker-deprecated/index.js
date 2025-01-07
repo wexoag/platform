@@ -49,7 +49,11 @@ export default {
 
     compatConfig: Shopware.compatConfig,
 
-    emits: ['update:value', 'inheritance-restore', 'inheritance-remove'],
+    emits: [
+        'update:value',
+        'inheritance-restore',
+        'inheritance-remove',
+    ],
 
     inject: ['feature'],
 
@@ -75,9 +79,17 @@ export default {
         dateType: {
             type: String,
             default: 'date',
-            validValues: ['time', 'date', 'datetime'],
+            validValues: [
+                'time',
+                'date',
+                'datetime',
+            ],
             validator(value) {
-                return ['time', 'date', 'datetime'].includes(value);
+                return [
+                    'time',
+                    'date',
+                    'datetime',
+                ].includes(value);
             },
         },
 
@@ -168,7 +180,12 @@ export default {
                  * The callback methods will emit the corresponding event to the parent.
                  */
                 Object.keys(this.$listeners).forEach((key) => {
-                    if (!['change', 'input'].includes(key)) {
+                    if (
+                        ![
+                            'change',
+                            'input',
+                        ].includes(key)
+                    ) {
                         listeners[key] = this.$listeners[key];
                     }
                 });
@@ -184,7 +201,12 @@ export default {
              * Do not pass "change" or "input" event listeners to the form elements.
              */
             Object.keys(this.$attrs).forEach((key) => {
-                if (!['onChange', 'onInput'].includes(key)) {
+                if (
+                    ![
+                        'onChange',
+                        'onInput',
+                    ].includes(key)
+                ) {
                     attrs[key] = this.$attrs[key];
                 }
             });
@@ -202,7 +224,12 @@ export default {
                     return null;
                 }
 
-                if (['time', 'date'].includes(this.dateType)) {
+                if (
+                    [
+                        'time',
+                        'date',
+                    ].includes(this.dateType)
+                ) {
                     return this.value;
                 }
 
@@ -219,12 +246,16 @@ export default {
                     return;
                 }
 
-                if (['time', 'date'].includes(this.dateType)) {
+                if (
+                    [
+                        'time',
+                        'date',
+                    ].includes(this.dateType)
+                ) {
                     this.$emit('update:value', newValue);
 
                     return;
                 }
-
                 // convert from user timezone (represented as UTC) to UTC timezone
                 const utcDate = zonedTimeToUtc(new Date(newValue), this.userTimeZone);
 
@@ -243,6 +274,13 @@ export default {
             }
 
             return 'UTC';
+        },
+
+        is24HourFormat() {
+            const locale = Shopware.State.get('session').currentLocale;
+            const formatter = new Intl.DateTimeFormat(locale, { hour: 'numeric' });
+            const intlOptions = formatter.resolvedOptions();
+            return !intlOptions.hour12;
         },
     },
 
@@ -337,14 +375,13 @@ export default {
         getMergedConfig(newConfig) {
             if (newConfig.mode !== undefined) {
                 console.warn(
-                    '[sw-datepicker] The only allowed mode is the default \'single\' mode ' +
-                    '(the specified mode will be ignored!). ' +
-                    'The modes \'multiple\' or \'range\' are currently not supported',
+                    "[sw-datepicker] The only allowed mode is the default 'single' mode " +
+                        '(the specified mode will be ignored!). ' +
+                        "The modes 'multiple' or 'range' are currently not supported",
                 );
             }
 
             return {
-
                 ...this.defaultConfig,
                 enableTime: this.enableTime,
                 noCalendar: this.noCalendar,
@@ -363,8 +400,10 @@ export default {
 
             const mergedConfig = this.getMergedConfig(this.config);
 
-            if (mergedConfig.enableTime !== undefined
-                    && mergedConfig.enableTime !== this.currentFlatpickrConfig.enableTime) {
+            if (
+                mergedConfig.enableTime !== undefined &&
+                mergedConfig.enableTime !== this.currentFlatpickrConfig.enableTime
+            ) {
                 // The instance must be recreated for some config options to take effect like 'enableTime' changes.
                 // See https://github.com/flatpickr/flatpickr/issues/1108 for details.
                 this.createFlatpickrInstance(this.config);
@@ -382,7 +421,10 @@ export default {
             this.flatpickrInstance.set(mergedConfig);
 
             // Workaround: Allow to change locale dynamically
-            ['locale', 'showMonths'].forEach((name) => {
+            [
+                'locale',
+                'showMonths',
+            ].forEach((name) => {
                 if (typeof mergedConfig[name] !== 'undefined') {
                     this.flatpickrInstance.set(name, mergedConfig[name]);
                 }
@@ -413,7 +455,8 @@ export default {
                 this.isDatepickerOpen = true;
             });
 
-            this.flatpickrInstance.config.onClose.push(() => {
+            this.flatpickrInstance.config.onClose.push((...args) => {
+                this.emitValue(args[1]);
                 this.isDatepickerOpen = false;
             });
 
@@ -488,25 +531,55 @@ export default {
 
         createConfig() {
             let dateFormat = 'Y-m-dTH:i:S';
-            let altFormat = 'Y-m-d H:i';
+            let altFormat = this.getDateStringFormat({
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
 
             if (this.dateType === 'time') {
                 dateFormat = 'H:i:S';
-                altFormat = 'H:i';
+                altFormat = this.getDateStringFormat({
+                    hour: '2-digit',
+                    minute: '2-digit',
+                });
             }
 
             if (this.dateType === 'date') {
-                altFormat = 'Y-m-d';
+                altFormat = this.getDateStringFormat({
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                });
             }
 
             this.defaultConfig = {
-                time_24hr: true,
+                time_24hr: this.is24HourFormat,
                 locale: this.locale,
                 dateFormat,
                 altInput: true,
                 altFormat,
                 allowInput: true,
             };
+        },
+
+        getDateStringFormat(options) {
+            const locale = Shopware.State.get('session').currentLocale;
+            const formatter = new Intl.DateTimeFormat(locale, options);
+            const parts = formatter.formatToParts(new Date(2000, 0, 1, 0, 0, 0));
+            const flatpickrMapping = {
+                // https://flatpickr.js.org/formatting/
+                year: 'Y', // 4-digit year
+                month: 'm', // 2-digit month
+                day: 'd', // 2-digit day
+                hour: this.is24HourFormat ? 'H' : 'h', // 24-hour or 12-hour
+                minute: 'i', // 2-digit minute
+                dayPeriod: 'K', // AM/PM
+            };
+            // 'literal' parts are the separators
+            return parts.map((part) => (part.type === 'literal' ? part.value : flatpickrMapping[part.type])).join('');
         },
     },
 };

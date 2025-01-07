@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace Shopware\Core\System\CustomEntity;
 
 use Shopware\Core\Framework\App\AppEntity;
-use Shopware\Core\Framework\App\Lifecycle\AbstractAppLoader;
+use Shopware\Core\Framework\App\Source\SourceResolver;
+use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Plugin\PluginEntity;
 use Shopware\Core\System\CustomEntity\Schema\CustomEntityPersister;
@@ -27,35 +28,44 @@ class CustomEntityLifecycleService
         private readonly CustomEntityEnrichmentService $customEntityEnrichmentService,
         private readonly CustomEntityXmlSchemaValidator $customEntityXmlSchemaValidator,
         private readonly string $projectDir,
-        private readonly AbstractAppLoader $appLoader
+        private readonly SourceResolver $sourceResolver
     ) {
     }
 
+    /**
+     * @deprecated tag:v6.7.0 - Custom entity for plugins are deprecated for performance reasons, use attribute entities instead
+     */
     public function updatePlugin(string $pluginId, string $pluginPath): ?CustomEntityXmlSchema
     {
+        $pathToCustomEntityFile = \sprintf(
+            '%s/%s/src/Resources/',
+            $this->projectDir,
+            $pluginPath,
+        );
+
+        if (\file_exists(Path::join($pathToCustomEntityFile, CustomEntityXmlSchema::FILENAME))) {
+            Feature::triggerDeprecationOrThrow('v6.7.0.0', 'Custom entity for plugins are deprecated for performance reasons, use attribute entities instead');
+        }
+
         return $this->update(
-            \sprintf(
-                '%s/%s/src/Resources/',
-                $this->projectDir,
-                $pluginPath,
-            ),
+            $pathToCustomEntityFile,
             PluginEntity::class,
             $pluginId
         );
     }
 
-    public function updateApp(string $appId, string $appPath): ?CustomEntityXmlSchema
+    public function updateApp(AppEntity $app): ?CustomEntityXmlSchema
     {
-        $resourcePath = $this->appLoader->locatePath($appPath, 'Resources');
+        $fs = $this->sourceResolver->filesystemForApp($app);
 
-        if ($resourcePath === null) {
+        if (!$fs->has('Resources')) {
             return null;
         }
 
         return $this->update(
-            $resourcePath,
+            $fs->path('Resources'),
             AppEntity::class,
-            $appId
+            $app->getId()
         );
     }
 

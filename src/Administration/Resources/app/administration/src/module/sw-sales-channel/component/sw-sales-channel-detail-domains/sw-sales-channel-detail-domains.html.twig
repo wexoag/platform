@@ -22,7 +22,7 @@
         {% block sw_sales_channel_detail_domains_add_button %}
         <sw-button
             size="small"
-            :disabled="disableEdit"
+            :disabled="disableEdit || undefined"
             class="sw-sales-channel-detail__button-domain-add"
             @click="onClickOpenCreateDomainModal"
         >
@@ -171,7 +171,7 @@
                 required
                 show-clearable-button
                 :options="salesChannel.currencies"
-                label-property="name"
+                label-property="translated.name"
                 value-property="id"
                 @update:value="onCurrencySelect"
             />
@@ -209,7 +209,7 @@
                 size="small"
                 @click="onCloseCreateDomainModal"
             >
-                {{ $tc('sw-sales-channel.modal.buttonCancel') }}
+                {{ $tc('global.default.cancel') }}
             </sw-button>
             {% endblock %}
 
@@ -251,7 +251,7 @@
                 size="small"
                 @click="onCloseDeleteDomainModal"
             >
-                {{ $tc('sw-sales-channel.detail.buttonCloseDeleteDomainModal') }}
+                {{ $tc('global.default.cancel') }}
             </sw-button>
             {% endblock %}
 

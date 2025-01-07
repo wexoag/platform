@@ -32,6 +32,7 @@
             @update:value="onPriceGrossChange"
             @keyup="keymonitor"
             @input-change="onPriceGrossInputChange"
+            @ends-with-decimal-separator="onEndsWithDecimalSeparator"
         >
             <template
                 v-if="!disableSuffix"
@@ -50,6 +51,8 @@
                 'is--locked': priceForCurrency.linked,
                 'is--disabled': isDisabled
             }"
+            :aria-label="$t('global.sw-price-field.toggleLinkedCurrency')"
+            :aria-pressed="priceForCurrency.linked"
             @click="onLockSwitch"
         >
             <sw-icon
@@ -85,6 +88,7 @@
             @update:value="onPriceNetChange"
             @keyup="keymonitor"
             @input-change="onPriceNetInputChange"
+            @ends-with-decimal-separator="onEndsWithDecimalSeparator"
         >
             <template
                 v-if="!disableSuffix"

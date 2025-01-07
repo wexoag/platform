@@ -1,6 +1,5 @@
 /**
  * @package services-settings
- * @group disabledCompat
  */
 import { mount } from '@vue/test-utils';
 import swBulkEditState from 'src/module/sw-bulk-edit/state/sw-bulk-edit.state';
@@ -11,6 +10,7 @@ async function createWrapper() {
             stubs: {
                 'sw-datepicker': true,
                 'sw-textarea-field': true,
+                'sw-switch-field': true,
             },
         },
     });
@@ -32,9 +32,11 @@ describe('sw-bulk-edit-order-documents-generate-invoice', () => {
     });
 
     it('should contain a generateData as a computed property', async () => {
-        expect(wrapper.vm.generateData).toEqual(expect.objectContaining({
-            documentComment: null,
-        }));
+        expect(wrapper.vm.generateData).toEqual(
+            expect.objectContaining({
+                documentComment: null,
+            }),
+        );
 
         Shopware.State.commit('swBulkEdit/setOrderDocumentsValue', {
             type: 'invoice',
@@ -44,10 +46,12 @@ describe('sw-bulk-edit-order-documents-generate-invoice', () => {
             },
         });
 
-        expect(wrapper.vm.generateData).toEqual(expect.objectContaining({
-            documentDate: 'documentDate',
-            documentComment: 'documentComment',
-        }));
+        expect(wrapper.vm.generateData).toEqual(
+            expect.objectContaining({
+                documentDate: 'documentDate',
+                documentComment: 'documentComment',
+            }),
+        );
     });
 
     it('should be able to update generateData', async () => {

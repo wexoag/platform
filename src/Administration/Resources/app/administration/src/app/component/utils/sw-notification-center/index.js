@@ -35,14 +35,14 @@ Component.register('sw-notification-center', {
 
         additionalContextButtonClass() {
             return {
-                'sw-notification-center__context-button--new-available': this.notifications.some(n => !n.visited),
+                'sw-notification-center__context-button--new-available': this.notifications.some((n) => !n.visited),
             };
         },
     },
 
     created() {
         this.unsubscribeFromStore = Shopware.State.subscribeAction(this.createNotificationFromSystemError);
-        if (!this.isCompatEnabled('INSTANCE_EVENT_EMITTER')) {
+        if (this.isCompatEnabled('INSTANCE_EVENT_EMITTER')) {
             this.$root.$on('on-change-notification-center-visibility', this.changeVisibility);
         } else {
             Shopware.Utils.EventBus.on('on-change-notification-center-visibility', this.changeVisibility);

@@ -10,8 +10,6 @@ use Shopware\Tests\Unit\Core\Checkout\Cart\TaxProvider\_fixtures\TestEmptyTaxPro
 use Shopware\Tests\Unit\Core\Checkout\Cart\TaxProvider\_fixtures\TestGenericExceptionTaxProvider;
 
 /**
- * @package checkout
- *
  * @internal
  */
 class TaxProviderRegistryTest extends TestCase
@@ -22,7 +20,7 @@ class TaxProviderRegistryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->taxProviderRegistry = $this->getContainer()->get(TaxProviderRegistry::class);
+        $this->taxProviderRegistry = static::getContainer()->get(TaxProviderRegistry::class);
     }
 
     public function testTestProvidersAreRegisteredByServiceContainerTag(): void

@@ -27,14 +27,15 @@ use Shopware\Core\Framework\RateLimiter\RateLimiter;
 use Shopware\Core\Framework\Test\RateLimiter\DisableRateLimiterCompilerPass;
 use Shopware\Core\Framework\Test\RateLimiter\RateLimiterTestTrait;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelLifecycleManager;
-use Shopware\Core\Framework\Test\TestDataCollection;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\SalesChannelRequest;
-use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\Test\Integration\Traits\CustomerTestTrait;
+use Shopware\Core\Test\Integration\Traits\OrderFixture;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Storefront\Checkout\Cart\SalesChannel\StorefrontCartFacade;
 use Shopware\Storefront\Controller\AuthController;
 use Shopware\Storefront\Controller\FormController;
@@ -44,8 +45,6 @@ use Shopware\Storefront\Page\Account\Order\AccountOrderPageLoader;
 use Shopware\Storefront\Page\Account\RecoverPassword\AccountRecoverPasswordPageLoader;
 use Shopware\Storefront\Page\GenericPageLoader;
 use Shopware\Storefront\Test\Controller\StorefrontControllerTestBehaviour;
-use Shopware\Tests\Integration\Core\Checkout\Customer\Rule\OrderFixture;
-use Shopware\Tests\Integration\Core\Checkout\Customer\SalesChannel\CustomerTestTrait;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -67,11 +66,9 @@ class ControllerRateLimiterTest extends TestCase
 
     private Context $context;
 
-    private TestDataCollection $ids;
+    private IdsCollection $ids;
 
     private KernelBrowser $browser;
-
-    private ?AbstractSalesChannelContextFactory $salesChannelContextFactory;
 
     private SalesChannelContext $salesChannelContext;
 
@@ -92,15 +89,15 @@ class ControllerRateLimiterTest extends TestCase
     protected function setUp(): void
     {
         $this->context = Context::createDefaultContext();
-        $this->ids = new TestDataCollection();
+        $this->ids = new IdsCollection();
 
         $this->browser = $this->createCustomSalesChannelBrowser([
             'id' => $this->ids->create('sales-channel'),
         ]);
         $this->assignSalesChannelContext($this->browser);
 
-        $this->salesChannelContextFactory = $this->getContainer()->get(SalesChannelContextFactory::class)->getDecorated();
-        $this->salesChannelContext = $this->salesChannelContextFactory->create(Uuid::randomHex(), $this->ids->get('sales-channel'));
+        $salesChannelContextFactory = static::getContainer()->get(SalesChannelContextFactory::class)->getDecorated();
+        $this->salesChannelContext = $salesChannelContextFactory->create(Uuid::randomHex(), $this->ids->get('sales-channel'));
 
         $this->clearCache();
 
@@ -108,7 +105,7 @@ class ControllerRateLimiterTest extends TestCase
         static::assertInstanceOf(Session::class, $session);
         $session->getFlashBag()->clear();
 
-        $this->translator = $this->getContainer()->get('translator');
+        $this->translator = static::getContainer()->get('translator');
     }
 
     public function testGenerateAccountRecoveryRateLimit(): void
@@ -117,20 +114,20 @@ class ControllerRateLimiterTest extends TestCase
         $passwordRecoveryMailRoute->method('sendRecoveryMail')->willThrowException(new RateLimitExceededException(time() + 10));
 
         $controller = new AuthController(
-            $this->getContainer()->get(AccountLoginPageLoader::class),
+            static::getContainer()->get(AccountLoginPageLoader::class),
             $passwordRecoveryMailRoute,
-            $this->getContainer()->get(ResetPasswordRoute::class),
-            $this->getContainer()->get(LoginRoute::class),
-            $this->getContainer()->get(LogoutRoute::class),
-            $this->getContainer()->get(ImitateCustomerRoute::class),
-            $this->getContainer()->get(StorefrontCartFacade::class),
-            $this->getContainer()->get(AccountRecoverPasswordPageLoader::class)
+            static::getContainer()->get(ResetPasswordRoute::class),
+            static::getContainer()->get(LoginRoute::class),
+            static::getContainer()->get(LogoutRoute::class),
+            static::getContainer()->get(ImitateCustomerRoute::class),
+            static::getContainer()->get(StorefrontCartFacade::class),
+            static::getContainer()->get(AccountRecoverPasswordPageLoader::class)
         );
-        $controller->setContainer($this->getContainer());
+        $controller->setContainer(static::getContainer());
 
         $request = $this->createRequest('frontend.account.recover.request');
 
-        $this->getContainer()->get('request_stack')->push($request);
+        static::getContainer()->get('request_stack')->push($request);
 
         $controller->generateAccountRecovery($request, new RequestDataBag([
             'email' => [
@@ -149,17 +146,16 @@ class ControllerRateLimiterTest extends TestCase
     public function testAuthControllerGuestLoginShowsRateLimit(): void
     {
         $controller = new AuthController(
-            $this->getContainer()->get(AccountLoginPageLoader::class),
+            static::getContainer()->get(AccountLoginPageLoader::class),
             $this->createMock(AbstractSendPasswordRecoveryMailRoute::class),
             $this->createMock(AbstractResetPasswordRoute::class),
             $this->createMock(LoginRoute::class),
             $this->createMock(AbstractLogoutRoute::class),
             $this->createMock(AbstractImitateCustomerRoute::class),
-            $this->getContainer()->get(StorefrontCartFacade::class),
-            $this->getContainer()->get(AccountRecoverPasswordPageLoader::class)
+            static::getContainer()->get(StorefrontCartFacade::class),
+            static::getContainer()->get(AccountRecoverPasswordPageLoader::class)
         );
-        $controller->setContainer($this->getContainer());
-        $controller->setTwig($this->getContainer()->get('twig'));
+        $controller->setContainer(static::getContainer());
 
         $request = $this->createRequest('frontend.account.guest.login.page', [
             'redirectTo' => 'frontend.account.order.single.page',
@@ -168,7 +164,7 @@ class ControllerRateLimiterTest extends TestCase
             'waitTime' => 5,
         ]);
 
-        $this->getContainer()->get('request_stack')->push($request);
+        static::getContainer()->get('request_stack')->push($request);
 
         $response = $controller->guestLoginPage($request, $this->salesChannelContext);
 
@@ -187,20 +183,20 @@ class ControllerRateLimiterTest extends TestCase
         $loginRoute->method('login')->willThrowException(CustomerException::customerAuthThrottledException(5));
 
         $controller = new AuthController(
-            $this->getContainer()->get(AccountLoginPageLoader::class),
+            static::getContainer()->get(AccountLoginPageLoader::class),
             $this->createMock(AbstractSendPasswordRecoveryMailRoute::class),
             $this->createMock(AbstractResetPasswordRoute::class),
             $loginRoute,
             $this->createMock(AbstractLogoutRoute::class),
             $this->createMock(AbstractImitateCustomerRoute::class),
-            $this->getContainer()->get(StorefrontCartFacade::class),
-            $this->getContainer()->get(AccountRecoverPasswordPageLoader::class)
+            static::getContainer()->get(StorefrontCartFacade::class),
+            static::getContainer()->get(AccountRecoverPasswordPageLoader::class)
         );
-        $controller->setContainer($this->getContainer());
+        $controller->setContainer(static::getContainer());
 
         $request = $this->createRequest('frontend.account.login');
 
-        $this->getContainer()->get('request_stack')->push($request);
+        static::getContainer()->get('request_stack')->push($request);
 
         $response = $controller->login($request, new RequestDataBag([
             'email' => 'test@example.com',
@@ -223,11 +219,10 @@ class ControllerRateLimiterTest extends TestCase
 
         $controller = new FormController(
             $contactFormRoute,
-            $this->getContainer()->get(NewsletterSubscribeRoute::class),
-            $this->getContainer()->get(NewsletterUnsubscribeRoute::class),
+            static::getContainer()->get(NewsletterSubscribeRoute::class),
+            static::getContainer()->get(NewsletterUnsubscribeRoute::class),
         );
-        $controller->setContainer($this->getContainer());
-        $controller->setTwig($this->getContainer()->get('twig'));
+        $controller->setContainer(static::getContainer());
 
         $response = $controller->sendContactForm(new RequestDataBag([
         ]), $this->salesChannelContext);
@@ -250,12 +245,12 @@ class ControllerRateLimiterTest extends TestCase
     public function testResetAccountOrderRateLimit(): void
     {
         $orderRoute = new OrderRoute(
-            $this->getContainer()->get('order.repository'),
-            $this->getContainer()->get('promotion.repository'),
+            static::getContainer()->get('order.repository'),
+            static::getContainer()->get('promotion.repository'),
             $this->mockResetLimiter([
                 RateLimiter::GUEST_LOGIN => 1,
             ]),
-            $this->getContainer()->get('event_dispatcher'),
+            static::getContainer()->get('event_dispatcher'),
         );
 
         $order = $this->createCustomerWithOrder();
@@ -337,7 +332,7 @@ class ControllerRateLimiterTest extends TestCase
         $orderId = Uuid::randomHex();
         $customerId = $this->createCustomer('orderTest@example.com', true);
 
-        $this->getContainer()->get('customer.repository')->update([
+        static::getContainer()->get('customer.repository')->update([
             [
                 'id' => $customerId,
                 'salesChannelId' => $this->ids->get('sales-channel'),
@@ -351,7 +346,7 @@ class ControllerRateLimiterTest extends TestCase
         $orderData[0]['addresses'][0]['zipcode'] = '12345';
         $orderData[0]['salesChannelId'] = $this->ids->get('sales-channel');
 
-        $orderRepository = $this->getContainer()->get('order.repository');
+        $orderRepository = static::getContainer()->get('order.repository');
         $orderRepository->create($orderData, $this->context);
 
         $order = $orderRepository->search(new Criteria([$orderId]), $this->context)->first();
@@ -369,7 +364,6 @@ class ControllerRateLimiterTest extends TestCase
 
         \parse_str($rawParams, $params);
 
-        static::assertIsArray($params);
         static::assertArrayHasKey($param, $params);
         static::assertIsString($params[$param]);
 

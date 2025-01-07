@@ -13,7 +13,7 @@
     {% block sw_cms_slot_content_component %}
     <component
         :is="elementConfig.component"
-        v-if="elementConfig && elementConfig.component"
+        v-if="elementConfig?.component"
         v-model:element="element"
         :element-data="elementConfig"
         :disabled="disabled || undefined"
@@ -251,7 +251,7 @@
             <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->
             {% block sw_cms_slot_content_element_modal_action_abort %}
             <sw-button @click="onCloseElementModal">
-                {{ $tc('sw-cms.detail.label.buttonElementChangeAbort') }}
+                {{ $tc('global.default.cancel') }}
             </sw-button>
             {% endblock %}
         </template>

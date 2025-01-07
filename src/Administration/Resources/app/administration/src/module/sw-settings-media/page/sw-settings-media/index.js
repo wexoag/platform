@@ -10,6 +10,8 @@ const { Mixin } = Shopware;
 export default {
     template,
 
+    compatConfig: Shopware.compatConfig,
+
     inject: [
         'systemConfigApiService',
     ],
@@ -41,9 +43,10 @@ export default {
             this.isLoading = true;
             try {
                 const values = await this.systemConfigApiService.getValues('core.media');
-                this.sliderValue = values['core.media.defaultLightIntensity'] !== undefined
-                    ? values['core.media.defaultLightIntensity']
-                    : 100;
+                this.sliderValue =
+                    values['core.media.defaultLightIntensity'] !== undefined
+                        ? values['core.media.defaultLightIntensity']
+                        : 100;
             } catch (error) {
                 if (error?.response?.data?.errors) {
                     this.createErrorNotification(error.response.data.errors);
@@ -61,21 +64,24 @@ export default {
             this.isSaveSuccessful = false;
             this.isLoading = true;
 
-            this.$refs.systemConfig.saveAll().then(async () => {
-                this.isLoading = false;
-                this.isSaveSuccessful = true;
+            this.$refs.systemConfig
+                .saveAll()
+                .then(async () => {
+                    this.isLoading = false;
+                    this.isSaveSuccessful = true;
 
-                await this.systemConfigApiService.batchSave({
-                    null: {
-                        'core.media.defaultLightIntensity': this.sliderValue,
-                    },
+                    await this.systemConfigApiService.batchSave({
+                        null: {
+                            'core.media.defaultLightIntensity': this.sliderValue,
+                        },
+                    });
+                })
+                .catch((err) => {
+                    this.isLoading = false;
+                    this.createNotificationError({
+                        message: err,
+                    });
                 });
-            }).catch((err) => {
-                this.isLoading = false;
-                this.createNotificationError({
-                    message: err,
-                });
-            });
         },
 
         onLoadingChanged(loading) {

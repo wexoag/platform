@@ -4,8 +4,8 @@ namespace Shopware\Core\Framework\Adapter\Cache\ReverseProxy;
 
 use Shopware\Core\Framework\Adapter\Cache\AbstractCacheTracer;
 use Shopware\Core\Framework\Adapter\Cache\CacheTagCollector;
-use Shopware\Core\Framework\Adapter\Cache\Http\CacheResponseSubscriber;
 use Shopware\Core\Framework\Adapter\Cache\Http\CacheStore;
+use Shopware\Core\Framework\Adapter\Cache\Http\HttpCacheKeyGenerator;
 use Shopware\Core\Framework\Adapter\Cache\InvalidateCacheEvent;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
@@ -63,10 +63,10 @@ class ReverseProxyCache implements StoreInterface
             $response->headers->remove(CacheStore::TAG_HEADER);
         }
 
-        $states = $response->headers->get(CacheResponseSubscriber::INVALIDATION_STATES_HEADER, '');
+        $states = $response->headers->get(HttpCacheKeyGenerator::INVALIDATION_STATES_HEADER, '');
         $states = array_unique(array_filter(array_merge(explode(',', $states), $this->states)));
 
-        $response->headers->set(CacheResponseSubscriber::INVALIDATION_STATES_HEADER, \implode(',', $states));
+        $response->headers->set(HttpCacheKeyGenerator::INVALIDATION_STATES_HEADER, \implode(',', $states));
 
         $this->gateway->tag(\array_values($tags), $request->getPathInfo(), $response);
 
@@ -125,7 +125,7 @@ class ReverseProxyCache implements StoreInterface
             return $this->collector->get($request);
         }
 
-        $tags = $this->tracer->get('all');
+        $tags = array_merge($this->tracer->get('all'), $this->collector->get($request));
 
         return \array_values(array_filter($tags, static function (string $tag): bool {
             // remove tag for global theme cache, http cache will be invalidate for each key which gets accessed in the request

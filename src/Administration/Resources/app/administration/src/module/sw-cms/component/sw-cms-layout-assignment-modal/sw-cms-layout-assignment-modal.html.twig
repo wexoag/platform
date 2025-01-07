@@ -199,7 +199,6 @@
                     :select-label="$tc('sw-cms.components.cmsLayoutAssignmentModal.products.productAssignmentLabel')"
                     :placeholder="$tc('sw-cms.components.cmsLayoutAssignmentModal.products.productAssignmentPlaceholder')"
                 >
-
                     <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->
                     {% block sw_cms_layout_assignment_modal_product_detail_pages_column_name %}
                     <template #column-name="{ item, column }">
@@ -208,7 +207,7 @@
                         >
                             <sw-product-variant-info
                                 :variations="item.options"
-                                @click.native="onAbort"
+                                @click="onAbort"
                             >
                                 {{ item.translated.name }}
                             </sw-product-variant-info>
@@ -241,6 +240,7 @@
                     {% block sw_cms_layout_assignment_modal_product_detail_pages_empty_state %}
                     <template #empty-state>
                         <img
+                            class="sw-cms-product-assignment__empty-state"
                             :src="assetFilter('/administration/static/img/empty-states/products-empty-state.svg')"
                             alt=""
                         >
@@ -362,7 +362,7 @@
                     size="small"
                     @click="onDiscardChanges"
                 >
-                    {{ $tc('sw-cms.components.cmsLayoutAssignmentModal.confirmChangesRestorePrev') }}
+                    {{ $tc('global.default.discard') }}
                 </sw-button>
                 {% endblock %}
 
@@ -374,7 +374,7 @@
                     size="small"
                     @click="onConfirmChanges"
                 >
-                    {{ $tc('sw-cms.components.cmsLayoutAssignmentModal.confirmChangesConfirm') }}
+                    {{ $tc('global.default.confirm') }}
                 </sw-button>
                 {% endblock %}
             </div>
@@ -406,7 +406,7 @@
             variant="primary"
             @click="onConfirm"
         >
-            {{ $tc('sw-cms.components.cmsLayoutAssignmentModal.confirmChanges') }}
+            {{ $tc('global.default.apply') }}
         </sw-button>
         {% endblock %}
     </template>

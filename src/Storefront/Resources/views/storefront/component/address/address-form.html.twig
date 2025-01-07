@@ -102,6 +102,11 @@
     {% endblock %}
 
     {% block component_address_form_address_fields %}
+        {% set options = {
+            scopeElementSelector,
+            prefix,
+        } %}
+
         <div class="row g-2">
             {% block component_address_form_street %}
                 <div class="form-group col-md-6">
@@ -143,7 +148,8 @@
 
             {% block component_address_form_zipcode_city %}
                 {% set zipcodeField %}
-                {% set zipcodeValue = formViolations.getInputData()['zipcode'] ?? data.get('zipcode') %}
+                    {% set zipcodeValue = formViolations.getInputData()['zipcode'] ?? data.get('zipcode') %}
+
                     {% if formViolations.getViolations('/zipcode') is not empty %}
                         {% set violationPath = '/zipcode' %}
                     {% elseif formViolations.getViolations("/#{prefix}/zipcode") is not empty %}
@@ -215,13 +221,31 @@
                     {% endblock %}
                 {% endset %}
 
-                <div class="form-group col-md-4 col-8">
-                    {{ cityField }}
-                </div>
+                {% set wrappedZipcodeField %}
+                    {% block component_address_form_zipcode_field %}
+                        <div class="form-group col-md-2 col-4">
+                            {{ zipcodeField }}
+                        </div>
+                    {% endblock %}
+                {% endset %}
 
-                <div class="form-group col-md-2 col-4">
-                    {{ zipcodeField }}
-                </div>
+                {% set wrappedCityField %}
+                    {% block component_address_form_city_field %}
+                        <div class="form-group col-md-4 col-8">
+                            {{ cityField }}
+                        </div>
+                    {% endblock %}
+                {% endset %}
+
+                {% block component_address_form_zipcode_city_fields %}
+                    {% if config('core.loginRegistration.showZipcodeInFrontOfCity') %}
+                        {{ wrappedZipcodeField }}
+                        {{ wrappedCityField }}
+                    {% else %}
+                        {{ wrappedCityField }}
+                        {{ wrappedZipcodeField }}
+                    {% endif %}
+                {% endblock %}
             {% endblock %}
 
             {% block component_address_form_additional_field1 %}
@@ -296,7 +320,7 @@
             {% endblock %}
         </div>
 
-        <div class="row g-2 country-and-state-form-elements" data-country-state-select="true">
+        <div class="row g-2 country-and-state-form-elements" data-country-state-select="true" data-country-state-select-options="{{ options|json_encode }}">
             {% block component_address_form_country %}
                 <div class="form-group col-md-6">
                     {% set initialCountryId = null %}

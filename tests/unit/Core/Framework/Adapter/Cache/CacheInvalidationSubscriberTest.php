@@ -58,14 +58,15 @@ class CacheInvalidationSubscriberTest extends TestCase
                     'context-factory-' . $salesChannelId,
                     'base-context-factory-' . $salesChannelId,
                 ],
-                false
+                true
             );
 
         $subscriber = new CacheInvalidationSubscriber(
             $cacheInvalidator,
             $this->createMock(Connection::class),
             false,
-            false
+            false,
+            true
         );
 
         $subscriber->invalidateContext(new EntityWrittenContainerEvent(
@@ -94,6 +95,7 @@ class CacheInvalidationSubscriberTest extends TestCase
     #[DataProvider('provideTracingTranslationExamples')]
     public function testInvalidateTranslation(bool $enabled, array $tags): void
     {
+        Feature::skipTestIfActive('cache_rework', $this);
         $cacheInvalidator = $this->createMock(CacheInvalidator::class);
         $cacheInvalidator->expects(static::once())
             ->method('invalidate')
@@ -106,7 +108,8 @@ class CacheInvalidationSubscriberTest extends TestCase
             $cacheInvalidator,
             $this->createMock(Connection::class),
             $enabled,
-            $enabled
+            $enabled,
+            true
         );
 
         $event = $this->createSnippetEvent();
@@ -137,6 +140,8 @@ class CacheInvalidationSubscriberTest extends TestCase
     #[DataProvider('provideTracingConfigExamples')]
     public function testInvalidateConfig(bool $enabled, array $tags): void
     {
+        Feature::skipTestIfActive('cache_rework', $this);
+
         $cacheInvalidator = $this->createMock(CacheInvalidator::class);
         $cacheInvalidator->expects(static::once())
             ->method('invalidate')
@@ -149,7 +154,8 @@ class CacheInvalidationSubscriberTest extends TestCase
             $cacheInvalidator,
             $this->createMock(Connection::class),
             $enabled,
-            $enabled
+            $enabled,
+            true
         );
 
         $subscriber->invalidateConfigKey(new SystemConfigChangedHook(['test' => '1'], []));
@@ -164,7 +170,8 @@ class CacheInvalidationSubscriberTest extends TestCase
             $this->cacheInvalidator,
             $this->connection,
             false,
-            false
+            false,
+            true
         );
         $this->connection->method('fetchAllAssociative')
             ->willReturn([['product_id' => $productId, 'version_id' => null]]);
@@ -202,7 +209,8 @@ class CacheInvalidationSubscriberTest extends TestCase
             $this->cacheInvalidator,
             $this->connection,
             false,
-            false
+            false,
+            true
         );
         $this->connection->method('fetchAllAssociative')
             ->willReturn([
@@ -233,9 +241,6 @@ class CacheInvalidationSubscriberTest extends TestCase
                     false
                 );
         }
-
-
-
 
         $subscriber->invalidateMedia($event);
     }

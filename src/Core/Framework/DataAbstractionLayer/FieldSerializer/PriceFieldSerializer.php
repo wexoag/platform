@@ -15,7 +15,6 @@ use Shopware\Core\Framework\DataAbstractionLayer\Write\WriteParameterBag;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Util\Json;
 use Shopware\Core\Framework\Validation\Constraint\Uuid;
-use Shopware\Core\Framework\Validation\WriteConstraintViolationException;
 use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Optional;
@@ -38,7 +37,8 @@ class PriceFieldSerializer extends AbstractFieldSerializer
         if (!$field instanceof StorageAware) {
             throw DataAbstractionLayerException::invalidSerializerField(self::class, $field);
         }
-        $value = $data->getValue();
+
+        $value = json_decode(json_encode($data->getValue(), \JSON_PRESERVE_ZERO_FRACTION | \JSON_THROW_ON_ERROR), true, 512, \JSON_THROW_ON_ERROR);
 
         if ($this->requiresValidation($field, $existence, $value, $parameters)) {
             if ($value !== null) {
@@ -114,9 +114,17 @@ class PriceFieldSerializer extends AbstractFieldSerializer
             $value = json_decode($value, true, 512, \JSON_THROW_ON_ERROR);
         }
 
+        if (!\is_array($value)) {
+            throw DataAbstractionLayerException::expectedArrayWithType('$value', \gettype($value));
+        }
+
         $collection = new PriceCollection();
 
         foreach ($value as $row) {
+            if (empty($row['currencyId'])) {
+                throw DataAbstractionLayerException::missingFieldValue($field);
+            }
+
             if ((!isset($row['listPrice']) || !isset($row['listPrice']['gross'])) && (!isset($row['regulationPrice']) || !isset($row['regulationPrice']['gross']))) {
                 $collection->add(
                     new Price($row['currencyId'], (float) $row['net'], (float) $row['gross'], (bool) $row['linked'])
@@ -228,7 +236,6 @@ class PriceFieldSerializer extends AbstractFieldSerializer
                 $prices
             )
         );
-
-        throw new WriteConstraintViolationException($violationList, $parameters->getPath());
+        throw DataAbstractionLayerException::invalidWriteConstraintViolation($violationList, $parameters->getPath());
     }
 }

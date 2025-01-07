@@ -12,6 +12,7 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Shopware\Storefront\Page\PageLoadedEvent;
 use Shopware\Storefront\Page\Wishlist\WishlistPageLoadedEvent;
 use Shopware\Storefront\Page\Wishlist\WishlistPageLoader;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -26,7 +27,7 @@ class WishlistPageTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->systemConfigService = $this->getContainer()->get(SystemConfigService::class);
+        $this->systemConfigService = static::getContainer()->get(SystemConfigService::class);
     }
 
     public function testInActiveWishlist(): void
@@ -81,13 +82,13 @@ class WishlistPageTest extends TestCase
 
     protected function getPageLoader(): WishlistPageLoader
     {
-        return $this->getContainer()->get(WishlistPageLoader::class);
+        return static::getContainer()->get(WishlistPageLoader::class);
     }
 
     private function createCustomerWishlist(string $customerId, string $productId, string $salesChannelId): string
     {
         $customerWishlistId = Uuid::randomHex();
-        $customerWishlistRepository = $this->getContainer()->get('customer_wishlist.repository');
+        $customerWishlistRepository = static::getContainer()->get('customer_wishlist.repository');
 
         $customerWishlistRepository->create([
             [

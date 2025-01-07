@@ -150,12 +150,13 @@ Component.register('sw-sidebar', {
             this.items.push(item);
 
             if (this.isCompatEnabled('INSTANCE_EVENT_EMITTER')) {
+                // eslint-disable-next-line vue/no-deprecated-events-api
                 this.$on('item-click', item.sidebarButtonClick);
                 item.$on('toggle-active', this.setItemActive);
                 item.$on('close-content', this.closeSidebar);
             } else {
-                // eslint-disable-next-line no-warning-comments
-                // TODO: Add alternative for toggle-active and close-content
+                item.registerToggleActiveListener(this.setItemActive);
+                item.registerCloseContentListener(this.closeSidebar);
             }
         },
 
@@ -163,7 +164,7 @@ Component.register('sw-sidebar', {
             this.$emit('item-click', clickedItem);
 
             if (!this.isCompatEnabled('INSTANCE_EVENT_EMITTER')) {
-                this.item.forEach((item) => {
+                this.items.forEach((item) => {
                     if (item.sidebarButtonClick) {
                         item.sidebarButtonClick(clickedItem);
                     }

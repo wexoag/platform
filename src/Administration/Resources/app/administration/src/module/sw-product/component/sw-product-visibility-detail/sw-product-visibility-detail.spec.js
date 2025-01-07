@@ -1,8 +1,7 @@
 import { mount } from '@vue/test-utils';
 
-/*
+/**
  * @package inventory
- * @group disabledCompat
  */
 
 const salesChannelFixture = {
@@ -60,9 +59,7 @@ async function createWrapper() {
         }),
         {
             global: {
-                provide: {
-
-                },
+                provide: {},
                 stubs: {
                     'sw-base-field': await wrapTestComponent('sw-base-field'),
                     'sw-radio-field': await wrapTestComponent('sw-radio-field'),
@@ -125,6 +122,7 @@ describe('src/module/sw-settings-listing/component/sw-product-visibility-detail'
         createStateMapper({
             visibilities: [
                 {
+                    id: salesChannelFixture.id,
                     salesChannel: {
                         ...salesChannelFixture,
                         translated: {
@@ -145,4 +143,3 @@ describe('src/module/sw-settings-listing/component/sw-product-visibility-detail'
         expect(nameElement.attributes()['tooltip-mock-message']).toBe(name);
     });
 });
-

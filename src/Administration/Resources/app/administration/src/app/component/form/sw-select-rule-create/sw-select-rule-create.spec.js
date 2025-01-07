@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -57,7 +56,10 @@ describe('components/sw-select-rule-create', () => {
                                 return { disabled: true, message: '' };
                             }
 
-                            return { disabled: false, message: 'ruleAwarenessRestrictionLabelText' };
+                            return {
+                                disabled: false,
+                                message: 'ruleAwarenessRestrictionLabelText',
+                            };
                         },
                         isRuleRestricted: (conditions) => {
                             return conditions[0];
@@ -112,7 +114,10 @@ describe('components/sw-select-rule-create', () => {
         const resultItems = wrapper.findAllComponents('.sw-select-result-list__item-list .sw-select-result');
         expect(resultItems).toHaveLength(2);
 
-        const [firstResult, secondResult] = resultItems;
+        const [
+            firstResult,
+            secondResult,
+        ] = resultItems;
 
         expect(firstResult.attributes('class')).not.toContain('is--disabled');
         expect(secondResult.attributes('class')).toContain('is--disabled');
@@ -120,7 +125,10 @@ describe('components/sw-select-rule-create', () => {
 
     it('should have disabled tooltip because rule is not in restricted array and not in rule awareness', async () => {
         const wrapper = await createWrapper();
-        const tooltipConfig = wrapper.vm.tooltipConfig({ id: 'ruleId', conditions: [] });
+        const tooltipConfig = wrapper.vm.tooltipConfig({
+            id: 'ruleId',
+            conditions: [],
+        });
 
         expect(tooltipConfig.disabled).toBeTruthy();
         expect(tooltipConfig.message).toBe('');
@@ -128,7 +136,10 @@ describe('components/sw-select-rule-create', () => {
 
     it('should have correct tooltip because rule is in restricted array', async () => {
         const wrapper = await createWrapper();
-        const tooltipConfig = wrapper.vm.tooltipConfig({ id: 'restrictedId', conditions: [] });
+        const tooltipConfig = wrapper.vm.tooltipConfig({
+            id: 'restrictedId',
+            conditions: [],
+        });
 
         expect(tooltipConfig.disabled).toBeFalsy();
         expect(tooltipConfig.message).toBe('myRestrictedLabelText');
@@ -136,7 +147,10 @@ describe('components/sw-select-rule-create', () => {
 
     it('should have correct tooltip because of restricted rule by rule awareness', async () => {
         const wrapper = await createWrapper();
-        const tooltipConfig = wrapper.vm.tooltipConfig({ id: 'someRuleAwarenessRestrictedId', conditions: [true] });
+        const tooltipConfig = wrapper.vm.tooltipConfig({
+            id: 'someRuleAwarenessRestrictedId',
+            conditions: [true],
+        });
 
         expect(tooltipConfig.disabled).toBeFalsy();
         expect(tooltipConfig.message).toBe('ruleAwarenessRestrictionLabelText');

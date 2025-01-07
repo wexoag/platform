@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -65,7 +64,9 @@ describe('src/app/component/form/select/base/sw-select-result', () => {
             methods: {
                 emitSelectItemByKeyboard() {
                     this.$emit('item-select-by-keyboard', [0]);
-                    Shopware.Utils.EventBus.emit('item-select-by-keyboard', [0]);
+                    Shopware.Utils.EventBus.emit('item-select-by-keyboard', [
+                        0,
+                    ]);
                 },
             },
         };

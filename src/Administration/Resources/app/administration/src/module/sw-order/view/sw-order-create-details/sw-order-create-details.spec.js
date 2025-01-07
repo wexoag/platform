@@ -3,13 +3,17 @@ import 'src/module/sw-order/mixin/cart-notification.mixin';
 import orderStore from 'src/module/sw-order/state/order.store';
 
 /**
- * @package customer-order
- * @group disabledCompat
+ * @package checkout
  */
 
 const contextState = {
     namespaced: true,
-    state: { api: { languageId: '2fbb5fe2e29a4d70aa5854ce7ce3e20b', systemLanguageId: '2fbb5fe2e29a4d70aa5854ce7ce3e20b' } },
+    state: {
+        api: {
+            languageId: '2fbb5fe2e29a4d70aa5854ce7ce3e20b',
+            systemLanguageId: '2fbb5fe2e29a4d70aa5854ce7ce3e20b',
+        },
+    },
     mutations: {
         setLanguageId: jest.fn(),
     },

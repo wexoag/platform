@@ -10,7 +10,7 @@ use Shopware\Storefront\Page\Checkout\Finish\CheckoutFinishPage;
 use Shopware\Storefront\Page\Checkout\Finish\CheckoutFinishPageLoadedEvent;
 use Shopware\Storefront\Page\Checkout\Finish\CheckoutFinishPageLoader;
 use Shopware\Storefront\Page\Checkout\Finish\CheckoutFinishPageOrderCriteriaEvent;
-use Shopware\Tests\Integration\Storefront\Page\StorefrontPageTestBehaviour;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -49,7 +49,7 @@ class FinishPageTest extends TestCase
         $criteria = new Criteria([$orderId]);
 
         $this->addEventListener(
-            $this->getContainer()->get('event_dispatcher'),
+            static::getContainer()->get('event_dispatcher'),
             CheckoutFinishPageOrderCriteriaEvent::class,
             static function (CheckoutFinishPageOrderCriteriaEvent $event) use ($criteria, &$eventWasThrown): void {
                 static::assertSame($criteria->getIds(), $event->getCriteria()->getIds());
@@ -75,6 +75,6 @@ class FinishPageTest extends TestCase
      */
     protected function getPageLoader()
     {
-        return $this->getContainer()->get(CheckoutFinishPageLoader::class);
+        return static::getContainer()->get(CheckoutFinishPageLoader::class);
     }
 }

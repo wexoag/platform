@@ -16,7 +16,10 @@ Component.register('sw-select-result', {
 
     compatConfig: Shopware.compatConfig,
 
-    inject: ['setActiveItemIndex', 'feature'],
+    inject: [
+        'setActiveItemIndex',
+        'feature',
+    ],
 
     props: {
         index: {
@@ -41,10 +44,23 @@ Component.register('sw-select-result', {
             type: String,
             required: false,
             default: 'right',
-            validValues: ['bottom', 'right', 'left'],
+            validValues: [
+                'bottom',
+                'right',
+                'left',
+            ],
             validator(value) {
-                return ['bottom', 'right', 'left'].includes(value);
+                return [
+                    'bottom',
+                    'right',
+                    'left',
+                ].includes(value);
             },
+        },
+        ariaLabel: {
+            type: String,
+            required: false,
+            default: undefined,
         },
     },
 
@@ -110,8 +126,12 @@ Component.register('sw-select-result', {
             if (selectedItemIndex === this.index) this.onClickResult({});
         },
 
-        checkIfActive(activeItemIndex) {
+        checkIfActive(activeItemIndex, { shouldFocus } = { shouldFocus: false }) {
             this.active = this.index === activeItemIndex;
+
+            if (this.active && shouldFocus) {
+                this.$el.focus();
+            }
         },
 
         onClickResult() {

@@ -26,13 +26,13 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
-use Shopware\Core\Framework\Test\TestDataCollection;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextRestorer;
 use Shopware\Core\System\SalesChannel\Event\SalesChannelContextRestorerOrderCriteriaEvent;
 use Shopware\Core\Test\Integration\Builder\Customer\CustomerBuilder;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -60,9 +60,9 @@ class SalesChannelContextRestorerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->connection = $this->getContainer()->get(Connection::class);
+        $this->connection = static::getContainer()->get(Connection::class);
 
-        $this->eventDispatcher = $this->getContainer()->get('event_dispatcher');
+        $this->eventDispatcher = static::getContainer()->get('event_dispatcher');
 
         $this->events = [];
 
@@ -71,14 +71,14 @@ class SalesChannelContextRestorerTest extends TestCase
         };
 
         /** @var AbstractSalesChannelContextFactory $contextFactory */
-        $contextFactory = $this->getContainer()->get(SalesChannelContextFactory::class);
-        $cartRuleLoader = $this->getContainer()->get(CartRuleLoader::class);
+        $contextFactory = static::getContainer()->get(SalesChannelContextFactory::class);
+        $cartRuleLoader = static::getContainer()->get(CartRuleLoader::class);
 
         $this->contextRestorer = new SalesChannelContextRestorer(
             $contextFactory,
             $cartRuleLoader,
-            $this->getContainer()->get(OrderConverter::class),
-            $this->getContainer()->get('order.repository'),
+            static::getContainer()->get(OrderConverter::class),
+            static::getContainer()->get('order.repository'),
             $this->connection,
             $this->eventDispatcher
         );
@@ -87,7 +87,7 @@ class SalesChannelContextRestorerTest extends TestCase
     public function testRestoreByOrder(): void
     {
         $context = Context::createDefaultContext();
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
         $this->createOrder($ids);
         $ruleId = Uuid::randomHex();
         $rule = [
@@ -100,7 +100,7 @@ class SalesChannelContextRestorerTest extends TestCase
         ];
 
         // Create rule after create order
-        $this->getContainer()->get('rule.repository')
+        static::getContainer()->get('rule.repository')
             ->create([$rule], $context);
 
         $saleChanelContext = $this->contextRestorer->restoreByOrder($ids->create('order'), $context);
@@ -110,7 +110,7 @@ class SalesChannelContextRestorerTest extends TestCase
     public function testRestoreByCustomer(): void
     {
         $context = Context::createDefaultContext();
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
         $this->createOrder($ids);
         $ruleId = Uuid::randomHex();
         $rule = [
@@ -123,7 +123,7 @@ class SalesChannelContextRestorerTest extends TestCase
         ];
 
         // Create rule after create order
-        $this->getContainer()->get('rule.repository')
+        static::getContainer()->get('rule.repository')
             ->create([$rule], $context);
 
         $saleChanelContext = $this->contextRestorer->restoreByCustomer($this->createCustomer()->getId(), $context);
@@ -135,7 +135,7 @@ class SalesChannelContextRestorerTest extends TestCase
         $context = Context::createDefaultContext();
         $context->addState('foo');
 
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
         $this->createOrder($ids);
 
         $saleChanelContext = $this->contextRestorer->restoreByCustomer($this->createCustomer()->getId(), $context);
@@ -145,7 +145,7 @@ class SalesChannelContextRestorerTest extends TestCase
     public function testOrderCriteriaEventIsFired(): void
     {
         $context = Context::createDefaultContext();
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
         $this->createOrder($ids);
 
         $this->eventDispatcher->addListener(SalesChannelContextRestorerOrderCriteriaEvent::class, $this->callbackFn);
@@ -156,7 +156,7 @@ class SalesChannelContextRestorerTest extends TestCase
         static::assertInstanceOf(SalesChannelContextRestorerOrderCriteriaEvent::class, $salesChannelContextRestorerCriteriaEvent);
     }
 
-    private function createOrder(TestDataCollection $ids): void
+    private function createOrder(IdsCollection $ids): void
     {
         $customer = (new CustomerBuilder($ids, '10000'))
             ->add('guest', true)
@@ -247,13 +247,13 @@ class SalesChannelContextRestorerTest extends TestCase
             ],
         ];
 
-        $this->getContainer()->get('order.repository')
+        static::getContainer()->get('order.repository')
             ->create([$data], Context::createDefaultContext());
     }
 
     private function getStateId(string $state, string $machine): ?string
     {
-        return $this->getContainer()->get(Connection::class)
+        return static::getContainer()->get(Connection::class)
             ->fetchOne(
                 '
                 SELECT LOWER(HEX(state_machine_state.id))
@@ -273,7 +273,7 @@ class SalesChannelContextRestorerTest extends TestCase
     private function getPrePaymentMethodId(): string
     {
         /** @var EntityRepository<PaymentMethodCollection> $repository */
-        $repository = $this->getContainer()->get('payment_method.repository');
+        $repository = static::getContainer()->get('payment_method.repository');
 
         $criteria = (new Criteria())
             ->setLimit(1)
@@ -319,7 +319,7 @@ class SalesChannelContextRestorerTest extends TestCase
         }
 
         /** @var EntityRepository<CustomerCollection> $repo */
-        $repo = $this->getContainer()->get('customer.repository');
+        $repo = static::getContainer()->get('customer.repository');
 
         $repo->create([$customer], Context::createDefaultContext());
 

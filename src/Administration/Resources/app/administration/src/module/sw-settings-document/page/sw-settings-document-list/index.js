@@ -1,7 +1,10 @@
 import template from './sw-settings-document-list.html.twig';
 import './sw-settings-document-list.scss';
 
-const { Mixin, Data: { Criteria } } = Shopware;
+const {
+    Mixin,
+    Data: { Criteria },
+} = Shopware;
 
 /**
  * @package services-settings
@@ -46,16 +49,13 @@ export default {
             };
         },
         listingCriteria() {
-            const criteria = new Criteria(1, 25);
+            const criteria = new Criteria(this.page, this.limit);
 
             if (this.term) {
                 criteria.setTerm(this.term);
             }
 
-            criteria
-                .addAssociation('documentType')
-                .getAssociation('salesChannels')
-                .addAssociation('salesChannel');
+            criteria.addAssociation('documentType').getAssociation('salesChannels').addAssociation('salesChannel');
 
             criteria.addSorting(Criteria.sort('name', 'ASC', false));
 

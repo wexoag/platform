@@ -3,7 +3,7 @@ import './sw-promotion-v2-rule-select.scss';
 
 /**
  * @private
- * @package buyers-experience
+ * @package checkout
  */
 export default {
     template,
@@ -78,10 +78,7 @@ export default {
         },
 
         onSaveRule(ruleId) {
-            const ruleRepository = this.repositoryFactory.create(
-                this.collection.entity,
-                this.collection.source,
-            );
+            const ruleRepository = this.repositoryFactory.create(this.collection.entity, this.collection.source);
 
             ruleRepository.assign(ruleId, this.collection.context).then(() => {
                 ruleRepository.search(this.collection.criteria, this.collection.context).then((searchResult) => {

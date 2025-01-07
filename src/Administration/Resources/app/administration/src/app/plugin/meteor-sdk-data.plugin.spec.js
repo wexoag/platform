@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import MeteorSdkDataPlugin from 'src/app/plugin/meteor-sdk-data.plugin';
@@ -23,15 +22,18 @@ describe('src/app/plugin/meteor-sdk-data.plugin.ts', () => {
     });
 
     it('should add and call dataSetUnwatchers to the component instance', () => {
-        const wrapper = mount({
-            template: '<div>jest</div>',
-        }, {
-            global: {
-                plugins: [
-                    MeteorSdkDataPlugin,
-                ],
+        const wrapper = mount(
+            {
+                template: '<div>jest</div>',
             },
-        });
+            {
+                global: {
+                    plugins: [
+                        MeteorSdkDataPlugin,
+                    ],
+                },
+            },
+        );
 
         // template should render normal and have dataSetUnwatchers property on the instance
         expect(wrapper.text()).toBe('jest');

@@ -25,7 +25,7 @@ class DefaultMediaResolverTest extends TestCase
 
     protected function setUp(): void
     {
-        $packages = $this->getContainer()->get('assets.packages');
+        $packages = static::getContainer()->get('assets.packages');
 
         $translator = $this->createConfiguredMock(
             Translator::class,
@@ -49,7 +49,7 @@ class DefaultMediaResolverTest extends TestCase
     public function testGetDefaultMediaEntityWithValidFileName(): void
     {
         $this->decorated->method('getDefaultCmsMediaEntity')->willReturn(new MediaEntity());
-        $media = $this->mediaResolver->getDefaultCmsMediaEntity('storefront/assets/default/cms/shopware.jpg');
+        $media = $this->mediaResolver->getDefaultCmsMediaEntity('bundles/storefront/assets/default/cms/shopware.jpg');
 
         static::assertInstanceOf(MediaEntity::class, $media);
 

@@ -25,11 +25,11 @@ use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseHelper\CallableClass;
-use Shopware\Core\Framework\Test\TestDataCollection;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionActions;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Core\Test\TestDefaults;
 
 /**
@@ -42,7 +42,7 @@ class OrderStateChangeEventListenerTest extends TestCase
 
     public function testTriggerTransactionEvents(): void
     {
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
 
         $this->createCustomer($ids);
         $this->createOrder($ids);
@@ -50,7 +50,7 @@ class OrderStateChangeEventListenerTest extends TestCase
         $this->assertEvent('state_leave.order_transaction.state.open');
         $this->assertEvent('state_enter.order_transaction.state.in_progress');
 
-        $this->getContainer()
+        static::getContainer()
             ->get(StateMachineRegistry::class)
             ->transition(
                 new Transition(
@@ -65,14 +65,14 @@ class OrderStateChangeEventListenerTest extends TestCase
 
     public function testTriggerOrderEvent(): void
     {
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
 
         $this->createCustomer($ids);
         $this->createOrder($ids);
         $this->assertEvent('state_leave.order.state.open');
         $this->assertEvent('state_enter.order.state.in_progress');
 
-        $this->getContainer()
+        static::getContainer()
             ->get(StateMachineRegistry::class)
             ->transition(
                 new Transition(
@@ -87,14 +87,14 @@ class OrderStateChangeEventListenerTest extends TestCase
 
     public function testOrderDeliveryEvent(): void
     {
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
 
         $this->createCustomer($ids);
         $this->createOrder($ids);
         $this->assertEvent('state_leave.order_delivery.state.open');
         $this->assertEvent('state_enter.order_delivery.state.shipped');
 
-        $this->getContainer()
+        static::getContainer()
             ->get(StateMachineRegistry::class)
             ->transition(
                 new Transition(
@@ -112,12 +112,12 @@ class OrderStateChangeEventListenerTest extends TestCase
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
         $listener->expects(static::once())->method('__invoke');
 
-        $this->getContainer()
+        static::getContainer()
             ->get('event_dispatcher')
             ->addListener($event, $listener);
     }
 
-    private function createOrder(TestDataCollection $ids): void
+    private function createOrder(IdsCollection $ids): void
     {
         $data = [
             'id' => $ids->create('order'),
@@ -204,11 +204,11 @@ class OrderStateChangeEventListenerTest extends TestCase
             ],
         ];
 
-        $this->getContainer()->get('order.repository')
+        static::getContainer()->get('order.repository')
             ->create([$data], Context::createDefaultContext());
     }
 
-    private function createCustomer(TestDataCollection $ids): string
+    private function createCustomer(IdsCollection $ids): string
     {
         $addressId = Uuid::randomHex();
 
@@ -244,7 +244,7 @@ class OrderStateChangeEventListenerTest extends TestCase
             $customer['defaultPaymentMethodId'] = $this->getValidPaymentMethodId();
         }
 
-        $this->getContainer()
+        static::getContainer()
             ->get('customer.repository')
             ->upsert([$customer], Context::createDefaultContext());
 
@@ -254,7 +254,7 @@ class OrderStateChangeEventListenerTest extends TestCase
     private function getPrePaymentMethodId(): string
     {
         /** @var EntityRepository $repository */
-        $repository = $this->getContainer()->get('payment_method.repository');
+        $repository = static::getContainer()->get('payment_method.repository');
 
         $criteria = (new Criteria())
             ->setLimit(1)
@@ -269,7 +269,7 @@ class OrderStateChangeEventListenerTest extends TestCase
 
     private function getStateId(string $state, string $machine): ?string
     {
-        return $this->getContainer()->get(Connection::class)
+        return static::getContainer()->get(Connection::class)
             ->fetchOne('
                 SELECT LOWER(HEX(state_machine_state.id))
                 FROM state_machine_state
@@ -289,10 +289,7 @@ class OrderStateChangeEventListenerTest extends TestCase
  */
 class RuleValidator extends CallableClass
 {
-    /**
-     * @var OrderStateMachineStateChangeEvent|null
-     */
-    public $event;
+    public ?OrderStateMachineStateChangeEvent $event;
 
     public function __invoke(): void
     {

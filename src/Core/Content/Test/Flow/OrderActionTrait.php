@@ -19,13 +19,16 @@ use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Test\TestCaseBase\CountryAddToSalesChannelTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelApiTestBehaviour;
-use Shopware\Core\Framework\Test\TestDataCollection;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
+/**
+ * @deprecated tag:v6.7.0 - reason:becomes-internal - Will be internal in v6.7.0
+ */
 #[Package('services-settings')]
 trait OrderActionTrait
 {
@@ -35,7 +38,7 @@ trait OrderActionTrait
 
     private KernelBrowser $browser;
 
-    private TestDataCollection $ids;
+    private IdsCollection $ids;
 
     private ?EntityRepository $customerRepository = null;
 
@@ -109,7 +112,7 @@ trait OrderActionTrait
 
     private function prepareProductTest(): void
     {
-        $this->getContainer()->get('product.repository')->create([
+        static::getContainer()->get('product.repository')->create([
             [
                 'id' => $this->ids->create('p1'),
                 'productNumber' => $this->ids->get('p1'),
@@ -170,7 +173,7 @@ trait OrderActionTrait
      */
     private function createOrder(string $customerId, array $additionalData = []): void
     {
-        $this->getContainer()->get('order.repository')->create([
+        static::getContainer()->get('order.repository')->create([
             array_merge([
                 'id' => $this->ids->create('order'),
                 'itemRounding' => json_decode(json_encode(new CashRoundingConfig(2, 0.01, true), \JSON_THROW_ON_ERROR), true, 512, \JSON_THROW_ON_ERROR),
@@ -252,7 +255,7 @@ trait OrderActionTrait
 
     private function getStateId(string $state, string $machine): string
     {
-        return $this->getContainer()->get(Connection::class)
+        return static::getContainer()->get(Connection::class)
             ->fetchOne('
                 SELECT LOWER(HEX(state_machine_state.id))
                 FROM state_machine_state
@@ -287,7 +290,7 @@ trait OrderActionTrait
             ],
             'customFieldSet' => [
                 'id' => $customFieldSetId,
-                'name' => 'Custom Field Set',
+                'name' => 'Custom_Field_Set',
                 'relations' => [[
                     'id' => Uuid::randomHex(),
                     'customFieldSetId' => $customFieldSetId,
@@ -296,7 +299,7 @@ trait OrderActionTrait
             ],
         ];
 
-        $this->getContainer()->get('custom_field.repository')
+        static::getContainer()->get('custom_field.repository')
             ->create([$data], Context::createDefaultContext());
 
         return $customFieldId;

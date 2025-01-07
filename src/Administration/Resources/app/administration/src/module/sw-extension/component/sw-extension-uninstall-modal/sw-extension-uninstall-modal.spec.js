@@ -30,7 +30,6 @@ async function createWrapper(propsData = {}) {
 
 /**
  * @package checkout
- * @group disabledCompat
  */
 describe('src/module/sw-extension/component/sw-extension-uninstall-modal', () => {
     it('should show the correct title', async () => {
@@ -63,6 +62,8 @@ describe('src/module/sw-extension/component/sw-extension-uninstall-modal', () =>
 
         await wrapper.vm.emitUninstall();
 
-        expect(wrapper.emitted()).toHaveProperty('uninstall-extension', [[false]]);
+        expect(wrapper.emitted()).toHaveProperty('uninstall-extension', [
+            [false],
+        ]);
     });
 });

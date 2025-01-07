@@ -3,11 +3,13 @@
 namespace Shopware\Tests\Integration\Storefront\Page;
 
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\Content\Category\CategoryEntity;
 use Shopware\Core\Content\Category\Exception\CategoryNotFoundException;
 use Shopware\Core\Content\Seo\SeoUrlPlaceholderHandlerInterface;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Storefront\Page\Navigation\NavigationPageLoadedEvent;
 use Shopware\Storefront\Page\Navigation\NavigationPageLoader;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -28,13 +30,14 @@ class NavigationPageTest extends TestCase
 
         $page = $this->getPageLoader()->load($request, $context);
 
-        self::assertPageEvent(NavigationPageLoadedEvent::class, $event, $context, $request, $page);
+        static::assertInstanceOf(CategoryEntity::class, $page->getCategory());
+        static::assertPageEvent(NavigationPageLoadedEvent::class, $event, $context, $request, $page);
     }
 
     public function testItDeniesAccessToInactiveCategoryPage(): void
     {
         $context = $this->createSalesChannelContextWithNavigation();
-        $repository = $this->getContainer()->get('category.repository');
+        $repository = static::getContainer()->get('category.repository');
 
         $categoryId = $context->getSalesChannel()->getNavigationCategoryId();
 
@@ -56,7 +59,7 @@ class NavigationPageTest extends TestCase
     {
         $request = new Request();
         $context = $this->createSalesChannelContextWithNavigation();
-        $seoUrlHandler = $this->getContainer()->get(SeoUrlPlaceholderHandlerInterface::class);
+        $seoUrlHandler = static::getContainer()->get(SeoUrlPlaceholderHandlerInterface::class);
 
         $event = null;
         $this->catchEvent(NavigationPageLoadedEvent::class, $event);
@@ -73,6 +76,6 @@ class NavigationPageTest extends TestCase
 
     protected function getPageLoader(): NavigationPageLoader
     {
-        return $this->getContainer()->get(NavigationPageLoader::class);
+        return static::getContainer()->get(NavigationPageLoader::class);
     }
 }

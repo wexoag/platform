@@ -27,7 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[Package('storefront')]
 class WishlistPageLoader
 {
-    private const LIMIT = 24;
+    private const DEFAULT_LIMIT = 24;
 
     private const DEFAULT_PAGE = 1;
 
@@ -82,13 +82,13 @@ class WishlistPageLoader
 
     private function createCriteria(Request $request): Criteria
     {
-        $limit = $request->query->get('limit');
-        $limit = $limit ? (int) $limit : self::LIMIT;
+        $limit = self::DEFAULT_LIMIT;
         $page = $request->query->get('p');
         $page = $page ? (int) $page : self::DEFAULT_PAGE;
         $offset = $limit * ($page - 1);
 
         return (new Criteria())
+            ->setTitle('wishlist::page')
             ->addSorting(new FieldSorting('wishlists.updatedAt', FieldSorting::ASCENDING))
             ->addAssociation('manufacturer')
             ->addAssociation('options.group')

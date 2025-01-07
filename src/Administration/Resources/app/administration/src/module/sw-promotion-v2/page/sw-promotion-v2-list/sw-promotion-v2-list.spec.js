@@ -1,6 +1,5 @@
 /**
- * @package buyers-experience
- * @group disabledCompat
+ * @package checkout
  */
 import { mount } from '@vue/test-utils';
 import { searchRankingPoint } from 'src/app/service/search-ranking.service';
@@ -11,7 +10,8 @@ async function createWrapper() {
         global: {
             stubs: {
                 'sw-page': {
-                    template: '<div class="sw-page"><slot name="smart-bar-actions"></slot><slot name="content"></slot></div>',
+                    template:
+                        '<div class="sw-page"><slot name="smart-bar-actions"></slot><slot name="content"></slot></div>',
                 },
                 'sw-button': true,
                 'sw-entity-listing': true,
@@ -29,6 +29,7 @@ async function createWrapper() {
                         search: () => Promise.resolve([]),
                         get: () => Promise.resolve([]),
                         create: () => {},
+                        clone: jest.fn(() => Promise.resolve({ id: 'new-promotion-id' })),
                     }),
                 },
                 searchRankingService: {
@@ -86,7 +87,10 @@ describe('src/module/sw-promotion-v2/page/sw-promotion-v2-list', () => {
     });
 
     it('should enable editing of entries when privilege is set', async () => {
-        global.activeAclRoles = ['promotion.viewer', 'promotion.editor'];
+        global.activeAclRoles = [
+            'promotion.viewer',
+            'promotion.editor',
+        ];
 
         const wrapper = await createWrapper();
 
@@ -104,7 +108,11 @@ describe('src/module/sw-promotion-v2/page/sw-promotion-v2-list', () => {
     });
 
     it('should enable deletion of entries when privilege is set', async () => {
-        global.activeAclRoles = ['promotion.viewer', 'promotion.editor', 'promotion.deleter'];
+        global.activeAclRoles = [
+            'promotion.viewer',
+            'promotion.editor',
+            'promotion.deleter',
+        ];
 
         const wrapper = await createWrapper();
 
@@ -217,5 +225,38 @@ describe('src/module/sw-promotion-v2/page/sw-promotion-v2-list', () => {
         expect(wrapper.vm.entitySearchable).toBe(false);
 
         wrapper.vm.searchRankingService.getSearchFieldsByEntity.mockRestore();
+    });
+
+    it('should duplicate promotion and navigate to the new promotion detail page', async () => {
+        const wrapper = await createWrapper();
+        await flushPromises();
+
+        const referencePromotion = {
+            id: 'reference-promotion-id',
+            name: 'Reference Promotion',
+        };
+
+        await wrapper.vm.onDuplicatePromotion(referencePromotion);
+
+        expect(wrapper.vm.promotionRepository.clone).toHaveBeenCalledWith(
+            'reference-promotion-id',
+            {
+                overwrites: {
+                    name: 'Reference Promotion global.default.copy',
+                    code: null,
+                    useCodes: false,
+                    useIndividualCodes: false,
+                    individualCodePattern: '',
+                    individualCodes: null,
+                    active: false,
+                },
+            },
+            Shopware.Context.api,
+        );
+
+        expect(wrapper.vm.$router.push).toHaveBeenCalledWith({
+            name: 'sw.promotion.v2.detail',
+            params: { id: 'new-promotion-id' },
+        });
     });
 });

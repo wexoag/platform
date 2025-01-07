@@ -1,6 +1,5 @@
 /**
  * @package inventory
- * @group disabledCompat
  */
 import { mount } from '@vue/test-utils';
 
@@ -18,7 +17,11 @@ async function createWrapper() {
                 },
                 'sw-category-tree': {
                     template: '<div class="sw-category-tree"></div>',
-                    props: ['allowEdit', 'allowCreate', 'allowDelete'],
+                    props: [
+                        'allowEdit',
+                        'allowCreate',
+                        'allowDelete',
+                    ],
                 },
                 'sw-button': true,
                 'sw-button-process': {
@@ -51,12 +54,27 @@ async function createWrapper() {
                 },
                 repositoryFactory: {
                     create: () => ({
-                        search: () => Promise.resolve({
-                            get: () => ({ sections: [] }),
-                        }),
+                        search: () =>
+                            Promise.resolve({
+                                get: () => ({ sections: [] }),
+                            }),
+                        save: jest.fn(() => Promise.resolve()),
+                        get: () =>
+                            Promise.resolve({
+                                slotConfig: '',
+                                navigationSalesChannels: [],
+                                footerSalesChannels: [],
+                                serviceSalesChannels: [],
+                            }),
                     }),
                 },
                 seoUrlService: {},
+                systemConfigApiService: {
+                    getValues: () =>
+                        Promise.resolve({
+                            'core.cms.default_category_cms_page': 'foo',
+                        }),
+                },
             },
         },
     });
@@ -66,9 +84,12 @@ describe('src/module/sw-category/page/sw-category-detail', () => {
     beforeEach(() => {
         global.activeAclRoles = [];
 
-        Shopware.Store.unregister('cmsPageState');
+        Shopware.Store.unregister('cmsPage');
         Shopware.Store.register({
-            id: 'cmsPageState',
+            id: 'cmsPage',
+            state: () => ({
+                currentPage: null,
+            }),
             actions: {
                 resetCmsPageState: () => {},
                 setCurrentMappingEntity: () => {},
@@ -130,7 +151,10 @@ describe('src/module/sw-category/page/sw-category-detail', () => {
     });
 
     it('should allow to create', async () => {
-        global.activeAclRoles = ['category.creator', 'category.editor'];
+        global.activeAclRoles = [
+            'category.creator',
+            'category.editor',
+        ];
 
         const wrapper = await createWrapper();
 
@@ -156,7 +180,11 @@ describe('src/module/sw-category/page/sw-category-detail', () => {
     });
 
     it('should allow to delete', async () => {
-        global.activeAclRoles = ['category.creator', 'category.editor', 'category.deleter'];
+        global.activeAclRoles = [
+            'category.creator',
+            'category.editor',
+            'category.deleter',
+        ];
 
         const wrapper = await createWrapper();
 
@@ -179,5 +207,38 @@ describe('src/module/sw-category/page/sw-category-detail', () => {
         expect(categoryTree.props('allowCreate')).toBe(true);
         expect(categoryTree.props('allowEdit')).toBe(true);
         expect(categoryTree.props('allowDelete')).toBe(true);
+    });
+
+    it('should set default layout', async () => {
+        global.activeAclRoles = [
+            'category.creator',
+            'category.editor',
+            'category.deleter',
+        ];
+
+        const wrapper = await createWrapper();
+
+        Shopware.State.commit('swCategoryDetail/setActiveCategory', {
+            category: {
+                slotConfig: '',
+                cmsPageId: 'foo',
+                navigationSalesChannels: [],
+                footerSalesChannels: [],
+                serviceSalesChannels: [],
+            },
+        });
+
+        await wrapper.setData({
+            isLoading: false,
+            cmsPage: null,
+        });
+
+        await wrapper.setProps({
+            categoryId: 'foo',
+        });
+
+        await wrapper.vm.onSave();
+
+        expect(wrapper.vm.categoryRepository.save.mock.calls[0][0].cmsPageId).toBeNull();
     });
 });

@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -88,4 +87,3 @@ describe('components/base/sw-version', () => {
         expect(wrapper.vm.version).toBe('6.4.9999999.9999999 Developer Version');
     });
 });
-

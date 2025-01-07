@@ -29,6 +29,7 @@ $sw-page-search-bar-z-index: $z-index-sw-page-search-bar;
         align-items: center;
         background: $sw-page-smart-bar-background-color;
         border-bottom: 2px solid $sw-page-smart-bar-border-color;
+        z-index: $z-index-page-header;
     }
 
     .sw-page__search-bar {
@@ -48,6 +49,7 @@ $sw-page-search-bar-z-index: $z-index-sw-page-search-bar;
         display: flex;
         align-content: flex-end;
         justify-content: flex-end;
+        align-items: center;
         gap: 16px;
     }
 
@@ -123,6 +125,7 @@ $sw-page-search-bar-z-index: $z-index-sw-page-search-bar;
         flex-direction: row;
         text-align: right;
         white-space: nowrap;
+        align-items: center;
 
         .sw-button,
         .sw-button-group,

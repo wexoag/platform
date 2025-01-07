@@ -1,6 +1,5 @@
 /**
  * @package content
- * @group disabledCompat
  */
 import { mount } from '@vue/test-utils';
 
@@ -8,11 +7,17 @@ const { Module } = Shopware;
 
 // mocking modules
 const modulesToCreate = new Map();
-modulesToCreate.set('sw-product', { icon: 'regular-products', entity: 'product' });
-modulesToCreate.set('sw-mail-template', { icon: 'regular-cog', entity: 'mail_template' });
+modulesToCreate.set('sw-product', {
+    icon: 'regular-products',
+    entity: 'product',
+});
+modulesToCreate.set('sw-mail-template', {
+    icon: 'regular-cog',
+    entity: 'mail_template',
+});
 modulesToCreate.set('sw-cms', { icon: 'regular-content', entity: 'cms_page' });
 
-Array.from(modulesToCreate.keys()).forEach(moduleName => {
+Array.from(modulesToCreate.keys()).forEach((moduleName) => {
     const currentModuleValues = modulesToCreate.get(moduleName);
 
     Module.register(moduleName, {
@@ -31,7 +36,6 @@ const ID_MAILTEMPLATE_FOLDER = '4006d6aa64ce409692ac2b952fa56ade';
 const ID_PRODUCTS_FOLDER = '0e6b005ca7a1440b8e87ac3d45ed5c9f';
 const ID_CONTENT_FOLDER = '08bc82b315c54cb097e5c3fb30f6ff16';
 
-
 async function createWrapper(defaultFolderId, privileges = []) {
     return mount(await wrapTestComponent('sw-media-folder-item', { sync: true }), {
         props: {
@@ -48,9 +52,11 @@ async function createWrapper(defaultFolderId, privileges = []) {
                 id: 'af46d5250e34403485e045ba7049dec7',
                 children: [],
                 isNew: () => false,
-                media: [{
-                    isNew: () => false,
-                }],
+                media: [
+                    {
+                        isNew: () => false,
+                    },
+                ],
             },
             showSelectionIndicator: false,
             showContextMenuButton: true,
@@ -69,12 +75,14 @@ async function createWrapper(defaultFolderId, privileges = []) {
             provide: {
                 repositoryFactory: {
                     create: () => ({
-                        create: () => Promise.resolve({
-                            isNew: () => true,
-                        }),
-                        search: () => Promise.resolve({
-                            isNew: () => false,
-                        }),
+                        create: () =>
+                            Promise.resolve({
+                                isNew: () => true,
+                            }),
+                        search: () =>
+                            Promise.resolve({
+                                isNew: () => false,
+                            }),
                         get: (folderId) => {
                             switch (folderId) {
                                 case ID_PRODUCTS_FOLDER:
@@ -100,7 +108,9 @@ async function createWrapper(defaultFolderId, privileges = []) {
                 },
                 acl: {
                     can: (identifier) => {
-                        if (!identifier) { return true; }
+                        if (!identifier) {
+                            return true;
+                        }
 
                         return privileges.includes(identifier);
                     },
@@ -278,5 +288,31 @@ describe('components/media/sw-media-folder-item', () => {
         const invalidName = { target: { value: 'Test <' } };
         wrapper.vm.onBlur(invalidName, item, () => {});
         expect(wrapper.vm.rejectRenaming).toHaveBeenCalledWith(item, 'invalid-name', expect.any(Function));
+    });
+
+    it('should not call the api get default folder if default folder id does not exist', async () => {
+        const wrapper = await createWrapper(null);
+        await wrapper.vm.$nextTick();
+
+        const mediaDefaultFolderRepositorySpy = jest.spyOn(wrapper.vm.mediaDefaultFolderRepository, 'get');
+        await wrapper.vm.getIconConfigFromFolder();
+
+        expect(mediaDefaultFolderRepositorySpy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should call the api get default folder if default folder id exists', async () => {
+        const wrapper = await createWrapper(ID_PRODUCTS_FOLDER);
+        await wrapper.setData({
+            lastDefaultFolderId: '',
+        });
+
+        wrapper.vm.mediaDefaultFolderRepository.get = jest.fn(() => Promise.resolve({}));
+        wrapper.vm.moduleFactory.getModuleByEntityName = jest.fn(() => Promise.resolve({}));
+
+        await wrapper.vm.getIconConfigFromFolder();
+        await flushPromises();
+
+        expect(wrapper.vm.mediaDefaultFolderRepository.get).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.moduleFactory.getModuleByEntityName).toHaveBeenCalledTimes(1);
     });
 });

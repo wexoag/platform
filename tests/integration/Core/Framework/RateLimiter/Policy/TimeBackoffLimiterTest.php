@@ -11,7 +11,7 @@ use Shopware\Core\Framework\RateLimiter\RateLimiterFactory;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelApiTestBehaviour;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
-use Shopware\Tests\Integration\Core\Checkout\Customer\SalesChannel\CustomerTestTrait;
+use Shopware\Core\Test\Integration\Traits\CustomerTestTrait;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\RateLimiter\Exception\ReserveNotSupportedException;
@@ -73,7 +73,7 @@ class TimeBackoffLimiterTest extends TestCase
         $this->limiter = $factory->create('example');
         $this->limiter->reset();
 
-        $this->getContainer()->get('cache.rate_limiter')->clear();
+        static::getContainer()->get('cache.rate_limiter')->clear();
     }
 
     public function testConsume(): void

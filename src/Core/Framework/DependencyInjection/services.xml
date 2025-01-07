@@ -16,18 +16,19 @@
 
         <!-- Migration config -->
         <parameter key="core.migration.directories" type="collection"/>
-        <parameter key="migration.active" type="collection"/>
 
         <parameter key="shopware.security.csp_templates" type="collection">
             <parameter key="default">
 object-src 'none';
 script-src 'none';
 base-uri 'self';
+frame-ancestors 'none';
             </parameter>
             <parameter key="administration">
 object-src 'none';
 script-src 'strict-dynamic' 'nonce-%%nonce%%' 'unsafe-inline' 'unsafe-eval' https: http:;
 base-uri 'self';
+frame-ancestors 'none';
             </parameter>
             <parameter key="storefront"/>
             <parameter key="installer"/>
@@ -119,6 +120,12 @@ base-uri 'self';
             <tag name="shopware.migration_source"/>
         </service>
 
+        <service id="Shopware\Core\Framework\Migration\MigrationSource.core.V6_8"
+                 class="Shopware\Core\Framework\Migration\MigrationSource">
+            <argument type="string">core.V6_8</argument>
+            <tag name="shopware.migration_source"/>
+        </service>
+
         <service id="Shopware\Core\Framework\Migration\MigrationSource.null"
                  class="Shopware\Core\Framework\Migration\MigrationSource">
             <argument type="string">null</argument>
@@ -135,7 +142,7 @@ base-uri 'self';
         <service id="Shopware\Core\Framework\Migration\MigrationCollectionLoader" public="true">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="Shopware\Core\Framework\Migration\MigrationRuntime"/>
-            <argument type="tagged" tag="shopware.migration_source"/>
+            <argument type="tagged_iterator" tag="shopware.migration_source"/>
             <argument type="service" id="logger"/>
         </service>
 
@@ -205,7 +212,7 @@ base-uri 'self';
         <service id="Shopware\Core\Framework\Routing\RouteScopeListener">
             <argument type="service" id="Shopware\Core\Framework\Routing\RouteScopeRegistry"/>
             <argument type="service" id="request_stack"/>
-            <argument type="tagged" tag="shopware.route_scope_whitelist"/>
+            <argument type="tagged_iterator" tag="shopware.route_scope_whitelist"/>
 
             <tag name="kernel.event_subscriber"/>
         </service>
@@ -234,7 +241,7 @@ base-uri 'self';
             <argument type="service" id="Shopware\Core\System\CustomEntity\Xml\Config\CustomEntityEnrichmentService"/>
             <argument type="service" id="Shopware\Core\System\CustomEntity\Xml\CustomEntityXmlSchemaValidator"/>
             <argument>%kernel.project_dir%</argument>
-            <argument type="service" id="Shopware\Core\Framework\App\Lifecycle\AppLoader"/>
+            <argument type="service" id="Shopware\Core\Framework\App\Source\SourceResolver"/>
         </service>
 
         <!-- Translation -->
@@ -300,7 +307,7 @@ base-uri 'self';
         </service>
 
         <service id="Shopware\Core\System\Snippet\Filter\SnippetFilterFactory" public="true">
-            <argument type="tagged" tag="shopware.snippet.filter"/>
+            <argument type="tagged_iterator" tag="shopware.snippet.filter"/>
         </service>
 
         <!--SnippetFilters-->
@@ -345,7 +352,7 @@ base-uri 'self';
         </service>
 
         <service id="Shopware\Core\Framework\Adapter\Twig\NamespaceHierarchy\NamespaceHierarchyBuilder">
-            <argument type="tagged" tag="shopware.twig.hierarchy_builder"/>
+            <argument type="tagged_iterator" tag="shopware.twig.hierarchy_builder"/>
         </service>
 
 
@@ -395,6 +402,10 @@ base-uri 'self';
             <tag name="twig.extension"/>
         </service>
 
+        <service id="Shopware\Core\Framework\Adapter\Twig\Filter\EmailIdnTwigFilter">
+            <tag name="twig.extension"/>
+        </service>
+
         <service id="Cocur\Slugify\Bridge\Twig\SlugifyExtension">
             <argument type="service" id="slugify"/>
             <tag name="twig.extension"/>
@@ -406,6 +417,11 @@ base-uri 'self';
 
         <service id="Shopware\Core\Framework\Adapter\Twig\SecurityExtension">
             <argument>%shopware.twig.allowed_php_functions%</argument>
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Shopware\Core\Framework\Adapter\Twig\Extension\InAppPurchaseExtension">
+            <argument type="service" id="Shopware\Core\Framework\Store\InAppPurchase"/>
             <tag name="twig.extension"/>
         </service>
 
@@ -462,7 +478,6 @@ base-uri 'self';
             <argument type="service" id="sales_channel.repository"/>
             <argument type="service" id="Shopware\Core\Framework\Validation\DataValidator"/>
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextPersister"/>
-            <argument type="service" id="Shopware\Core\Framework\Routing\SalesChannelRequestContextResolver"/>
             <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextService"/>
             <argument type="service" id="event_dispatcher"/>
             <argument type="service" id="Shopware\Core\Checkout\Cart\ApiOrderCartService"/>
@@ -488,7 +503,7 @@ base-uri 'self';
         </service>
 
         <service id="Shopware\Core\Framework\Routing\RouteScopeRegistry">
-            <argument type="tagged" tag="shopware.route_scope"/>
+            <argument type="tagged_iterator" tag="shopware.route_scope"/>
         </service>
 
         <!-- Logging -->
@@ -651,6 +666,12 @@ base-uri 'self';
             <argument>%shopware.cache.redis_prefix%</argument>
         </service>
 
+        <service id="Shopware\Core\Framework\Adapter\Redis\RedisConnectionProvider">
+            <argument />  <!-- $serviceLocator will be set in the compiler pass -->
+            <argument type="service" id="Shopware\Core\Framework\Adapter\Cache\RedisConnectionFactory"/>
+        </service>
+
+
         <service id="Shopware\Core\Framework\Routing\Facade\RequestFacadeFactory" public="true">
             <argument type="service" id="request_stack"/>
         </service>
@@ -659,10 +680,8 @@ base-uri 'self';
             <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
-        <service id="messenger.bus.shopware" class="Shopware\Core\Framework\Adapter\Messenger\MessageBus" decorates="messenger.default_bus">
-            <argument type="service" id=".inner"/>
-            <argument type="collection"></argument>
-            <argument>%shopware.messenger.routing_overwrite%</argument>
+        <service id="messenger.bus.shopware" alias="messenger.default_bus">
+            <deprecated package="shopware/core" version="6.7.0.0">tag:v6.7.0 - The %alias_id% service will be removed in v6.7.0.0 use messenger.default_bus instead</deprecated>
         </service>
 
         <service id="http_kernel" class="Shopware\Core\Framework\Adapter\Kernel\HttpKernel" public="true">

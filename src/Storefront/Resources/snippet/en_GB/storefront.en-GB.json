@@ -34,6 +34,8 @@
     "mainMenu": "Show all categories",
     "closeMenu": "Close menu",
     "back": "Back",
+    "expand": "Expand",
+    "collapse": "Collapse",
     "categories": "Categories",
     "showCategory": "Show %category%",
     "required": "*",
@@ -54,6 +56,10 @@
     "formSubmit": "Submit",
     "listPricePreviously": "previously %price%",
     "skipToContentLink": "Skip to main content",
+    "skipToNavigation": "Skip to main navigation",
+    "skipToSearch": "Skip to search",
+    "skipThisElement": "Skip this element",
+    "scrollUpBtn": "Go back to the top of the page",
     "pagination": {
       "first": "First page",
       "prev": "Previous page",
@@ -75,7 +81,12 @@
     "indexLinkService": "Service/help",
     "searchNoResult": "No results found.",
     "wishlist": "Wishlist",
-    "navigationAriaLabel": "Main navigation"
+    "navigationAriaLabel": "Main navigation",
+    "topBarAriaLabel": "Shop settings",
+    "languageTrigger": "Change language (%lang% is the current language)",
+    "languageList": "Available languages",
+    "currencyTrigger": "Change currency (%currency% is the current currency)",
+    "currencyList": "Available currencies"
   },
   "error": {
     "VIOLATION::IS_BLANK_ERROR": "Input should not be empty.",
@@ -87,7 +98,21 @@
     "VIOLATION::VAT_ID_FORMAT_NOT_CORRECT": "The VAT Reg.No. you have entered does not have the correct format.",
     "VIOLATION::ZIP_CODE_INVALID": "The postal code you have entered does not have the correct format.",
     "VIOLATION::INVALID_FORMAT_ERROR": "The input does not have the correct format.",
-    "VIOLATION::NOT_EQUAL_ERROR": "The input is not identical.",
+    "VIOLATION::INVALID_EMAIL_FORMAT_ERROR": "Invalid email address. Email addresses must use this format `user@example.com` and include an `@` and an `.`.",
+    "VIOLATION::NOT_EQUAL_ERROR": "Your inputs do not match. Please try again.",
+    "VIOLATION::FIRST_NAME_IS_BLANK_ERROR": "Nothing entered. Please fill in this field with your first name.",
+    "VIOLATION::LAST_NAME_IS_BLANK_ERROR": "Nothing entered. Please fill in this field with your last name.",
+    "VIOLATION::STREET_IS_BLANK_ERROR": "Nothing entered. Please fill in this field with with the street from your address.",
+    "VIOLATION::CITY_IS_BLANK_ERROR": "Nothing entered. Please fill in this field with the city from your address.",
+    "VIOLATION::COUNTRY_IS_BLANK_ERROR": "Nothing entered. Please fill in this field with your country of residence.",
+    "VIOLATION::ADDITIONAL_ADDR1_IS_BLANK_ERROR": "Nothing entered. Please fill in this field with additional address information.",
+    "VIOLATION::ADDITIONAL_ADDR2_IS_BLANK_ERROR": "Nothing entered. Please fill in this field with additional address information.",
+    "VIOLATION::PHONE_NUMBER_IS_BLANK_ERROR": "Nothing entered. Please fill in this field with your phone number.",
+    "VIOLATION::PHONE_NUMBER_IS_TOO_LONG": "Input too long. Please enter a valid phone number.",
+    "VIOLATION::FIRST_NAME_IS_TOO_LONG": "Input too long. Please enter only your first name or a short form of it.",
+    "VIOLATION::LAST_NAME_IS_TOO_LONG": "Input too long. Please enter a shorter form of your last name.",
+    "VIOLATION::TITLE_IS_TOO_LONG": "Input too long. Please enter only your main title or use abbreviations.",
+    "VIOLATION::ZIPCODE_IS_TOO_LONG": "Input too long. Please enter a valid zip code.",
     "message-default": "Unfortunately, something went wrong.",
     "message-404": "The requested page cannot be found.",
     "addToCartError": "An error occurred while trying to add items to the shopping cart.",
@@ -105,6 +130,7 @@
       "basic-captcha-invalid": "Incorrect input. Please try again."
     },
     "CHECKOUT__ORDER_ORDER_ALREADY_PAID": "The order with the order number \"%orderNumber%\" was already paid and cannot be edited afterwards.",
+    "CHECKOUT__ORDER_ORDER_CANCELLED": "The order with the order number \"%orderNumber%\" was canceled and cannot be edited afterwards.",
     "CHECKOUT__ORDER_ORDER_NOT_FOUND": "This order could not be found.",
     "CHECKOUT__CART_HASH_MISMATCH": "Products or prices in your shopping cart may have changed. Please check your shopping cart before placing your order.",
     "CHECKOUT__CART_INVALID_LINE_ITEM_QUANTITY": "The quantity (%quantity%) is incorrect."
@@ -126,6 +152,7 @@
     "loginPasswordLabel": "Your password",
     "loginPasswordPlaceholder": "Enter password...",
     "loginPasswordRecover": "I have forgotten my password.",
+    "loginRegistrationHeader": "Log in or create account",
     "loginSubmit": "Log in",
     "loginBadCredentials": "Could not find an account that matches the given credentials.",
     "loginThrottled": "Too many login attempts. Please wait %seconds% seconds before trying to log in again.",
@@ -323,12 +350,12 @@
     "orderItemInfoContent": "Content:",
     "orderItemInfoCurrentPrice": "Current unit price",
     "orderItemInfoNotAvailable": "Product no longer available for a follow-up order",
-    "orderActionView": "Expand",
-    "orderActionHide": "Collapse",
+    "orderActionView": "Show details",
+    "orderActionHide": "Hide details",
     "orderInfoNoDispatch": "No stated",
     "orderLinkRepeat": "Repeat order",
     "documentItemColumnTitle": "Document",
-    "documentItemColumnDate": "Date",
+    "documentItemColumnDate": "Creation date",
     "documentItemViewFileButton": "View file",
     "downloadFileButton": "Download",
     "downloadItemColumnTitle": "File",
@@ -341,7 +368,13 @@
     "colonCharacter": ":",
     "orderGuestLoginTitle": "Authentication",
     "orderGuestLoginDescription": "To view your order, please enter your mail address and the postal code given with your billing address.",
-    "orderGuestLoginWrongCredentials": "The given data could not be associated with an order."
+    "orderGuestLoginWrongCredentials": "The given data could not be associated with an order.",
+    "orderLineItemsListAriaLabel": "Order line items",
+    "orderItemAriaLabel": "Order number %order_number%",
+    "orderDocumentsAriaLabel": "Documents of this order",
+    "orderSummaryAriaLabel": "Summary of this order",
+    "orderInfoAriaLabel": "Information about this order",
+    "orderTrackingNotAvailable": "Not available"
   },
   "address": {
     "streetLabel": "Street address",
@@ -403,8 +436,8 @@
     "cartHeaderTaxIncludeVat": "incl. VAT",
     "cartHeaderTaxExcludeVat": "excl. VAT",
     "cartItemInfoId": "Product number:",
-    "addPromotionLabel": "Discount code",
-    "addPromotionPlaceholder": "Enter discount code...",
+    "addPromotionLabel": "Promo code",
+    "addPromotionPlaceholder": "Enter promo code...",
     "addProductLabel": "Product number",
     "addProductPlaceholder": "Enter product number...",
     "summaryPositionPrice": "Total",
@@ -450,9 +483,9 @@
     "finishButtonBackToShop": "Back to shop",
     "finishChangePayment": "Change payment method",
     "finishPaymentFailed": "Unfortunately, the payment process went wrong. Please change your payment method to finish your order. <a href=\"%editOrderUrl%\">Change payment method</a>",
-    "codeAddedSuccessful": "Gift code added successfully.",
+    "codeAddedSuccessful": "Promo code added successfully.",
     "addToCartSuccess": "{1} 1 product added to your shopping cart.|]1,Inf[ %count% products added to your shopping cart.",
-    "shippingCosts": "Shipping details",
+    "shippingCosts": "Open shipping details",
     "shippingCountry": "Shipping country",
     "paymentMethod": "Payment method",
     "shippingMethod": "Shipping method",
@@ -468,7 +501,7 @@
     "lineItemDeliveryDate": "Delivery period: %earliest% - %latest%",
     "promotion-discount-deleted": "Discount \"%name%\" has been removed",
     "promotion-discount-added": "Discount \"%name%\" has been added",
-    "promotion-not-found": "Promotion with code \"%code%\" could not be found.",
+    "promotion-not-found": "Promo code \"%code%\" could not be found.",
     "auto-promotion-not-found": "Promotion \"%name%\" no longer valid!",
     "promotion-not-eligible": "Promotion code valid - however, not all conditions were met and the discount was not applied. Once all conditions are met, the discount will be applied automatically.",
     "promotion-excluded": "One or more discounts have been removed from the shopping cart, due to conflicts with other discounts. Once the conditions are met again, the discounts will be applied automatically.",
@@ -493,7 +526,7 @@
     "checkout-gateway-error": "%reason%"
   },
   "listing": {
-    "filterTitleText": "Filter",
+    "filterTitleText": "Filter products",
     "showResults": "Show results",
     "boxUnitLabel": "Content:",
     "boxLabelTopseller": "Tip",
@@ -533,6 +566,7 @@
     "filterByManufacturerAriaLabel": "Filter by manufacturer",
     "filterByPriceAriaLabel": "Filter by price",
     "filterByRatingAriaLabel": "Filter by minimum rating",
+    "filterClose": "Close filters",
     "defaultProductSortingLabel": "Name, ascending",
     "disabledFilterTooltip": "This filter does not display any further results in combination with the selected filters.",
     "beforeListPrice": "",
@@ -574,7 +608,7 @@
   },
   "search": {
     "headline": "{0} 0 products found for \"%searchTerm%\" | {1} One product found for \"%searchTerm%\" | ]1,Inf[ %count% products found for \"%searchTerm%\"",
-    "metaTitle": "Searchresult"
+    "metaTitle": "Search results"
   },
   "detail": {
     "ordernumberLabel": "Product number:",
@@ -647,8 +681,10 @@
     "arSupportDevices": "iOS11+, Android 8.0+ with ARCore 1.9 support",
     "moveTheDeviceToStart": "Move the device to start",
     "tapToPlaceTheObject": "Tap to place the object",
-    "openAugmentedRealityView": "Open Augmented Reality View",
-    "openArView": "Open AR View"
+    "openAugmentedRealityView": "Open Augmented Reality view",
+    "augmentedRealityView": "Augmented Reality view",
+    "openArView": "Open AR view",
+    "openArViewDescription": "Open Augmented Reality view"
   },
   "wishlist": {
     "cartTitle": "Your wishlist",
@@ -664,7 +700,8 @@
     "wishlistEmptyHeader": "Your wishlist is empty",
     "wishlistEmptyDescription": "Keep an eye on products you like by adding them to your wishlist.",
     "deliveryTimeRestock": "{1} Available in 1 day, delivery time %name%|]1,Inf[ Available in %restockTime% days, delivery time %name%",
-    "deliveryShipping": "This product will be released on"
+    "deliveryShipping": "This product will be released on",
+    "remove": "Remove %product_name% from wishlist"
   },
   "footer": {
     "serviceHotlineHeadline": "Service hotline",
@@ -732,20 +769,32 @@
         }
       },
       "quantitySelect": {
+        "legend": "Product Quantity: Enter the desired amount or use the buttons to increase or decrease the quantity.",
+        "areaLiveText": "Quantity of %product% set to %quantity%.",
         "label": "Quantity",
+        "labelWithProduct": "Quantity of %product%",
         "increase": "Increase quantity",
-        "decrease": "Decrease quantity"
+        "increaseOfProduct": "Increase quantity of %product%",
+        "decrease": "Decrease quantity",
+        "decreaseOfProduct": "Decrease quantity of %product%"
       }
     },
     "cms": {
       "vimeo": {
         "privacyNoticeText": "By viewing the video you agree that your data will be transferred to %platform% and that you have read the <a data-ajax-modal=\"true\" data-url=\"%url%\" href=\"%url%\" title=\"Privacy policy\">Privacy policy</a>.",
-        "acceptButtonLabel": "Accept"
+        "acceptButtonLabel": "Accept",
+        "watchUrlLabel": "Watch on Vimeo"
       },
       "imageGallery": {
+        "ariaLabel": "Image gallery containing %total% items",
         "touchMove": "Touch and drag",
         "clickMove": "Click and move",
-        "sliderDotLabel": "Show image %index% of %total%"
+        "sliderDotLabel": "Show image %index% of %total%",
+        "skipImageGallery": "Skip image gallery"
+      },
+      "productGallery": {
+        "ariaLabel": "Product gallery containing %total% items",
+        "skipProductGallery": "Skip product gallery"
       },
       "defaultMedia": {
         "preview_camera_large": {

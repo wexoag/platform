@@ -12,6 +12,14 @@ export default {
 
     inject: ['extensionHelperService'],
 
+    props: {
+        insideModal: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+    },
+
     data() {
         return {
             isLoading: false,
@@ -35,15 +43,17 @@ export default {
             this.isLoading = true;
             this.activationStatus = null;
 
-            this.extensionHelperService.downloadAndActivateExtension(this.extensionName)
+            this.extensionHelperService
+                .downloadAndActivateExtension(this.extensionName)
                 .then(() => {
                     this.activationStatus = 'success';
                     window.location.reload();
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.activationStatus = 'error';
 
-                    if (error?.response?.data &&
+                    if (
+                        error?.response?.data &&
                         Array.isArray(error.response.data.errors) &&
                         error.response.data.errors[0]
                     ) {

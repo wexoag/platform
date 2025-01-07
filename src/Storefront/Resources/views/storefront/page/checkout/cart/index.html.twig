@@ -33,7 +33,12 @@
 
         {% block page_checkout_cart_product_table %}
             <div class="card checkout-product-table">
-                <div class="card-body">
+                {# @deprecated tag:v6.7.0 - Line items wrapper will be `<ul>` element instead of `<div>` #}
+                {%- if feature('ACCESSIBILITY_TWEAKS') -%}
+                    <ul class="card-body list-unstyled">
+                {%- else -%}
+                    <div class="card-body" role="list">
+                {%- endif -%}
                     {% block page_checkout_cart_table_header %}
                         {% sw_include '@Storefront/storefront/component/checkout/cart-header.html.twig' %}
                     {% endblock %}
@@ -47,7 +52,12 @@
                             {% endblock %}
                         {% endfor %}
                     {% endblock %}
-                </div>
+                {# @deprecated tag:v6.7.0 - Line items wrapper will be `<ul>` element instead of `<div>` #}
+                {%- if not feature('ACCESSIBILITY_TWEAKS') -%}
+                    </div>
+                {%- else -%}
+                    </ul>
+                {%- endif -%}
             </div>
         {% endblock %}
 
@@ -71,14 +81,14 @@
                                        value="frontend.checkout.cart.page">
                             {% endblock %}
 
+                            {% block page_checkout_cart_add_product_label %}
+                                <label class="visually-hidden" for="addProductInput">
+                                    {{ 'checkout.addProductLabel'|trans|sw_sanitize }}
+                                </label>
+                            {% endblock %}
+
                             {% block page_checkout_cart_add_product_input_group %}
                                 <div class="input-group">
-                                    {% block page_checkout_cart_add_product_label %}
-                                        <label class="visually-hidden" for="addProductInput">
-                                            {{ 'checkout.addProductLabel'|trans|sw_sanitize }}
-                                        </label>
-                                    {% endblock %}
-
                                     {% block page_checkout_cart_add_product_input %}
                                         <input type="text"
                                                name="number"
@@ -91,7 +101,7 @@
                                     {% endblock %}
 
                                     {% block page_checkout_cart_add_product_submit %}
-                                        <button class="btn btn-secondary"
+                                        <button class="btn btn-outline-secondary add-product-button"
                                                 type="submit"
                                                 aria-labelledby="addProductInput"
                                                 id="addProductButton">
@@ -121,9 +131,11 @@
                                        aria-controls="collapseExample">
                                         {{ 'checkout.shippingCosts'|trans|sw_sanitize }}
 
-                                        {% block page_checkout_cart_shipping_costs_trigger_icon %}
-                                            {% sw_icon 'arrow-medium-right' style { pack:'solid', size: 'sm' } %}
-                                        {% endblock %}
+                                        {%- if not feature('ACCESSIBILITY_TWEAKS') -%}
+                                            {% block page_checkout_cart_shipping_costs_trigger_icon %}
+                                                {% sw_icon 'arrow-medium-right' style { pack:'solid', size: 'sm' } %}
+                                            {% endblock %}
+                                        {% endif %}
                                     </a>
                                 {% endif %}
                             {% endblock %}
@@ -211,27 +223,28 @@
                            value="frontend.checkout.cart.page">
                 {% endblock %}
 
-                {% block page_checkout_cart_add_promotion_input_group %}
-                    <div class="input-group checkout-aside-add-code mt-3">
-                        {% block page_checkout_cart_add_promotion_label %}
-                            <label class="visually-hidden" for="addPromotionInput">
-                                {{ 'checkout.addPromotionLabel'|trans|sw_sanitize }}
-                            </label>
-                        {% endblock %}
+                {% block page_checkout_cart_add_promotion_label %}
+                    <label class="mb-1" for="addPromotionInput">
+                        {{ 'checkout.addPromotionLabel'|trans|sw_sanitize }}
+                    </label>
+                {% endblock %}
 
+                {% block page_checkout_cart_add_promotion_input_group %}
+                    <div class="input-group checkout-aside-add-code">
                         {% block page_checkout_cart_add_promotion_input %}
                             <input type="text"
                                    name="code"
                                    class="form-control"
-                                   id="addPromotionInput"
                                    placeholder="{{ 'checkout.addPromotionPlaceholder'|trans|striptags }}"
+                                   id="addPromotionInput"
                                    aria-label="{{ 'checkout.addPromotionLabel'|trans|striptags }}"
                                    aria-describedby="addPromotion"
-                                   required="required">
+                                   required="required"
+                                   aria-invalid="false">
                         {% endblock %}
 
                         {% block page_checkout_cart_add_promotion_submit %}
-                            <button class="btn btn-secondary"
+                            <button class="btn btn-outline-secondary checkout-aside-add-promotion-button"
                                     type="submit"
                                     aria-labelledby="addPromotionInput"
                                     id="addPromotion">

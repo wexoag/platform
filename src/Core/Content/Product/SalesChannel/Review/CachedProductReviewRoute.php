@@ -12,7 +12,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\RuleAreas;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Framework\Util\Json;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -83,7 +83,7 @@ class CachedProductReviewRoute extends AbstractProductReviewRoute
 
     public static function buildName(string $productId): string
     {
-        return ProductReviewRoute::buildName($productId);
+        return 'product-review-route-' . $productId;
     }
 
     private function generateKey(string $productId, Request $request, SalesChannelContext $context, Criteria $criteria): string
@@ -96,7 +96,7 @@ class CachedProductReviewRoute extends AbstractProductReviewRoute
         $event = new ProductDetailRouteCacheKeyEvent($parts, $request, $context, $criteria);
         $this->dispatcher->dispatch($event);
 
-        return self::buildName($productId) . '-' . md5(Json::encode($event->getParts()));
+        return self::buildName($productId) . '-' . Hasher::hash($event->getParts());
     }
 
     /**
@@ -106,6 +106,7 @@ class CachedProductReviewRoute extends AbstractProductReviewRoute
     {
         $tags = array_merge(
             $this->tracer->get(self::buildName($productId)),
+            [EntityCacheKeyGenerator::buildProductTag($productId)],
             [self::buildName($productId)]
         );
 

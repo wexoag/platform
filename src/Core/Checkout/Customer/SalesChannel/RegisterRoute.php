@@ -22,6 +22,7 @@ use Shopware\Core\Checkout\Customer\Validation\Constraint\CustomerZipCode;
 use Shopware\Core\Checkout\Order\SalesChannel\OrderService;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Indexing\EntityIndexerRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Validation\EntityExists;
@@ -29,6 +30,7 @@ use Shopware\Core\Framework\Event\DataMappingEvent;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Plugin\Exception\DecorationPatternException;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\BuildValidationEvent;
 use Shopware\Core\Framework\Validation\DataBag\DataBag;
@@ -185,17 +187,23 @@ class RegisterRoute extends AbstractRegisterRoute
             return $value;
         }, $customer);
 
-        $this->customerRepository->create([$customer], $context->getContext());
+        $writeContext = clone $context->getContext();
+        $writeContext->addState(EntityIndexerRegistry::USE_INDEXING_QUEUE);
+
+        $this->customerRepository->create([$customer], $writeContext);
 
         $criteria = new Criteria([$customer['id']]);
-        $criteria->addAssociation('addresses');
-        $criteria->addAssociation('salutation');
-        $criteria->addAssociation('defaultBillingAddress.country');
-        $criteria->addAssociation('defaultBillingAddress.countryState');
-        $criteria->addAssociation('defaultBillingAddress.salutation');
-        $criteria->addAssociation('defaultShippingAddress.country');
-        $criteria->addAssociation('defaultShippingAddress.countryState');
-        $criteria->addAssociation('defaultShippingAddress.salutation');
+
+        if (!Feature::isActive('v6.7.0.0') && !Feature::isActive('PERFORMANCE_TWEAKS')) {
+            $criteria->addAssociation('addresses');
+            $criteria->addAssociation('salutation');
+            $criteria->addAssociation('defaultBillingAddress.country');
+            $criteria->addAssociation('defaultBillingAddress.countryState');
+            $criteria->addAssociation('defaultBillingAddress.salutation');
+            $criteria->addAssociation('defaultShippingAddress.country');
+            $criteria->addAssociation('defaultShippingAddress.countryState');
+            $criteria->addAssociation('defaultShippingAddress.salutation');
+        }
 
         /** @var CustomerEntity $customerEntity */
         $customerEntity = $this->customerRepository->search($criteria, $context->getContext())->first();
@@ -240,7 +248,7 @@ class RegisterRoute extends AbstractRegisterRoute
                 $context->getLanguageId(),
                 $context->getCurrencyId(),
                 $context->getDomainId(),
-                $context->getContext(),
+                null,
                 $customerEntity->getId()
             )
         );
@@ -351,8 +359,10 @@ class RegisterRoute extends AbstractRegisterRoute
         }
 
         if ($accountType === CustomerEntity::ACCOUNT_TYPE_BUSINESS) {
-            $countryId = $billingAddress instanceof DataBag ? $billingAddress->get('countryId') :
-                ($shippingAddress instanceof DataBag ? $shippingAddress->get('countryId') : null);
+            $countryId = $shippingAddress instanceof DataBag
+                ? $shippingAddress->get('countryId')
+                : ($billingAddress instanceof DataBag ? $billingAddress->get('countryId') : null);
+
             if ($countryId) {
                 if ($this->requiredVatIdField($countryId, $context)) {
                     $definition->add('vatIds', new NotBlank());
@@ -593,7 +603,7 @@ class RegisterRoute extends AbstractRegisterRoute
             $urlTemplate = '/registration/confirm?em=%%HASHEDEMAIL%%&hash=%%SUBSCRIBEHASH%%';
         }
 
-        $emailHash = hash('sha1', $customer->getEmail());
+        $emailHash = Hasher::hash($customer->getEmail(), 'sha1');
 
         $urlEvent = new CustomerConfirmRegisterUrlEvent($context, $urlTemplate, $emailHash, $customer->getHash(), $customer);
         $this->eventDispatcher->dispatch($urlEvent);

@@ -8,21 +8,20 @@ use Shopware\Core\Checkout\Payment\Hook\PaymentMethodRouteHook;
 use Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Script\Debugging\ScriptTraces;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelApiTestBehaviour;
-use Shopware\Core\Framework\Test\TestDataCollection;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\Test\Integration\PaymentHandler\AsyncTestPaymentHandler;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @package checkout
- *
  * @internal
  */
 #[Group('store-api')]
@@ -33,13 +32,13 @@ class PaymentMethodRouteTest extends TestCase
 
     private KernelBrowser $browser;
 
-    private TestDataCollection $ids;
+    private IdsCollection $ids;
 
     private SalesChannelContext $salesChannelContext;
 
     protected function setUp(): void
     {
-        $this->ids = new TestDataCollection();
+        $this->ids = new IdsCollection();
 
         $this->createData();
 
@@ -53,7 +52,7 @@ class PaymentMethodRouteTest extends TestCase
             ],
         ]);
 
-        $this->salesChannelContext = $this->getContainer()
+        $this->salesChannelContext = static::getContainer()
             ->get(SalesChannelContextFactory::class)
             ->create(Uuid::randomHex(), TestDefaults::SALES_CHANNEL);
     }
@@ -72,13 +71,18 @@ class PaymentMethodRouteTest extends TestCase
         static::assertContains($this->ids->get('payment2'), $ids);
         static::assertContains($this->ids->get('payment3'), $ids);
 
-        $traces = $this->getContainer()->get(ScriptTraces::class)->getTraces();
+        $traces = static::getContainer()->get(ScriptTraces::class)->getTraces();
         static::assertArrayHasKey(PaymentMethodRouteHook::HOOK_NAME, $traces);
     }
 
+    /**
+     * @deprecated tag:v6.7.0 - will be removed due to behavior change
+     */
     public function testSorting(): void
     {
-        $paymentMethodRoute = $this->getContainer()->get(PaymentMethodRoute::class);
+        Feature::skipTestIfActive('ACCESSIBILITY_TWEAKS', $this);
+
+        $paymentMethodRoute = static::getContainer()->get(PaymentMethodRoute::class);
 
         $request = new Request();
 
@@ -92,7 +96,7 @@ class PaymentMethodRouteTest extends TestCase
         static::assertNotNull($selectedPaymentMethodResult->getPaymentMethods()->first());
         static::assertSame($lastPaymentMethodId, $selectedPaymentMethodResult->getPaymentMethods()->first()->getId());
 
-        $traces = $this->getContainer()->get(ScriptTraces::class)->getTraces();
+        $traces = static::getContainer()->get(ScriptTraces::class)->getTraces();
         static::assertArrayHasKey(PaymentMethodRouteHook::HOOK_NAME, $traces);
     }
 
@@ -133,7 +137,7 @@ class PaymentMethodRouteTest extends TestCase
         static::assertCount(2, $response['elements']);
         static::assertNotContains($this->ids->get('payment3'), array_column($response['elements'], 'id'));
 
-        $traces = $this->getContainer()->get(ScriptTraces::class)->getTraces();
+        $traces = static::getContainer()->get(ScriptTraces::class)->getTraces();
         static::assertArrayHasKey(PaymentMethodRouteHook::HOOK_NAME, $traces);
     }
 
@@ -153,7 +157,7 @@ class PaymentMethodRouteTest extends TestCase
         static::assertCount(2, $response['elements']);
         static::assertNotContains($this->ids->get('payment3'), array_column($response['elements'], 'id'));
 
-        $traces = $this->getContainer()->get(ScriptTraces::class)->getTraces();
+        $traces = static::getContainer()->get(ScriptTraces::class)->getTraces();
         static::assertArrayHasKey(PaymentMethodRouteHook::HOOK_NAME, $traces);
     }
 
@@ -228,7 +232,7 @@ class PaymentMethodRouteTest extends TestCase
             ],
         ];
 
-        $this->getContainer()->get('payment_method.repository')
+        static::getContainer()->get('payment_method.repository')
             ->create($data, Context::createDefaultContext());
     }
 }

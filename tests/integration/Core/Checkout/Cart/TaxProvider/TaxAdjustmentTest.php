@@ -9,8 +9,6 @@ use Shopware\Core\Checkout\Cart\TaxProvider\TaxAdjustmentCalculator;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 
 /**
- * @package checkout
- *
  * @internal
  */
 class TaxAdjustmentTest extends TestCase
@@ -19,7 +17,7 @@ class TaxAdjustmentTest extends TestCase
 
     public function testUsesCorrectCalculator(): void
     {
-        $adjustment = $this->getContainer()->get(TaxAdjustment::class);
+        $adjustment = static::getContainer()->get(TaxAdjustment::class);
         $ref = new \ReflectionClass(TaxAdjustment::class);
 
         static::assertTrue($ref->hasProperty('amountCalculator'));

@@ -10,7 +10,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Storefront\Pagelet\Header\HeaderPageletLoader;
-use Shopware\Tests\Integration\Storefront\Page\StorefrontPageTestBehaviour;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -25,7 +25,7 @@ class HeaderPageletLoaderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->languageRepository = $this->getContainer()->get('language.repository');
+        $this->languageRepository = static::getContainer()->get('language.repository');
     }
 
     /**
@@ -134,7 +134,7 @@ class HeaderPageletLoaderTest extends TestCase
 
     protected function getPageLoader(): HeaderPageletLoader
     {
-        return $this->getContainer()->get(HeaderPageletLoader::class);
+        return static::getContainer()->get(HeaderPageletLoader::class);
     }
 
     /**

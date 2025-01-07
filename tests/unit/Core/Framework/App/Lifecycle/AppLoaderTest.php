@@ -7,18 +7,14 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Shopware\Core\Framework\App\AppEntity;
 use Shopware\Core\Framework\App\AppException;
-use Shopware\Core\Framework\App\Lifecycle\AbstractAppLoader;
 use Shopware\Core\Framework\App\Lifecycle\AppLoader;
 use Shopware\Core\Framework\App\Manifest\Xml\Setup\Setup;
-use Shopware\Core\System\SystemConfig\Util\ConfigReader;
 
 /**
  * @internal
  */
 #[CoversClass(AppLoader::class)]
-#[CoversClass(AbstractAppLoader::class)]
 class AppLoaderTest extends TestCase
 {
     /**
@@ -41,70 +37,6 @@ class AppLoaderTest extends TestCase
         InstalledVersions::reload($this->packages);
     }
 
-    public function testGetConfigWhenNotExists(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('non-existing');
-
-        static::assertNull($appLoader->getConfiguration($appEntity));
-    }
-
-    public function testGetConfig(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('../_fixtures/');
-
-        static::assertNotNull($appLoader->getConfiguration($appEntity));
-    }
-
-    public function testGetCMSNotExistent(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('non-existing');
-
-        static::assertNull($appLoader->getCmsExtensions($appEntity));
-    }
-
-    public function testGetCMS(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('../_fixtures/');
-
-        static::assertNotNull($appLoader->getCmsExtensions($appEntity));
-    }
-
-    public function testGetSnippets(): void
-    {
-        $expectedSnippet = [];
-        $expectedSnippet['en-GB'] = file_get_contents(__DIR__ . '/../_fixtures/Resources/app/administration/snippet/en-GB.json');
-
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('../_fixtures/');
-
-        $snippets = $appLoader->getSnippets($appEntity);
-        static::assertEquals($expectedSnippet, $snippets);
-    }
-
-    public function testSnippetsMissing(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('non-existing');
-
-        static::assertSame([], $appLoader->getSnippets($appEntity));
-    }
-
     public function testLoadAppByComposer(): void
     {
         $packages = InstalledVersions::getAllRawData();
@@ -124,6 +56,12 @@ class AppLoaderTest extends TestCase
 
         $appLoader = $this->getAppLoader();
 
+        /**
+         * @deprecated tag:v6.7.0 - double check if we can increase composer constraint and remove this
+         * @see https://github.com/composer/composer/issues/12235
+         */
+        static::markTestSkipped('This test is not compatible with Composer 2.8.4');
+
         $apps = $appLoader->load();
         static::assertCount(1, $apps);
         static::assertArrayHasKey('test', $apps);
@@ -142,6 +80,12 @@ class AppLoaderTest extends TestCase
 
     public function testLoadAppByComposerWithInvalidAppManifest(): void
     {
+        /**
+         * @deprecated tag:v6.7.0 - double check if we can increase composer constraint and remove this
+         * @see https://github.com/composer/composer/issues/12235
+         */
+        static::markTestSkipped('This test is not compatible with Composer 2.8.4');
+
         $packages = InstalledVersions::getAllRawData();
         $modified = $packages[0];
         static::assertIsArray($modified);
@@ -161,66 +105,10 @@ class AppLoaderTest extends TestCase
 
         $appLoader = new AppLoader(
             __DIR__,
-            __DIR__,
-            new ConfigReader(),
             $loggerMock
         );
 
         $appLoader->load();
-    }
-
-    public function testGetFlowActions(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('../_fixtures/');
-
-        $flowActions = $appLoader->getFlowActions($appEntity);
-        static::assertNotNull($flowActions);
-        static::assertNotNull($flowActions->getActions());
-    }
-
-    public function testGetFlowActionsWithFileNotExist(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('../_fixtures/flow/');
-
-        $flowActions = $appLoader->getFlowActions($appEntity);
-        static::assertNull($flowActions);
-    }
-
-    public function testGetFlowEvents(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath('../_fixtures/');
-
-        $expected = [
-            'name' => 'swag.before.open_the_doors',
-            'aware' => ['customerAware'],
-        ];
-
-        $events = $appLoader->getFlowEvents($appEntity);
-        static::assertNotNull($events);
-        static::assertNotNull($events->getCustomEvents());
-        $customEvents = $events->getCustomEvents();
-        $events = $customEvents->getCustomEvents();
-        static::assertEquals($expected, $events[0]->toArray('en-GB'));
-    }
-
-    public function testGetFlowEventsWithFileNotExist(): void
-    {
-        $appLoader = $this->getAppLoader();
-
-        $appEntity = new AppEntity();
-        $appEntity->setPath(__DIR__ . '/../_fixtures/flow/');
-
-        $events = $appLoader->getFlowEvents($appEntity);
-        static::assertNull($events);
     }
 
     public function testLoadShouldLoadOnlyValidPlugin(): void
@@ -230,8 +118,6 @@ class AppLoaderTest extends TestCase
 
         $appLoader = new AppLoader(
             __DIR__ . '/_fixtures/appDirValidationTest',
-            __DIR__,
-            new ConfigReader(),
             $loggerMock
         );
 
@@ -249,8 +135,6 @@ class AppLoaderTest extends TestCase
 
         $appLoader = new AppLoader(
             __DIR__ . '/_fixtures/appDirValidationTest',
-            __DIR__,
-            new ConfigReader(),
             $loggerMock
         );
 
@@ -270,8 +154,6 @@ class AppLoaderTest extends TestCase
     {
         return new AppLoader(
             __DIR__,
-            __DIR__,
-            new ConfigReader(),
             new NullLogger()
         );
     }

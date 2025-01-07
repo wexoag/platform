@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -33,7 +32,9 @@ describe('components/data-grid/sw-data-grid-settings', () => {
                     'sw-switch-field-deprecated': await wrapTestComponent('sw-switch-field-deprecated', { sync: true }),
                     'sw-checkbox-field': await wrapTestComponent('sw-checkbox-field', { sync: true }),
                     'sw-checkbox-field-deprecated': await wrapTestComponent('sw-checkbox-field-deprecated', { sync: true }),
-                    'sw-button': await wrapTestComponent('sw-button', { sync: true }),
+                    'sw-button': await wrapTestComponent('sw-button', {
+                        sync: true,
+                    }),
                     'sw-button-deprecated': await wrapTestComponent('sw-button-deprecated', { sync: true }),
                     'sw-icon': true,
                     'sw-context-menu-divider': true,
@@ -76,13 +77,22 @@ describe('components/data-grid/sw-data-grid-settings', () => {
             });
         };
 
-        expectOrder(['Name', 'Company', 'Number', 'Date', 'Address']);
+        expectOrder([
+            'Name',
+            'Company',
+            'Number',
+            'Date',
+            'Address',
+        ]);
 
         // move company from 1 to 2
         let companyDownButton = wrapper.find('.sw-data-grid__settings-item--1 .sw-button.down');
         await companyDownButton.trigger('click');
 
-        expect(wrapper.emitted('change-column-order')[0]).toEqual([1, 2]);
+        expect(wrapper.emitted('change-column-order')[0]).toEqual([
+            1,
+            2,
+        ]);
 
         await wrapper.setProps({
             columns: [
@@ -94,13 +104,22 @@ describe('components/data-grid/sw-data-grid-settings', () => {
             ],
         });
 
-        expectOrder(['Name', 'Number', 'Company', 'Date', 'Address']);
+        expectOrder([
+            'Name',
+            'Number',
+            'Company',
+            'Date',
+            'Address',
+        ]);
 
         // move company from 2 to 3
         companyDownButton = wrapper.find('.sw-data-grid__settings-item--2 .sw-button.down');
         await companyDownButton.trigger('click');
 
-        expect(wrapper.emitted('change-column-order')[1]).toEqual([2, 3]);
+        expect(wrapper.emitted('change-column-order')[1]).toEqual([
+            2,
+            3,
+        ]);
 
         await wrapper.setProps({
             columns: [
@@ -112,13 +131,22 @@ describe('components/data-grid/sw-data-grid-settings', () => {
             ],
         });
 
-        expectOrder(['Name', 'Number', 'Date', 'Company', 'Address']);
+        expectOrder([
+            'Name',
+            'Number',
+            'Date',
+            'Company',
+            'Address',
+        ]);
 
         // move date from 2 to 1
         const dateUpButton = wrapper.find('.sw-data-grid__settings-item--2 .sw-button:not(.down)');
         await dateUpButton.trigger('click');
 
-        expect(wrapper.emitted('change-column-order')[2]).toEqual([2, 1]);
+        expect(wrapper.emitted('change-column-order')[2]).toEqual([
+            2,
+            1,
+        ]);
 
         await wrapper.setProps({
             columns: [
@@ -130,6 +158,12 @@ describe('components/data-grid/sw-data-grid-settings', () => {
             ],
         });
 
-        expectOrder(['Name', 'Date', 'Number', 'Company', 'Address']);
+        expectOrder([
+            'Name',
+            'Date',
+            'Number',
+            'Company',
+            'Address',
+        ]);
     });
 });

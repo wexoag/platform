@@ -22,6 +22,7 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionActions;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
+use Shopware\Core\Test\Integration\Traits\OrderFixture;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
 
@@ -47,10 +48,10 @@ class DaysSinceLastOrderRuleTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->ruleRepository = $this->getContainer()->get('rule.repository');
-        $this->conditionRepository = $this->getContainer()->get('rule_condition.repository');
+        $this->ruleRepository = static::getContainer()->get('rule.repository');
+        $this->conditionRepository = static::getContainer()->get('rule_condition.repository');
         $this->context = Context::createDefaultContext();
-        $this->stateMachineRegistry = $this->getContainer()->get(StateMachineRegistry::class);
+        $this->stateMachineRegistry = static::getContainer()->get(StateMachineRegistry::class);
     }
 
     public function testValidateWithMissingValues(): void
@@ -104,7 +105,7 @@ class DaysSinceLastOrderRuleTest extends TestCase
         $ruleId = Uuid::randomHex();
         $this->ruleRepository->create(
             [['id' => $ruleId, 'name' => 'Demo rule', 'priority' => 1]],
-            Context::createDefaultContext()
+            $this->context
         );
 
         $id = Uuid::randomHex();
@@ -121,6 +122,8 @@ class DaysSinceLastOrderRuleTest extends TestCase
         ], $this->context);
 
         static::assertNotNull($this->conditionRepository->search(new Criteria([$id]), $this->context)->get($id));
+        $this->ruleRepository->delete([['id' => $ruleId]], $this->context);
+        $this->conditionRepository->delete([['id' => $id]], $this->context);
     }
 
     public function testWithRealCustomerEntity(): void
@@ -136,9 +139,9 @@ class DaysSinceLastOrderRuleTest extends TestCase
     public function testCustomerMetaFieldSubscriber(): void
     {
         /** @var EntityRepository $orderRepository */
-        $orderRepository = $this->getContainer()->get('order.repository');
+        $orderRepository = static::getContainer()->get('order.repository');
         /** @var EntityRepository $customerRepository */
-        $customerRepository = $this->getContainer()->get('customer.repository');
+        $customerRepository = static::getContainer()->get('customer.repository');
         $defaultContext = Context::createDefaultContext();
         $orderId = Uuid::randomHex();
         $orderData = $this->getOrderData($orderId, $defaultContext);
@@ -152,7 +155,7 @@ class DaysSinceLastOrderRuleTest extends TestCase
                 StateMachineTransitionActions::ACTION_PROCESS,
                 'stateId',
             ),
-            Context::createDefaultContext()
+            $this->context
         );
 
         $this->stateMachineRegistry->transition(
@@ -162,7 +165,7 @@ class DaysSinceLastOrderRuleTest extends TestCase
                 StateMachineTransitionActions::ACTION_COMPLETE,
                 'stateId',
             ),
-            Context::createDefaultContext()
+            $this->context
         );
 
         /** @var CustomerCollection|CustomerEntity[] $result */
@@ -190,8 +193,8 @@ class DaysSinceLastOrderRuleTest extends TestCase
     private function createTestOrderAndReturnCustomer(): CustomerEntity
     {
         /** @var EntityRepository $customerRepository */
-        $customerRepository = $this->getContainer()->get('customer.repository');
-        $orderRepository = $this->getContainer()->get('order.repository');
+        $customerRepository = static::getContainer()->get('customer.repository');
+        $orderRepository = static::getContainer()->get('order.repository');
 
         $orderId = Uuid::randomHex();
         $defaultContext = Context::createDefaultContext();

@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -47,12 +46,15 @@ async function createSingleSelect(customOptions) {
         },
     };
 
-    return mount(await wrapTestComponent('sw-single-select', {
-        sync: true,
-    }), {
-        ...options,
-        ...customOptions,
-    });
+    return mount(
+        await wrapTestComponent('sw-single-select', {
+            sync: true,
+        }),
+        {
+            ...options,
+            ...customOptions,
+        },
+    );
 }
 
 describe('components/sw-single-select', () => {

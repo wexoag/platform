@@ -68,6 +68,17 @@ Component.register('sw-tagged-field', {
                 'sw-tagged-field__input--hidden': this.hasValues && !this.hasFocus,
             };
         },
+
+        /**
+         * @deprecated tag:v6.7.0 - Will be removed
+         */
+        listeners() {
+            if (this.isCompatEnabled('INSTANCE_LISTENERS')) {
+                return this.$listeners;
+            }
+
+            return {};
+        },
     },
 
     methods: {
@@ -95,7 +106,10 @@ Component.register('sw-tagged-field', {
                 return;
             }
 
-            this.$emit('update:value', [...this.value, this.newTagName]);
+            this.$emit('update:value', [
+                ...this.value,
+                this.newTagName,
+            ]);
             this.newTagName = '';
         },
 

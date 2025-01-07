@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount, RouterLinkStub } from '@vue/test-utils';
@@ -16,26 +15,31 @@ const setup = async (propOverride) => {
         global: {
             stubs: {
                 'sw-icon': true,
-                RouterLink: process.env.DISABLE_JEST_COMPAT_MODE ? RouterLinkStub : {
-                    name: 'RouterLinkStub',
+                RouterLink: process.env.DISABLE_JEST_COMPAT_MODE
+                    ? RouterLinkStub
+                    : {
+                          name: 'RouterLinkStub',
 
-                    props: {
-                        to: {
-                            type: [String, Object],
-                            required: true,
-                        },
-                        custom: {
-                            type: Boolean,
-                            default: false,
-                        },
-                    },
+                          props: {
+                              to: {
+                                  type: [
+                                      String,
+                                      Object,
+                                  ],
+                                  required: true,
+                              },
+                              custom: {
+                                  type: Boolean,
+                                  default: false,
+                              },
+                          },
 
-                    render(h) {
-                        // mock reasonable return values to mimic vue-router's useLink
-                        const children = this.$slots?.default;
-                        return this.custom ? children : h('a', undefined, children);
-                    },
-                },
+                          render(h) {
+                              // mock reasonable return values to mimic vue-router's useLink
+                              const children = this.$slots?.default;
+                              return this.custom ? children : h('a', undefined, children);
+                          },
+                      },
             },
         },
         slots: {

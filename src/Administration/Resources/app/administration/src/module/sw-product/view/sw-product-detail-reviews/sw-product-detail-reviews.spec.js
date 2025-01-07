@@ -1,6 +1,5 @@
-/*
+/**
  * @package inventory
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -30,7 +29,6 @@ async function createWrapper(privileges = []) {
                         return privileges.includes(identifier);
                     },
                 },
-
             },
             stubs: {
                 'sw-card': {
@@ -180,7 +178,9 @@ describe('src/module/sw-product/view/sw-product-detail-reviews', () => {
         const wrapper = await createWrapper();
         wrapper.vm.getReviews = jest.fn();
 
-        await Shopware.State.commit('swProductDetail/setProduct', { id: '101' });
+        await Shopware.State.commit('swProductDetail/setProduct', {
+            id: '101',
+        });
         await flushPromises();
 
         expect(wrapper.vm.getReviews).toHaveBeenCalled();

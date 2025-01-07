@@ -14,7 +14,6 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 use Shopware\Core\Framework\App\AppUrlChangeResolver\AbstractAppUrlChangeStrategy;
 use Shopware\Core\Framework\App\Lifecycle\AbstractAppLifecycle;
-use Shopware\Core\Framework\App\Lifecycle\AbstractAppLoader;
 use Shopware\Core\Framework\App\Lifecycle\RefreshableAppDryRun;
 use Shopware\Core\Framework\App\Lifecycle\Update\AbstractAppUpdater;
 use Shopware\Core\Framework\Log\Package;
@@ -42,7 +41,6 @@ class DecorationPatternRule implements Rule
         AbstractAppUpdater::class,
         RefreshableAppDryRun::class,
         RefreshableAppDryRun::class,
-        AbstractAppLoader::class,
         AbstractAppLifecycle::class,
         AbstractAppUrlChangeStrategy::class,
     ];
@@ -105,11 +103,15 @@ class DecorationPatternRule implements Rule
 
         $doc = $node->getDocComment()?->getText() ?? '';
         if ($this->isInternal($doc)) {
-            $errors[] = RuleErrorBuilder::message('Decoration error: Concrete class is marked as @internal. Remove `getDecorated` (if not intended that these classes can be decorated) or remove @internal annotation')->identifier('shopware.decorationPattern')->build();
+            $errors[] = RuleErrorBuilder::message('Decoration error: Concrete class is marked as @internal. Remove `getDecorated` (if not intended that these classes can be decorated) or remove @internal annotation')
+                ->identifier('shopware.decorationPattern')
+                ->build();
         }
 
         if ($class->implementsInterface(EventSubscriberInterface::class)) {
-            $errors[] = RuleErrorBuilder::message('Decoration error: Decoration pattern is not compatible with event subscribers. Remove `getDecorated` (if not intended that these classes can be decorated) or extract EventSubscriberInterface into own class')->identifier('shopware.decorationPattern')->build();
+            $errors[] = RuleErrorBuilder::message('Decoration error: Decoration pattern is not compatible with event subscribers. Remove `getDecorated` (if not intended that these classes can be decorated) or extract EventSubscriberInterface into own class')
+                ->identifier('shopware.decorationPattern')
+                ->build();
         }
 
         // loop all methods and ensure that all public function also inside the parent class
@@ -126,7 +128,9 @@ class DecorationPatternRule implements Rule
                 continue;
             }
 
-            $errors[] = RuleErrorBuilder::message(\sprintf('Decoration error: Concrete class has a public method %s which is not defined in the parent class %s', $method->getName(), $parent->getName()))->identifier('shopware.decorationPattern')->build();
+            $errors[] = RuleErrorBuilder::message(\sprintf('Decoration error: Concrete class has a public method %s which is not defined in the parent class %s', $method->getName(), $parent->getName()))
+                ->identifier('shopware.decorationPattern')
+                ->build();
         }
 
         return $errors;

@@ -100,13 +100,17 @@ Component.register('sw-category-tree-field', {
         },
 
         numberOfHiddenTags() {
-            const hiddenTagsLength = this.selectedCategoriesTotal - this.visibleTags.length;
+            const hiddenTagsLength = this.selectedCategoriesItemsTotal - this.visibleTags.length;
 
             return hiddenTagsLength > 0 ? hiddenTagsLength : 0;
         },
 
         selectedCategoriesItemsIds() {
-            return this.selectedCategories;
+            return this.pageId ? this.selectedCategories : this.categoriesCollection.getIds();
+        },
+
+        selectedCategoriesItemsTotal() {
+            return this.pageId ? this.selectedCategoriesTotal : this.categoriesCollection.length;
         },
 
         selectedCategoriesPathIds() {
@@ -115,7 +119,10 @@ Component.register('sw-category-tree-field', {
                 const pathIds = item.path ? item.path.split('|').filter((pathId) => pathId.length > 0) : '';
 
                 // add parent id to accumulator
-                return [...acc, ...pathIds];
+                return [
+                    ...acc,
+                    ...pathIds,
+                ];
             }, []);
         },
 
@@ -192,7 +199,7 @@ Component.register('sw-category-tree-field', {
                     }
 
                     actualElement.scrollTo({
-                        top: offsetValue - (actualElement.clientHeight / 2) - 50,
+                        top: offsetValue - actualElement.clientHeight / 2 - 50,
                         behavior: 'smooth',
                     });
                 }, 50)();
@@ -286,8 +293,10 @@ Component.register('sw-category-tree-field', {
                     this.isExpanded = false;
                 }
 
-                this.selectedCategories.push(item.id);
-                this.selectedCategoriesTotal += 1;
+                if (this.pageId) {
+                    this.selectedCategories.push(item.id);
+                    this.selectedCategoriesTotal += 1;
+                }
 
                 return true;
             }
@@ -299,9 +308,11 @@ Component.register('sw-category-tree-field', {
         removeItem(item) {
             this.categoriesCollection.remove(item.id);
 
-            const itemIndex = this.selectedCategories.findIndex(id => id === item.id);
-            this.selectedCategories.splice(itemIndex, 1);
-            this.selectedCategoriesTotal -= 1;
+            if (this.pageId) {
+                const itemIndex = this.selectedCategories.findIndex((id) => id === item.id);
+                this.selectedCategories.splice(itemIndex, 1);
+                this.selectedCategoriesTotal -= 1;
+            }
 
             if (item.data) {
                 this.$emit('selection-remove', item.data);
@@ -567,7 +578,7 @@ Component.register('sw-category-tree-field', {
         },
 
         changeSearchSelection(type = 'next') {
-            const typeValue = (type === 'previous') ? -1 : 1;
+            const typeValue = type === 'previous' ? -1 : 1;
 
             const actualIndex = this.searchResult.indexOf(this.searchResultFocusItem);
             const focusItem = this.searchResult[actualIndex + typeValue];

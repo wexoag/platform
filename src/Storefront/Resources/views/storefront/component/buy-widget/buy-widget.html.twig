@@ -52,15 +52,17 @@
             {% endblock %}
 
             {% block buy_widget_rich_snippets_release_date %}
-                <meta itemprop="releaseDate"
-                      content="{{ product.releaseDate|format_date(pattern='Y-MM-dd') }}">
+                {% if product.releaseDate %}
+                    <meta itemprop="releaseDate"
+                          content="{{ product.releaseDate|format_date(pattern='Y-MM-dd') }}">
+                {% endif %}
             {% endblock %}
         {% endblock %}
 
         {% block buy_widget_buy_container %}
             <div itemprop="offers"
                  itemscope
-                 itemtype="{% if product.calculatedPrices|length > 1 %}http://schema.org/AggregateOffer{% else %}http://schema.org/Offer{% endif %}">
+                 itemtype="{% if product.calculatedPrices|length > 1 %}https://schema.org/AggregateOffer{% else %}https://schema.org/Offer{% endif %}">
                 {% block buy_widget_data %}
                     {% block buy_widget_data_rich_snippet_url %}
                         <meta itemprop="url"

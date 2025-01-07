@@ -19,7 +19,6 @@ use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Test\TestCaseBase\BasicTestDataBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\StateMachine\Aggregation\StateMachineState\StateMachineStateEntity;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionEntity;
 use Shopware\Core\System\StateMachine\StateMachineException;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
@@ -52,9 +51,9 @@ class StateMachineRegistryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->connection = $this->getContainer()->get(Connection::class);
-        $this->stateMachineRegistry = $this->getContainer()->get(StateMachineRegistry::class);
-        $this->stateMachineRepository = $this->getContainer()->get('state_machine.repository');
+        $this->connection = static::getContainer()->get(Connection::class);
+        $this->stateMachineRegistry = static::getContainer()->get(StateMachineRegistry::class);
+        $this->stateMachineRepository = static::getContainer()->get('state_machine.repository');
 
         $this->stateMachineName = 'test_state_machine';
         $this->stateMachineId = Uuid::randomHex();
@@ -139,8 +138,8 @@ EOF;
         static::assertNotEmpty($stateCollection);
         static::assertNotEmpty($stateCollection->get('fromPlace'));
         static::assertNotEmpty($stateCollection->get('toPlace'));
-        static::assertInstanceOf(StateMachineStateEntity::class, $fromPlace = $stateCollection->get('fromPlace'));
-        static::assertInstanceOf(StateMachineStateEntity::class, $toPlace = $stateCollection->get('toPlace'));
+        $fromPlace = $stateCollection->get('fromPlace');
+        $toPlace = $stateCollection->get('toPlace');
         static::assertEquals(OrderDeliveryStates::STATE_PARTIALLY_RETURNED, $fromPlace->getTechnicalName());
         static::assertEquals(OrderDeliveryStates::STATE_RETURNED, $toPlace->getTechnicalName());
     }
@@ -154,8 +153,8 @@ EOF;
         static::assertNotEmpty($stateCollection);
         static::assertNotEmpty($stateCollection->get('fromPlace'));
         static::assertNotEmpty($stateCollection->get('toPlace'));
-        static::assertInstanceOf(StateMachineStateEntity::class, $fromPlace = $stateCollection->get('fromPlace'));
-        static::assertInstanceOf(StateMachineStateEntity::class, $toPlace = $stateCollection->get('toPlace'));
+        $fromPlace = $stateCollection->get('fromPlace');
+        $toPlace = $stateCollection->get('toPlace');
         static::assertEquals(OrderDeliveryStates::STATE_PARTIALLY_RETURNED, $fromPlace->getTechnicalName());
         static::assertEquals(OrderDeliveryStates::STATE_PARTIALLY_RETURNED, $toPlace->getTechnicalName());
     }
@@ -166,7 +165,7 @@ EOF;
         $addressId = Uuid::randomHex();
         $orderLineItemId = Uuid::randomHex();
 
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $orderStateMachineId = $connection->fetchOne('SELECT id FROM state_machine WHERE technical_name = :name', ['name' => 'order.state']);
         $orderOpen = $connection->fetchOne('SELECT id FROM state_machine_state WHERE technical_name = :name AND state_machine_id = :id', ['name' => OrderStates::STATE_OPEN, 'id' => $orderStateMachineId]);
@@ -262,7 +261,7 @@ EOF;
             'payload' => '{}',
         ];
 
-        $this->getContainer()->get('order.repository')->upsert([$order], Context::createDefaultContext());
+        static::getContainer()->get('order.repository')->upsert([$order], Context::createDefaultContext());
 
         return $orderDeliveryId;
     }
@@ -296,7 +295,7 @@ EOF;
 
     private function fetchFirstIdFromTable(string $table): string
     {
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         return Uuid::fromBytesToHex((string) $connection->fetchOne('SELECT id FROM ' . $table . ' LIMIT 1'));
     }
@@ -338,7 +337,7 @@ EOF;
             $customer['defaultPaymentMethodId'] = $this->getValidPaymentMethodId();
         }
 
-        $this->getContainer()->get('customer.repository')->upsert([$customer], Context::createDefaultContext());
+        static::getContainer()->get('customer.repository')->upsert([$customer], Context::createDefaultContext());
 
         return $customerId;
     }

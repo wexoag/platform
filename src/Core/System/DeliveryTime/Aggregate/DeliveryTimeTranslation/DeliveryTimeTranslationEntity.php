@@ -14,28 +14,24 @@ class DeliveryTimeTranslationEntity extends TranslationEntity
 
     /**
      * @var DeliveryTimeEntity|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $deliveryTime;
 
     /**
      * @var string
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $deliveryTimeId;
 
     /**
      * @var string|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $name;
-
-    /**
-     * @var \DateTimeInterface|null
-     */
-    protected $createdAt;
-
-    /**
-     * @var \DateTimeInterface|null
-     */
-    protected $updatedAt;
 
     public function getDeliveryTime(): ?DeliveryTimeEntity
     {

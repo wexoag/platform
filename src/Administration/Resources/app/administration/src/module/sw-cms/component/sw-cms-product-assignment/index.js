@@ -10,11 +10,27 @@ const { Criteria } = Shopware.Data;
 export default {
     template,
 
-    emits: ['change', 'paginate'],
+    compatConfig: Shopware.compatConfig,
+
+    emits: [
+        'change',
+        'paginate',
+    ],
+
     data() {
         return {
             steps: [5],
         };
+    },
+
+    computed: {
+        listeners() {
+            if (this.isCompatEnabled('INSTANCE_LISTENERS')) {
+                return this.$listeners;
+            }
+
+            return {};
+        },
     },
 
     watch: {
@@ -85,7 +101,6 @@ export default {
 
             return Promise.resolve();
         },
-
 
         onSelectCollapsed() {
             this.resultCollection = null;

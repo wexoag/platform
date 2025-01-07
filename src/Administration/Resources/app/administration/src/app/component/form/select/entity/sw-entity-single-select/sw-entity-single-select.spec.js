@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -74,11 +73,13 @@ function getPropertyCollection() {
     );
 }
 
-async function createEntitySingleSelect(customOptions = {
-    global: {},
-    props: {},
-    slots: {},
-}) {
+async function createEntitySingleSelect(
+    customOptions = {
+        global: {},
+        props: {},
+        slots: {},
+    },
+) {
     const options = {
         global: {
             stubs: {
@@ -87,7 +88,11 @@ async function createEntitySingleSelect(customOptions = {
                 'sw-base-field': await wrapTestComponent('sw-base-field'),
                 'sw-icon': {
                     template: '<div @click="$emit(\'click\', $event)"></div>',
-                    props: ['size', 'color', 'name'],
+                    props: [
+                        'size',
+                        'color',
+                        'name',
+                    ],
                 },
                 'sw-field-error': await wrapTestComponent('sw-field-error'),
                 'sw-select-result-list': await wrapTestComponent('sw-select-result-list', {
@@ -130,11 +135,14 @@ async function createEntitySingleSelect(customOptions = {
         },
     };
 
-    return mount(await wrapTestComponent('sw-entity-single-select', {
-        sync: true,
-    }), {
-        ...options,
-    });
+    return mount(
+        await wrapTestComponent('sw-entity-single-select', {
+            sync: true,
+        }),
+        {
+            ...options,
+        },
+    );
 }
 
 describe('components/sw-entity-single-select', () => {
@@ -164,7 +172,7 @@ describe('components/sw-entity-single-select', () => {
             props: {
                 value: null,
                 entity: 'test',
-                selectionDisablingMethod: item => item.name === 'second entry',
+                selectionDisablingMethod: (item) => item.name === 'second entry',
             },
             global: {
                 provide: {
@@ -222,7 +230,7 @@ describe('components/sw-entity-single-select', () => {
             props: {
                 value: null,
                 entity: 'test',
-                selectionDisablingMethod: item => item.name === 'second entry',
+                selectionDisablingMethod: (item) => item.name === 'second entry',
                 disabledSelectionTooltip: { message: 'test message' },
             },
             global: {
@@ -446,8 +454,12 @@ describe('components/sw-entity-single-select', () => {
         });
         const listContent = wrapper.find('.sw-select-result-list__content');
 
-        Object.defineProperty(listContent.element, 'scrollHeight', { value: 1050 });
-        Object.defineProperty(listContent.element, 'clientHeight', { value: 250 });
+        Object.defineProperty(listContent.element, 'scrollHeight', {
+            value: 1050,
+        });
+        Object.defineProperty(listContent.element, 'clientHeight', {
+            value: 250,
+        });
         Object.defineProperty(listContent.element, 'scrollTop', { value: 150 });
 
         await listContent.trigger('scroll');
@@ -484,8 +496,12 @@ describe('components/sw-entity-single-select', () => {
         });
         const listContent = wrapper.find('.sw-select-result-list__content');
 
-        Object.defineProperty(listContent.element, 'scrollHeight', { value: 1050 });
-        Object.defineProperty(listContent.element, 'clientHeight', { value: 250 });
+        Object.defineProperty(listContent.element, 'scrollHeight', {
+            value: 1050,
+        });
+        Object.defineProperty(listContent.element, 'clientHeight', {
+            value: 250,
+        });
         Object.defineProperty(listContent.element, 'scrollTop', { value: 800 });
 
         await listContent.trigger('scroll');
@@ -524,7 +540,9 @@ describe('components/sw-entity-single-select', () => {
         await swEntitySingleSelect.find('input').trigger('change');
         await swEntitySingleSelect.vm.$nextTick();
 
-        expect(swEntitySingleSelect.emitted('search-term-change')[0]).toEqual(['first']);
+        expect(swEntitySingleSelect.emitted('search-term-change')[0]).toEqual([
+            'first',
+        ]);
     });
 
     it('should not display variations', async () => {
@@ -564,14 +582,15 @@ describe('components/sw-entity-single-select', () => {
 
             expect(productVariantInfo.exists()).toBeTruthy();
 
-            expect(productVariantInfo.find('.sw-product-variant-info__product-name').text())
-                .toEqual(fixture[0].name);
+            expect(productVariantInfo.find('.sw-product-variant-info__product-name').text()).toEqual(fixture[0].name);
 
-            expect(productVariantInfo.find('.sw-product-variant-info__specification').text())
-                .toContain(fixture[0].variation[0].group);
+            expect(productVariantInfo.find('.sw-product-variant-info__specification').text()).toContain(
+                fixture[0].variation[0].group,
+            );
 
-            expect(productVariantInfo.find('.sw-product-variant-info__specification').text())
-                .toContain(fixture[0].variation[0].option);
+            expect(productVariantInfo.find('.sw-product-variant-info__specification').text()).toContain(
+                fixture[0].variation[0].option,
+            );
         });
     });
 
@@ -598,8 +617,7 @@ describe('components/sw-entity-single-select', () => {
         await flushPromises();
 
         await swEntitySingleSelect.vm.$nextTick();
-        expect(swEntitySingleSelect.find('.sw-entity-single-select__selection-text').text())
-            .toBe('test');
+        expect(swEntitySingleSelect.find('.sw-entity-single-select__selection-text').text()).toBe('test');
 
         await swEntitySingleSelect.find('input').trigger('click');
         await swEntitySingleSelect.vm.$nextTick();
@@ -647,8 +665,7 @@ describe('components/sw-entity-single-select', () => {
 
         // expect test value selected
         let selectionText = wrapper.find('.sw-entity-single-select__selection-text');
-        expect(selectionText.text())
-            .toBe('test');
+        expect(selectionText.text()).toBe('test');
 
         // expect no emitted value
         expect(wrapper.emitted('change')).toBeUndefined();
@@ -714,14 +731,7 @@ describe('components/sw-entity-single-select', () => {
     });
 
     it('should recognize non-existing entity and offer entity creation', async () => {
-        const nonExistingEntityMock = new EntityCollection(
-            '',
-            '',
-            Shopware.Context.api,
-            null,
-            [],
-            0,
-        );
+        const nonExistingEntityMock = new EntityCollection('', '', Shopware.Context.api, null, [], 0);
 
         const existingEntityMock = new EntityCollection(
             '',
@@ -782,20 +792,14 @@ describe('components/sw-entity-single-select', () => {
                                     return Promise.resolve(existingEntityMock);
                                 }
 
-                                return Promise.resolve(new EntityCollection(
-                                    '',
-                                    '',
-                                    Shopware.Context.api,
-                                    null,
-                                    [],
-                                    0,
-                                ));
+                                return Promise.resolve(new EntityCollection('', '', Shopware.Context.api, null, [], 0));
                             },
-                            get: () => Promise.resolve({
-                                id: 'manufacturerId',
-                                name: 'ThisIsMyEntity',
-                                product: [],
-                            }),
+                            get: () =>
+                                Promise.resolve({
+                                    id: 'manufacturerId',
+                                    name: 'ThisIsMyEntity',
+                                    product: [],
+                                }),
                             create: () => Promise.resolve({}),
                         }),
                     },

@@ -21,7 +21,7 @@ use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Script\Debugging\ScriptTraces;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\MailTemplateTestBehaviour;
-use Shopware\Core\Framework\Test\TestDataCollection;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\DataBag\QueryDataBag;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
@@ -31,6 +31,7 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SalesChannel\SalesChannelEntity;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Core\Test\TestDefaults;
 use Shopware\Storefront\Controller\RegisterController;
 use Shopware\Storefront\Framework\Routing\RequestTransformer;
@@ -60,7 +61,7 @@ class RegisterControllerTest extends TestCase
 
     protected function setUp(): void
     {
-        $salesChannelContextFactory = $this->getContainer()->get(SalesChannelContextFactory::class);
+        $salesChannelContextFactory = static::getContainer()->get(SalesChannelContextFactory::class);
 
         $token = Uuid::randomHex();
         $this->salesChannelContext = $salesChannelContextFactory->create($token, TestDefaults::SALES_CHANNEL);
@@ -72,11 +73,11 @@ class RegisterControllerTest extends TestCase
 
     public function testGuestRegisterWithRequirePasswordConfirmation(): void
     {
-        $container = $this->getContainer();
+        $container = static::getContainer();
 
         $customerRepository = $container->get('customer.repository');
 
-        $config = $this->getContainer()->get(SystemConfigService::class);
+        $config = static::getContainer()->get(SystemConfigService::class);
 
         $mock = $this->createMock(SystemConfigService::class);
 
@@ -108,7 +109,7 @@ class RegisterControllerTest extends TestCase
 
         $response = $registerController->register($request, $data, $this->salesChannelContext);
 
-        $customers = $this->getContainer()->get(Connection::class)
+        $customers = static::getContainer()->get(Connection::class)
             ->fetchAllAssociative('SELECT * FROM customer WHERE email = :mail', ['mail' => $data->get('email')]);
 
         static::assertEquals(200, $response->getStatusCode());
@@ -122,9 +123,9 @@ class RegisterControllerTest extends TestCase
 
         $request = $this->createRequest();
 
-        $response = $this->getContainer()->get(RegisterController::class)->register($request, $data, $this->salesChannelContext);
+        $response = static::getContainer()->get(RegisterController::class)->register($request, $data, $this->salesChannelContext);
 
-        $customers = $this->getContainer()->get(Connection::class)
+        $customers = static::getContainer()->get(Connection::class)
             ->fetchAllAssociative('SELECT * FROM customer WHERE email = :mail', ['mail' => $data->get('email')]);
 
         static::assertEquals(200, $response->getStatusCode());
@@ -134,11 +135,11 @@ class RegisterControllerTest extends TestCase
 
     public function testRegisterWithDoubleOptIn(): void
     {
-        $container = $this->getContainer();
+        $container = static::getContainer();
 
         $customerRepository = $container->get('customer.repository');
 
-        $systemConfigService = $this->getContainer()->get(SystemConfigService::class);
+        $systemConfigService = static::getContainer()->get(SystemConfigService::class);
         $systemConfigService->set('core.loginRegistration.doubleOptInRegistration', true);
 
         $event = null;
@@ -187,11 +188,11 @@ class RegisterControllerTest extends TestCase
 
     public function testRegisterWithDoubleOptInDomainChanged(): void
     {
-        $container = $this->getContainer();
+        $container = static::getContainer();
 
         $customerRepository = $container->get('customer.repository');
 
-        $systemConfigService = $this->getContainer()->get(SystemConfigService::class);
+        $systemConfigService = static::getContainer()->get(SystemConfigService::class);
         $systemConfigService->set('core.loginRegistration.doubleOptInRegistration', true);
         $systemConfigService->set('core.loginRegistration.doubleOptInDomain', 'https://test.test.com');
 
@@ -244,12 +245,12 @@ class RegisterControllerTest extends TestCase
 
     public function testConfirmRegisterWithRedirectTo(): void
     {
-        $container = $this->getContainer();
+        $container = static::getContainer();
 
         /** @var EntityRepository<CustomerCollection> $customerRepository */
         $customerRepository = $container->get('customer.repository');
 
-        $systemConfigService = $this->getContainer()->get(SystemConfigService::class);
+        $systemConfigService = static::getContainer()->get(SystemConfigService::class);
         $systemConfigService->set('core.loginRegistration.doubleOptInRegistration', true);
 
         $event = null;
@@ -287,7 +288,7 @@ class RegisterControllerTest extends TestCase
         $queryData = new QueryDataBag();
         $queryData->set('redirectTo', 'frontend.checkout.confirm.page');
         $queryData->set('hash', $customer->first()?->getHash());
-        $queryData->set('em', hash('sha1', $event->getCustomer()->getEmail()));
+        $queryData->set('em', Hasher::hash($event->getCustomer()->getEmail(), 'sha1'));
 
         $response = $registerController->confirmRegistration($this->salesChannelContext, $queryData);
 
@@ -303,20 +304,20 @@ class RegisterControllerTest extends TestCase
         $response = $this->request('GET', '/account/register', []);
         static::assertEquals(200, $response->getStatusCode());
 
-        $traces = $this->getContainer()->get(ScriptTraces::class)->getTraces();
+        $traces = static::getContainer()->get(ScriptTraces::class)->getTraces();
 
         static::assertArrayHasKey(AccountRegisterPageLoadedHook::HOOK_NAME, $traces);
     }
 
     public function testCustomerGroupRegistrationPageLoadedHookScriptsAreExecuted(): void
     {
-        $ids = new TestDataCollection();
+        $ids = new IdsCollection();
         $this->createCustomerGroup($ids);
 
         $response = $this->request('GET', 'customer-group-registration/' . $ids->get('group'), []);
         static::assertEquals(200, $response->getStatusCode(), print_r($response->getContent(), true));
 
-        $traces = $this->getContainer()->get(ScriptTraces::class)->getTraces();
+        $traces = static::getContainer()->get(ScriptTraces::class)->getTraces();
 
         static::assertArrayHasKey(CustomerGroupRegistrationPageLoadedHook::HOOK_NAME, $traces);
     }
@@ -338,7 +339,7 @@ class RegisterControllerTest extends TestCase
         $response = $this->request('GET', '/checkout/register', []);
         static::assertEquals(200, $response->getStatusCode());
 
-        $traces = $this->getContainer()->get(ScriptTraces::class)->getTraces();
+        $traces = static::getContainer()->get(ScriptTraces::class)->getTraces();
 
         static::assertArrayHasKey(CheckoutRegisterPageLoadedHook::HOOK_NAME, $traces);
     }
@@ -361,7 +362,7 @@ class RegisterControllerTest extends TestCase
         $request->attributes->add(['_route' => 'frontend.checkout.register.page', SalesChannelRequest::ATTRIBUTE_IS_SALES_CHANNEL_REQUEST => true]);
         $request->attributes->set(RequestTransformer::STOREFRONT_URL, 'shopware.test');
 
-        $this->getContainer()->get('request_stack')->push($request);
+        static::getContainer()->get('request_stack')->push($request);
 
         return $request;
     }
@@ -394,9 +395,9 @@ class RegisterControllerTest extends TestCase
         return new RequestDataBag($data);
     }
 
-    private function createCustomerGroup(TestDataCollection $ids): void
+    private function createCustomerGroup(IdsCollection $ids): void
     {
-        $salesChannel = $this->getContainer()->get('sales_channel.repository')->search(
+        $salesChannel = static::getContainer()->get('sales_channel.repository')->search(
             (new Criteria())->addFilter(
                 new EqualsFilter('typeId', Defaults::SALES_CHANNEL_TYPE_STOREFRONT),
                 new EqualsFilter('domains.url', $_SERVER['APP_URL'])
@@ -406,7 +407,7 @@ class RegisterControllerTest extends TestCase
 
         static::assertInstanceOf(SalesChannelEntity::class, $salesChannel);
 
-        $this->getContainer()->get('customer_group.repository')->create([
+        static::getContainer()->get('customer_group.repository')->create([
             [
                 'id' => $ids->create('group'),
                 'registrationActive' => true,
@@ -425,7 +426,7 @@ class RegisterControllerTest extends TestCase
         $taxId = Uuid::randomHex();
         $context = Context::createDefaultContext();
 
-        $salesChannel = $this->getContainer()->get('sales_channel.repository')->search(
+        $salesChannel = static::getContainer()->get('sales_channel.repository')->search(
             (new Criteria())->addFilter(
                 new EqualsFilter('typeId', Defaults::SALES_CHANNEL_TYPE_STOREFRONT),
                 new EqualsFilter('domains.url', $_SERVER['APP_URL'])
@@ -455,6 +456,6 @@ class RegisterControllerTest extends TestCase
                 ],
             ],
         ];
-        $this->getContainer()->get('product.repository')->create([$product], $context);
+        static::getContainer()->get('product.repository')->create([$product], $context);
     }
 }

@@ -13,7 +13,7 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextService;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Page\Account\Order\AccountOrderPageLoader;
-use Shopware\Tests\Integration\Storefront\Page\StorefrontPageTestBehaviour;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -36,8 +36,8 @@ class AccountOrderPageLoaderTest extends TestCase
     protected function setUp(): void
     {
         $this->salesChannel = $this->createSalesChannelContext();
-        $this->customerRepository = $this->getContainer()->get('customer.repository');
-        $this->orderRepository = $this->getContainer()->get('order.repository');
+        $this->customerRepository = static::getContainer()->get('customer.repository');
+        $this->orderRepository = static::getContainer()->get('order.repository');
     }
 
     public function testLogsInGuestById(): void
@@ -62,7 +62,7 @@ class AccountOrderPageLoaderTest extends TestCase
             ],
         ], $context);
 
-        $salesChannel = $this->getContainer()->get(SalesChannelContextFactory::class)->create(
+        $salesChannel = static::getContainer()->get(SalesChannelContextFactory::class)->create(
             $this->salesChannel->getToken(),
             $this->salesChannel->getSalesChannelId(),
             [SalesChannelContextService::CUSTOMER_ID => $expectedCustomer->getId()],
@@ -97,6 +97,6 @@ class AccountOrderPageLoaderTest extends TestCase
 
     protected function getPageLoader(): AccountOrderPageLoader
     {
-        return $this->getContainer()->get(AccountOrderPageLoader::class);
+        return static::getContainer()->get(AccountOrderPageLoader::class);
     }
 }

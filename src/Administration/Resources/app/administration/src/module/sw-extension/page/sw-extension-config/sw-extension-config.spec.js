@@ -2,7 +2,6 @@ import { mount } from '@vue/test-utils';
 
 /**
  * @package checkout
- * @group disabledCompat
  */
 describe('src/module/sw-extension/page/sw-extension-config.spec', () => {
     let SwExtensionConfig;
@@ -40,6 +39,7 @@ describe('src/module/sw-extension/page/sw-extension-config.spec', () => {
                     'sw-form-field-renderer': true,
                     'sw-inherit-wrapper': true,
                     'sw-card': true,
+                    'sw-app-topbar-button': true,
                 },
                 provide: {
                     shopwareExtensionService: {
@@ -67,8 +67,12 @@ describe('src/module/sw-extension/page/sw-extension-config.spec', () => {
     }
 
     beforeAll(async () => {
-        SwExtensionConfig = await wrapTestComponent('sw-extension-config', { sync: true });
-        SwMeteorPage = await wrapTestComponent('sw-meteor-page', { sync: true });
+        SwExtensionConfig = await wrapTestComponent('sw-extension-config', {
+            sync: true,
+        });
+        SwMeteorPage = await wrapTestComponent('sw-meteor-page', {
+            sync: true,
+        });
     });
 
     beforeEach(async () => {
@@ -102,7 +106,9 @@ describe('src/module/sw-extension/page/sw-extension-config.spec', () => {
     });
 
     it('should not reload extensions on createdComponent if extensions are loaded', async () => {
-        Shopware.State.commit('shopwareExtensions/setMyExtensions', { data: [{ name: 'test-extension' }] });
+        Shopware.State.commit('shopwareExtensions/setMyExtensions', {
+            data: [{ name: 'test-extension' }],
+        });
         const wrapper = await createWrapper();
 
         expect(wrapper.vm.shopwareExtensionService.updateExtensionData).toHaveBeenCalledTimes(0);
@@ -130,8 +136,7 @@ describe('src/module/sw-extension/page/sw-extension-config.spec', () => {
 
         wrapper.vm.$refs.systemConfig.saveAll = jest.fn(() => Promise.reject());
 
-        await wrapper.find('.sw-extension-config__save-action')
-            .trigger('click');
+        await wrapper.find('.sw-extension-config__save-action').trigger('click');
 
         expect(wrapper.vm.createNotificationError).toHaveBeenCalledTimes(1);
     });
@@ -195,12 +200,7 @@ describe('src/module/sw-extension/page/sw-extension-config.spec', () => {
             name: 'from.route.name',
         };
 
-        SwExtensionConfig.beforeRouteEnter.call(
-            wrapper.vm,
-            undefined,
-            fromRoute,
-            (c) => c(wrapper.vm),
-        );
+        SwExtensionConfig.beforeRouteEnter.call(wrapper.vm, undefined, fromRoute, (c) => c(wrapper.vm));
         await wrapper.vm.$nextTick();
 
         const page = wrapper.findComponent(SwMeteorPage);

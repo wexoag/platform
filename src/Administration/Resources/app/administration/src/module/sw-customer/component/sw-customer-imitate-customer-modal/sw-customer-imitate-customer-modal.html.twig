@@ -6,15 +6,19 @@
     class="sw-customer-imitate-customer-modal"
     @modal-close="onCancel"
 >
+    <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->
+    {% block sw_customer_imitate_customer_modal_alert %}
     <sw-alert>
         <i18n-t
             keypath="sw-customer.imitateCustomerModal.modalInfo"
-            tag="p">
+            tag="p"
+        >
             <template #logout>
                 <b>{{ $tc('sw-customer.imitateCustomerModal.modalInfoLogout') }}</b>
             </template>
         </i18n-t>
     </sw-alert>
+    {% endblock %}
 
     <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->
     {% block sw_customer_imitate_customer_modal_description %}
@@ -36,7 +40,8 @@
             v-for="salesChannelDomain of salesChannelDomains"
             :key="salesChannelDomain.id"
             target="_blank"
-            @click="onSalesChannelDomainMenuItemClick(salesChannelDomain.salesChannelId, salesChannelDomain.url)">
+            @click="onSalesChannelDomainMenuItemClick(salesChannelDomain.salesChannelId, salesChannelDomain.url)"
+        >
 
             <div
                 class="imitate-customer-modal-item-content"

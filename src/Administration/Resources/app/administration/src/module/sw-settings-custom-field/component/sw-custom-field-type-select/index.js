@@ -8,6 +8,8 @@ import './sw-custom-field-type-select.scss';
 export default {
     template,
 
+    compatConfig: Shopware.compatConfig,
+
     data() {
         return {
             multiSelectSwitch: false,
@@ -33,28 +35,49 @@ export default {
     methods: {
         createdComponent() {
             if (!this.currentCustomField.config.hasOwnProperty('options')) {
-                this.$set(this.currentCustomField.config, 'options', []);
+                if (this.isCompatEnabled('INSTANCE_SET')) {
+                    this.$set(this.currentCustomField.config, 'options', []);
+                } else {
+                    this.currentCustomField.config.options = [];
+                }
+
                 this.addOption();
                 this.addOption();
             }
 
-            if (!this.currentCustomField.config.hasOwnProperty('componentName')) {
+            const componentName = this.currentCustomField.config.componentName;
+            if (
+                !componentName ||
+                ![
+                    'sw-single-select',
+                    'sw-multi-select',
+                ].includes(componentName)
+            ) {
                 this.currentCustomField.config.componentName = 'sw-single-select';
             }
 
-            this.$set(this.currentCustomField.config, 'options', this.currentCustomField.config.options.map(option => {
+            this.multiSelectSwitch = componentName === 'sw-multi-select';
+
+            const options = this.currentCustomField.config.options.map((option) => {
                 if (Array.isArray(option.label)) {
                     option.label = {};
                 }
 
                 return option;
-            }));
+            });
 
-            this.multiSelectSwitch = this.currentCustomField.config.componentName === 'sw-multi-select';
+            if (this.isCompatEnabled('INSTANCE_SET')) {
+                this.$set(this.currentCustomField.config, 'options', options);
+            } else {
+                this.currentCustomField.config.options = options;
+            }
         },
 
         addOption() {
-            this.currentCustomField.config.options.push({ value: '', label: {} });
+            this.currentCustomField.config.options.push({
+                value: '',
+                label: {},
+            });
         },
 
         onClickAddOption() {

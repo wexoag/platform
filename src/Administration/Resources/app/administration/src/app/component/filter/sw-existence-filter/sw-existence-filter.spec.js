@@ -1,6 +1,3 @@
-/**
- * @group disabledCompat
- */
 import 'src/app/component/filter/sw-existence-filter';
 import 'src/app/component/filter/sw-base-filter';
 import 'src/app/component/form/sw-select-field';
@@ -15,7 +12,9 @@ async function createWrapper() {
         global: {
             stubs: {
                 'sw-block-field': await wrapTestComponent('sw-block-field', { sync: true }),
-                'sw-base-field': await wrapTestComponent('sw-base-field', { sync: true }),
+                'sw-base-field': await wrapTestComponent('sw-base-field', {
+                    sync: true,
+                }),
                 'sw-select-field': await wrapTestComponent('sw-select-field', { sync: true }),
                 'sw-select-field-deprecated': await wrapTestComponent('sw-select-field-deprecated', { sync: true }),
                 'sw-base-filter': await wrapTestComponent('sw-base-filter', { sync: true }),
@@ -78,7 +77,9 @@ describe('components/sw-existence-filter', () => {
     it('should emit `filter-reset` event when user clicks Reset button from `true`', async () => {
         const wrapper = await createWrapper();
 
-        await wrapper.setProps({ filter: { ...wrapper.vm.filter, value: 'true' } });
+        await wrapper.setProps({
+            filter: { ...wrapper.vm.filter, value: 'true' },
+        });
 
         // Trigger click Reset button
         await wrapper.find('.sw-base-filter__reset').trigger('click');
@@ -89,7 +90,9 @@ describe('components/sw-existence-filter', () => {
     it('should emit `filter-reset` event when user clicks Reset button from `false`', async () => {
         const wrapper = await createWrapper();
 
-        await wrapper.setProps({ filter: { ...wrapper.vm.filter, value: 'false' } });
+        await wrapper.setProps({
+            filter: { ...wrapper.vm.filter, value: 'false' },
+        });
 
         // Trigger click Reset button
         await wrapper.find('.sw-base-filter__reset').trigger('click');
@@ -100,7 +103,9 @@ describe('components/sw-existence-filter', () => {
     it('should emit `filter-update` event when user changes from `true` to `false`', async () => {
         const wrapper = await createWrapper();
 
-        await wrapper.setProps({ filter: { ...wrapper.vm.filter, value: 'true' } });
+        await wrapper.setProps({
+            filter: { ...wrapper.vm.filter, value: 'true' },
+        });
 
         const options = wrapper.find('select').findAll('option');
 
@@ -116,7 +121,9 @@ describe('components/sw-existence-filter', () => {
     it('should emit `filter-update` event when user changes from `false` to `true`', async () => {
         const wrapper = await createWrapper();
 
-        await wrapper.setProps({ filter: { ...wrapper.vm.filter, value: 'false' } });
+        await wrapper.setProps({
+            filter: { ...wrapper.vm.filter, value: 'false' },
+        });
 
         const options = wrapper.find('select').findAll('option');
 

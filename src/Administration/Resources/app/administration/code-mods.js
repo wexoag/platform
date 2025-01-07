@@ -131,6 +131,8 @@ const sections = [
         process.exit(1);
     }
 
+    createPluginsTsConfigFile(pluginName);
+
     src.forEach(async (folder) => {
         let srcFound = false;
         const pluginFolder = `${customPluginsPath}/${pluginName}`;
@@ -166,6 +168,8 @@ const sections = [
         // always remove the working dir, because src files could collide
         fs.rmSync(workingDir, { recursive: true, force: true });
     });
+
+    removePluginsTsConfigFile();
 }());
 
 // Helper functions
@@ -204,6 +208,8 @@ function createESLintInstance(overrideConfig, fix) {
         fix,
         extensions: [
             '.html.twig',
+            '.js',
+            '.ts',
         ],
     });
 }
@@ -235,6 +241,7 @@ async function lintFiles(filePaths, fix) {
     const overrideConfig = {
         plugins: [
             'twig-vue',
+            'sw-core-rules',
             'sw-deprecation-rules',
         ],
         overrides: [
@@ -254,10 +261,60 @@ async function lintFiles(filePaths, fix) {
                     'vue/jsx-uses-vars': 'off',
                 },
             },
+            {
+                extends: [
+                    'plugin:vue/vue3-recommended',
+                    '@shopware-ag/eslint-config-base',
+                ],
+                files: ['**/*.js'],
+                excludedFiles: ['*.spec.js', '*.spec.vue3.js'],
+                rules: {
+                    'vue/no-deprecated-destroyed-lifecycle': 'error',
+                    'vue/no-deprecated-events-api': 'error',
+                    'vue/require-slots-as-functions': 'error',
+                    'vue/no-deprecated-props-default-this': 'error',
+                    'sw-deprecation-rules/no-compat-conditions': ['error'],
+                    'sw-deprecation-rules/no-empty-listeners': ['error'],
+                    'sw-core-rules/require-explicit-emits': 'error',
+                },
+            },
+            {
+                files: ['**/*.ts', '**/*.tsx'],
+                extends: [
+                    'plugin:vue/vue3-recommended',
+                    '@shopware-ag/eslint-config-base',
+                ],
+                parser: '@typescript-eslint/parser',
+                parserOptions: {
+                    tsconfigRootDir: __dirname,
+                    project: ['./tsconfig-plugins.json'],
+                },
+                plugins: ['@typescript-eslint'],
+                rules: {
+                    'sw-deprecation-rules/no-compat-conditions': ['error'],
+                    'sw-deprecation-rules/no-empty-listeners': ['error'],
+                    'sw-core-rules/require-explicit-emits': 'error',
+                },
+            },
         ],
     };
 
     const eslint = createESLintInstance(overrideConfig, fix);
     const results = await lintAndFix(eslint, filePaths);
     return outputLintingResults(results, eslint);
+}
+
+function createPluginsTsConfigFile(pluginName) {
+    const tsConfig = {
+        extends: './tsconfig.json',
+        include: [
+            `./${pluginName}/**/*`,
+        ],
+    };
+
+    fs.writeFileSync('./tsconfig-plugins.json', JSON.stringify(tsConfig));
+}
+
+function removePluginsTsConfigFile() {
+    fs.rmSync('./tsconfig-plugins.json', { force: true });
 }

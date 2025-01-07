@@ -17,7 +17,6 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Query\ScoreQuery;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Framework\Test\IdsCollection;
 use Shopware\Core\Framework\Test\TestCaseBase\DatabaseTransactionBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseHelper\CallableClass;
@@ -28,6 +27,7 @@ use Shopware\Core\System\Country\SalesChannel\CountryRoute;
 use Shopware\Core\System\Country\SalesChannel\CountryRouteResponse;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\TagAwareAdapter;
@@ -54,14 +54,14 @@ class CachedCountryRouteTest extends TestCase
         Feature::skipTestIfActive('cache_rework', $this);
         parent::setUp();
 
-        $this->context = $this->getContainer()->get(SalesChannelContextFactory::class)
+        $this->context = static::getContainer()->get(SalesChannelContextFactory::class)
             ->create(Uuid::randomHex(), TestDefaults::SALES_CHANNEL);
     }
 
     #[AfterClass]
     public function cleanup(): void
     {
-        $this->getContainer()->get('cache.object')
+        static::getContainer()->get('cache.object')
             ->invalidateTags([CachedCountryRoute::buildName(TestDefaults::SALES_CHANNEL)]);
     }
 
@@ -81,9 +81,9 @@ class CachedCountryRouteTest extends TestCase
         $route = new CachedCountryRoute(
             $core,
             new TagAwareAdapter(new ArrayAdapter(100)),
-            $this->getContainer()->get(EntityCacheKeyGenerator::class),
-            $this->getContainer()->get(CacheTracer::class),
-            $this->getContainer()->get('event_dispatcher'),
+            static::getContainer()->get(EntityCacheKeyGenerator::class),
+            static::getContainer()->get(CacheTracer::class),
+            static::getContainer()->get('event_dispatcher'),
             []
         );
 
@@ -111,25 +111,25 @@ class CachedCountryRouteTest extends TestCase
     #[DataProvider('invalidationProvider')]
     public function testInvalidation(\Closure $before, \Closure $after, int $calls): void
     {
-        $this->getContainer()->get('cache.object')
+        static::getContainer()->get('cache.object')
             ->invalidateTags([CachedCountryRoute::buildName(TestDefaults::SALES_CHANNEL)]);
 
-        $route = $this->getContainer()->get(CountryRoute::class);
+        $route = static::getContainer()->get(CountryRoute::class);
 
         static::assertInstanceOf(CachedCountryRoute::class, $route);
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = static::getContainer()->get('event_dispatcher');
         $listener = $this->getMockBuilder(CallableClass::class)->getMock();
 
         $listener->expects(static::exactly($calls))->method('__invoke');
         $this->addEventListener($dispatcher, 'country.loaded', $listener);
 
-        $before($this->getContainer());
+        $before(static::getContainer());
 
         $route->load(new Request(), new Criteria(), $this->context);
         $route->load(new Request(), new Criteria(), $this->context);
 
-        $after($this->getContainer());
+        $after(static::getContainer());
 
         $route->load(new Request(), new Criteria(), $this->context);
         $route->load(new Request(), new Criteria(), $this->context);

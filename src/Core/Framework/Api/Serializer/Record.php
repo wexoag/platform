@@ -4,43 +4,59 @@ namespace Shopware\Core\Framework\Api\Serializer;
 
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\Log\Package;
+use Shopware\Core\Framework\Struct\Struct;
 
 #[Package('core')]
 class Record implements \JsonSerializable
 {
     /**
      * @var string
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $id;
 
     /**
      * @var string
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $type;
 
     /**
-     * @var array
+     * @var array<string, mixed|null>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $attributes = [];
 
     /**
-     * @var array
+     * @var array<string, mixed|null>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $extensions = [];
 
     /**
-     * @var array
+     * @var array<string, mixed|null>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $links = [];
 
     /**
-     * @var array[]
+     * @var array<string, mixed|null>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $relationships = [];
 
     /**
-     * @var array
+     * @var array<string, mixed|null>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $meta;
 
@@ -62,24 +78,33 @@ class Record implements \JsonSerializable
         return $this->type;
     }
 
+    /**
+     * @return array<string, mixed|null>
+     */
     public function getAttributes(): array
     {
         return $this->attributes;
     }
 
+    /**
+     * @return array<string, mixed|null>
+     */
     public function getLinks(): array
     {
         return $this->links;
     }
 
     /**
-     * @return array[]
+     * @return array<string, mixed|null>
      */
     public function getRelationships(): array
     {
         return $this->relationships;
     }
 
+    /**
+     * @return array<string, mixed|null>
+     */
     public function getMeta(): array
     {
         return $this->meta;
@@ -95,6 +120,9 @@ class Record implements \JsonSerializable
         $this->type = $type;
     }
 
+    /**
+     * @param mixed|null $value
+     */
     public function setAttribute(string $key, $value): void
     {
         $this->attributes[$key] = $value;
@@ -110,16 +138,25 @@ class Record implements \JsonSerializable
         return $this->links[$key];
     }
 
+    /**
+     * @param array<mixed, mixed|null> $relationship
+     */
     public function addRelationship(string $key, array $relationship): void
     {
         $this->relationships[$key] = $relationship;
     }
 
+    /**
+     * @param mixed|null $data
+     */
     public function addMeta(string $key, $data): void
     {
         $this->meta[$key] = $data;
     }
 
+    /**
+     * @return array<mixed, mixed|null>
+     */
     public function jsonSerialize(): array
     {
         $vars = get_object_vars($this);
@@ -142,11 +179,17 @@ class Record implements \JsonSerializable
         return $vars;
     }
 
+    /**
+     * @param mixed|null $value
+     */
     public function addExtension(string $key, $value): void
     {
         $this->extensions[$key] = $value;
     }
 
+    /**
+     * @return array<string, mixed|null>
+     */
     public function getExtensions(): array
     {
         return $this->extensions;
@@ -172,8 +215,13 @@ class Record implements \JsonSerializable
         }
 
         if ($entity->hasExtension('foreignKeys')) {
-            $extension = $entity->getExtension('foreignKeys')
-                ->jsonSerialize();
+            $extension = $entity->getExtension('foreignKeys');
+
+            if (!$extension instanceof Struct) {
+                return;
+            }
+
+            $extension = $extension->jsonSerialize();
 
             unset($extension['extensions']);
 
@@ -193,9 +241,13 @@ class Record implements \JsonSerializable
                 continue;
             }
 
+            if (!$relationship['tmp']['definition'] instanceof EntityDefinition) {
+                return;
+            }
+
             $entityName = $relationship['tmp']['definition']->getEntityName();
 
-            if ($relationData instanceof EntityCollection) {
+            if ($relationData instanceof EntityCollection || \is_array($relationData)) {
                 $relationship['data'] = [];
 
                 foreach ($relationData as $item) {
@@ -213,6 +265,9 @@ class Record implements \JsonSerializable
         }
     }
 
+    /**
+     * @param array<string, mixed|null> $relationships
+     */
     public function setRelationships(array $relationships): void
     {
         $this->relationships = $relationships;

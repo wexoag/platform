@@ -7,7 +7,7 @@ use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Storefront\Page\Account\PaymentMethod\AccountPaymentMethodPageLoadedEvent;
 use Shopware\Storefront\Page\Account\PaymentMethod\AccountPaymentMethodPageLoader;
-use Shopware\Tests\Integration\Storefront\Page\StorefrontPageTestBehaviour;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Shopware\Tests\Integration\Storefront\Page\StorefrontPageTestConstants;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -42,6 +42,6 @@ class PaymentMethodPageTest extends TestCase
 
     protected function getPageLoader(): AccountPaymentMethodPageLoader
     {
-        return $this->getContainer()->get(AccountPaymentMethodPageLoader::class);
+        return static::getContainer()->get(AccountPaymentMethodPageLoader::class);
     }
 }

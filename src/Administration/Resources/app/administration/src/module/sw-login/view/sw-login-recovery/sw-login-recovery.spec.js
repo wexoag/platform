@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { config, mount } from '@vue/test-utils';
@@ -60,7 +59,8 @@ async function createWrapper() {
                             type: String,
                         },
                     },
-                    template: '<div><input id="email" :value="value" @input="ev => $emit(`input`, ev.target.value)"></input></div>',
+                    template:
+                        '<div><input id="email" :value="value" @input="ev => $emit(`input`, ev.target.value)"></input></div>',
                 },
                 'sw-contextual-field': true,
                 'router-link': true,

@@ -46,7 +46,10 @@ Component.register('sw-context-button', {
                 if (!value.length) {
                     return true;
                 }
-                return ['right', 'left'].includes(value);
+                return [
+                    'right',
+                    'left',
+                ].includes(value);
             },
         },
 
@@ -58,7 +61,10 @@ Component.register('sw-context-button', {
                 if (!value.length) {
                     return true;
                 }
-                return ['bottom', 'top'].includes(value);
+                return [
+                    'bottom',
+                    'top',
+                ].includes(value);
             },
         },
 
@@ -99,6 +105,12 @@ Component.register('sw-context-button', {
             type: Number,
             required: false,
             default: 1100,
+        },
+
+        ariaLabel: {
+            type: String,
+            required: false,
+            default: 'sw-context-button.ariaLabel',
         },
     },
 
@@ -181,10 +193,10 @@ Component.register('sw-context-button', {
             }
 
             // only close the menu on inside clicks if autoclose is active
-            const shouldCloseOnInsideClick = (this.autoClose && !clickedInside);
+            const shouldCloseOnInsideClick = this.autoClose && !clickedInside;
 
             // close menu when there is no native event (when vue event is triggered) or user clicked outside
-            if ((!event || !event.target) || shouldCloseOnInsideClick) {
+            if (!event || !event.target || shouldCloseOnInsideClick) {
                 return this.closeMenu();
             }
 

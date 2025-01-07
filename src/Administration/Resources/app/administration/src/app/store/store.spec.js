@@ -1,6 +1,13 @@
+/**
+ * @package admin
+ */
 import Store from 'src/app/store/index';
 
 describe('src/app/store/index.ts', () => {
+    beforeAll(() => {
+        Shopware.Store.clear();
+    });
+
     it('should be a Singleton', () => {
         const aStore = Store.instance;
 
@@ -23,7 +30,10 @@ describe('src/app/store/index.ts', () => {
             id: 'bar',
         });
 
-        expect(store.list()).toStrictEqual(['foo', 'bar']);
+        expect(store.list()).toStrictEqual([
+            'foo',
+            'bar',
+        ]);
 
         store.unregister('foo');
         store.unregister('bar');
@@ -80,5 +90,24 @@ describe('src/app/store/index.ts', () => {
         expect(() => {
             root.get('foo');
         }).toThrow('Store with id "foo" not found');
+    });
+
+    it('should correctly unregister all stores', () => {
+        const root = Store.instance;
+        root.register({
+            id: 'foo',
+        });
+
+        root.register({
+            id: 'bar',
+        });
+
+        expect(root.list()).toStrictEqual([
+            'foo',
+            'bar',
+        ]);
+
+        root.clear();
+        expect(root.list()).toStrictEqual([]);
     });
 });

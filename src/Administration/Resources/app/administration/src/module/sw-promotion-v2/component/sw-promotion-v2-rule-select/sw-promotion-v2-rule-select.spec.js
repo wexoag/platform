@@ -1,6 +1,5 @@
 /**
- * @package buyers-experience
- * @group disabledCompat
+ * @package checkout
  */
 import { mount } from '@vue/test-utils';
 

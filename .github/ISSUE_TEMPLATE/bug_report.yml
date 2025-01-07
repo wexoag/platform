@@ -25,6 +25,7 @@ body:
           description: In which area or extension of the product does the behavior occur?
           options:
             - Platform(Default)
+            - Extension:Commercial
             - Extension:B2B-Suite
             - Extension:CINEMA-Theme
             - Extension:CMS-Professional
@@ -43,17 +44,17 @@ body:
       validations:
           required: true
     - type: textarea
+      id: actual-behaviour
+      attributes:
+        label: Actual behaviour
+        description: Please describe the issue
+      validations:
+        required: true
+    - type: textarea
       id: expected-behaviour
       attributes:
           label: Expected behaviour
           description: What did you expect to happen?
-      validations:
-          required: true
-    - type: textarea
-      id: actual-behaviour
-      attributes:
-          label: Actual behaviour
-          description: Please describe the issue
       validations:
           required: true
     - type: textarea

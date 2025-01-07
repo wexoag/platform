@@ -2,7 +2,6 @@ import { mount } from '@vue/test-utils';
 
 /**
  * @package services-settings
- * @group disabledCompat
  */
 
 const sequence = {
@@ -151,7 +150,10 @@ describe('module/sw-flow/component/sw-flow-app-action-modal', () => {
 
         await wrapper.setProps({
             config: {
-                content: [1, 2],
+                content: [
+                    1,
+                    2,
+                ],
             },
         });
 

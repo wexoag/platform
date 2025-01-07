@@ -68,6 +68,8 @@ class AdministrationControllerTest extends TestCase
 
     private string $shopwareCoreDir;
 
+    private string $refreshTokenTtl;
+
     protected function setUp(): void
     {
         $this->connection = $this->createMock(Connection::class);
@@ -79,33 +81,7 @@ class AdministrationControllerTest extends TestCase
         $this->htmlSanitizer = $this->createMock(HtmlSanitizer::class);
         $this->parameterBag = $this->createMock(ParameterBagInterface::class);
         $this->shopwareCoreDir = __DIR__ . '/../../../../src/Core/';
-    }
-
-    protected function createAdministrationController(
-        ?CustomerCollection $collection = null,
-        bool $isCustomerBoundToSalesChannel = false
-    ): AdministrationController {
-        $collection = $collection ?? new CustomerCollection();
-
-        return new AdministrationController(
-            $this->createMock(TemplateFinder::class),
-            $this->createMock(FirstRunWizardService::class),
-            $this->createMock(SnippetFinderInterface::class),
-            [],
-            new KnownIpsCollector(),
-            $this->connection,
-            $this->eventDispatcher,
-            $this->shopwareCoreDir,
-            new StaticEntityRepository([$collection]),
-            $this->currencyRepository,
-            $this->htmlSanitizer,
-            $this->definitionRegistry,
-            $this->parameterBag,
-            new StaticSystemConfigService([
-                'core.systemWideLoginRegistration.isCustomerBoundToSalesChannel' => $isCustomerBoundToSalesChannel,
-            ]),
-            $this->fileSystemOperator,
-        );
+        $this->refreshTokenTtl = 'P1W';
     }
 
     public function testIndexPerformsOnSearchOfCurrency(): void
@@ -135,6 +111,7 @@ class AdministrationControllerTest extends TestCase
                     'cspNonce' => null,
                     'adminEsEnable' => true,
                     'storefrontEsEnable' => true,
+                    'refreshTokenTtl' => 7 * 86400 * 1000,
                 ]
             );
 
@@ -482,6 +459,34 @@ class AdministrationControllerTest extends TestCase
             false,
             new Context(new SystemSource(), [], Defaults::CURRENCY, [$languageId]),
         ];
+    }
+
+    protected function createAdministrationController(
+        ?CustomerCollection $collection = null,
+        bool $isCustomerBoundToSalesChannel = false
+    ): AdministrationController {
+        $collection = $collection ?? new CustomerCollection();
+
+        return new AdministrationController(
+            $this->createMock(TemplateFinder::class),
+            $this->createMock(FirstRunWizardService::class),
+            $this->createMock(SnippetFinderInterface::class),
+            [],
+            new KnownIpsCollector(),
+            $this->connection,
+            $this->eventDispatcher,
+            $this->shopwareCoreDir,
+            new StaticEntityRepository([$collection]),
+            $this->currencyRepository,
+            $this->htmlSanitizer,
+            $this->definitionRegistry,
+            $this->parameterBag,
+            new StaticSystemConfigService([
+                'core.systemWideLoginRegistration.isCustomerBoundToSalesChannel' => $isCustomerBoundToSalesChannel,
+            ]),
+            $this->fileSystemOperator,
+            $this->refreshTokenTtl,
+        );
     }
 
     private function buildCustomerEntity(): CustomerEntity

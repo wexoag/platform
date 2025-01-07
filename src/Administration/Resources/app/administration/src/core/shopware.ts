@@ -31,6 +31,7 @@ import FlatTreeHelper from 'src/core/helper/flattree.helper';
 import SanitizerHelper from 'src/core/helper/sanitizer.helper';
 import DeviceHelper from 'src/core/helper/device.helper';
 import MiddlewareHelper from 'src/core/helper/middleware.helper';
+import { DiscountScopes, DiscountTypes, PromotionPermissions } from 'src/module/sw-promotion-v2/helper/promotion.helper';
 import data from 'src/core/data/index';
 import ApplicationBootstrapper from 'src/core/application';
 
@@ -44,7 +45,12 @@ import ApiServices from 'src/core/service/api';
 import ModuleFilterFactory from 'src/core/data/filter-factory.data';
 import type { VueI18n } from 'vue-i18n';
 import Store from 'src/app/store';
+import { createExtendableSetup, overrideComponentSetup } from 'src/app/adapter/composition-extension-system';
+import * as Vue from 'vue';
+import type { DefineComponent, Ref } from 'vue';
+import InAppPurchase from './in-app-purchase';
 import ExtensionApi from './extension-api';
+import { LineItemType } from '../module/sw-order/order.types';
 
 /** Initialize feature flags at the beginning */
 if (window.hasOwnProperty('_features_')) {
@@ -105,6 +111,11 @@ application
     });
 
 class ShopwareClass implements CustomShopwareProperties {
+    /**
+     * @private
+     */
+    static #overrideComponents: Ref<Array<DefineComponent<unknown, unknown, unknown>>> = Vue.ref([]);
+
     public Module = {
         register: ModuleFactory.registerModule,
         getModuleRegistry: ModuleFactory.getModuleRegistry,
@@ -124,6 +135,21 @@ class ShopwareClass implements CustomShopwareProperties {
         registerComponentHelper: AsyncComponentFactory.registerComponentHelper,
         markComponentAsSync: AsyncComponentFactory.markComponentAsSync,
         isSyncComponent: AsyncComponentFactory.isSyncComponent,
+        createExtendableSetup: createExtendableSetup,
+        overrideComponentSetup: overrideComponentSetup,
+
+        /**
+         * @experimental stableVersion:v6.8.0 feature:ADMIN_COMPOSITION_API_EXTENSION_SYSTEM
+         */
+        registerOverrideComponent: (component: DefineComponent<unknown, unknown, unknown>) => {
+            ShopwareClass.#overrideComponents.value.push(component);
+        },
+        /**
+         * @experimental stableVersion:v6.8.0 feature:ADMIN_COMPOSITION_API_EXTENSION_SYSTEM
+         */
+        getOverrideComponents: () => {
+            return ShopwareClass.#overrideComponents.value;
+        },
     };
 
     public Template = {
@@ -182,6 +208,10 @@ class ShopwareClass implements CustomShopwareProperties {
     public Application = application;
 
     public Feature = Feature;
+
+    public InAppPurchase = InAppPurchase;
+
+    public Vue = Vue;
 
     public ApiService = {
         register: ApiServiceFactory.register,
@@ -251,6 +281,14 @@ class ShopwareClass implements CustomShopwareProperties {
         RefreshTokenHelper: RefreshTokenHelper,
         SanitizerHelper: SanitizerHelper,
         DeviceHelper: DeviceHelper,
+        PromotionHelper: {
+            DiscountScopes,
+            DiscountTypes,
+            PromotionPermissions,
+        },
+        OrderHelper: {
+            LineItemType,
+        },
     };
 
     /**
@@ -266,7 +304,7 @@ class ShopwareClass implements CustomShopwareProperties {
      *     ...
      *     compatConfig: Shopware.compatConfig,
      *     ...
- *   * });
+     *   * });
      */
     public compatConfig = {
         GLOBAL_MOUNT: !window._features_.DISABLE_VUE_COMPAT,
@@ -320,6 +358,9 @@ class ShopwareClass implements CustomShopwareProperties {
 }
 
 const ShopwareInstance = new ShopwareClass();
+
+// Freeze InAppPurchase to prevent modifications
+Object.defineProperty(ShopwareInstance, 'InAppPurchase', { configurable: false, writable: false });
 
 // Only works for webpack order of imports
 if (!window._features_.ADMIN_VITE) {

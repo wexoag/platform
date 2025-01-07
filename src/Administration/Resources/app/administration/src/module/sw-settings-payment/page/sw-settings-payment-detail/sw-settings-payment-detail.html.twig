@@ -19,7 +19,7 @@
             :disabled="isLoading || undefined"
             @click="onCancel"
         >
-            {{ $tc('sw-settings-payment.detail.buttonCancel') }}
+            {{ $tc('global.default.cancel') }}
         </sw-button>
         {% endblock %}
 
@@ -260,7 +260,8 @@
                 >
                     <sw-alert
                         v-if="forbidDelete"
-                        variant="info">
+                        variant="info"
+                    >
                         {{ $tc('sw-settings-payment.detail.delete.textAlert') }}
                     </sw-alert>
 
@@ -281,7 +282,8 @@
                     v-if="showDeleteModal && acl.can('payment.deleter')"
                     :title="$tc('global.default.warning')"
                     variant="default"
-                    @modal-close="showDeleteModal = false">
+                    @modal-close="showDeleteModal = false"
+                >
 
                     {% block sw_settings_payment_detail_delete_modal_info %}
                     <div class="sw_theme_manager__confirm-delete-text">
@@ -296,8 +298,9 @@
                         {% block sw_settings_payment_detail_reset_modal_cancel %}
                         <sw-button
                             size="small"
-                            @click="showDeleteModal = false">
-                            {{ $tc('sw-settings-payment.detail.delete.modal.buttonCancel') }}
+                            @click="showDeleteModal = false"
+                        >
+                            {{ $tc('global.default.cancel') }}
                         </sw-button>
                         {% endblock %}
 
@@ -306,7 +309,8 @@
                             :disabled="deletionInProcess || undefined"
                             variant="danger"
                             size="small"
-                            @click="deletePaymentMethod">
+                            @click="deletePaymentMethod"
+                        >
                             {{ $tc('sw-settings-payment.detail.delete.modal.buttonDelete') }}
                         </sw-button>
                         {% endblock %}

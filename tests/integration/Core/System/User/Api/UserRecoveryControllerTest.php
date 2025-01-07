@@ -12,6 +12,7 @@ use Shopware\Core\Framework\Log\Monolog\ExcludeFlowEventHandler;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Test\TestCaseBase\AdminFunctionalTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\EventDispatcherBehaviour;
+use Shopware\Core\Maintenance\User\Service\UserProvisioner;
 use Shopware\Core\System\User\Aggregate\UserRecovery\UserRecoveryEntity;
 use Shopware\Core\System\User\Recovery\UserRecoveryRequestEvent;
 use Shopware\Core\System\User\Recovery\UserRecoveryService;
@@ -25,7 +26,7 @@ class UserRecoveryControllerTest extends TestCase
     use AdminFunctionalTestBehaviour;
     use EventDispatcherBehaviour;
 
-    private const VALID_EMAIL = 'info@shopware.com';
+    private const VALID_EMAIL = UserProvisioner::USER_EMAIL_FALLBACK;
 
     public function testUpdateUserPassword(): void
     {
@@ -63,10 +64,10 @@ class UserRecoveryControllerTest extends TestCase
 
     public function testCreateUserRecovery(): void
     {
-        $logger = $this->getContainer()->get('monolog.logger.business_events');
+        $logger = static::getContainer()->get('monolog.logger.business_events');
         $handlers = $logger->getHandlers();
         $logger->setHandlers([
-            new ExcludeFlowEventHandler($this->getContainer()->get(DoctrineSQLHandler::class), [
+            new ExcludeFlowEventHandler(static::getContainer()->get(DoctrineSQLHandler::class), [
                 UserRecoveryRequestEvent::EVENT_NAME,
             ]),
         ]);
@@ -74,7 +75,7 @@ class UserRecoveryControllerTest extends TestCase
         $dispatchedEvent = null;
 
         $this->addEventListener(
-            $this->getContainer()->get('event_dispatcher'),
+            static::getContainer()->get('event_dispatcher'),
             UserRecoveryRequestEvent::EVENT_NAME,
             function (UserRecoveryRequestEvent $event) use (&$dispatchedEvent): void {
                 $dispatchedEvent = $event;
@@ -94,7 +95,7 @@ class UserRecoveryControllerTest extends TestCase
         $criteria->setLimit(1);
         $criteria->addFilter(new EqualsFilter('user.email', self::VALID_EMAIL));
 
-        $userRecovery = $this->getContainer()->get('user_recovery.repository')->search(
+        $userRecovery = static::getContainer()->get('user_recovery.repository')->search(
             $criteria,
             Context::createDefaultContext()
         )->first();
@@ -110,7 +111,7 @@ class UserRecoveryControllerTest extends TestCase
             new EqualsFilter('context.additionalData.eventName', $originalEvent),
         ]));
 
-        $logEntries = $this->getContainer()->get('log_entry.repository')->search(
+        $logEntries = static::getContainer()->get('log_entry.repository')->search(
             $logCriteria,
             Context::createDefaultContext()
         );
@@ -123,7 +124,7 @@ class UserRecoveryControllerTest extends TestCase
 
     private function createRecovery(string $email): void
     {
-        $this->getContainer()->get(UserRecoveryService::class)->generateUserRecovery(
+        static::getContainer()->get(UserRecoveryService::class)->generateUserRecovery(
             $email,
             Context::createDefaultContext()
         );
@@ -134,7 +135,7 @@ class UserRecoveryControllerTest extends TestCase
         $criteria = new Criteria();
         $criteria->setLimit(1);
 
-        static::assertInstanceOf(UserRecoveryEntity::class, $recovery = $this->getContainer()->get('user_recovery.repository')->search(
+        static::assertInstanceOf(UserRecoveryEntity::class, $recovery = static::getContainer()->get('user_recovery.repository')->search(
             $criteria,
             Context::createDefaultContext()
         )->first());

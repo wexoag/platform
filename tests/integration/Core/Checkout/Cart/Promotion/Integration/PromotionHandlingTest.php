@@ -9,9 +9,9 @@ use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
+use Shopware\Core\Test\Integration\Traits\Promotion\PromotionIntegrationTestBehaviour;
+use Shopware\Core\Test\Integration\Traits\Promotion\PromotionTestFixtureBehaviour;
 use Shopware\Core\Test\TestDefaults;
-use Shopware\Tests\Integration\Core\Checkout\Cart\Promotion\Helpers\Traits\PromotionIntegrationTestBehaviour;
-use Shopware\Tests\Integration\Core\Checkout\Cart\Promotion\Helpers\Traits\PromotionTestFixtureBehaviour;
 
 /**
  * @internal
@@ -29,9 +29,9 @@ class PromotionHandlingTest extends TestCase
     {
         parent::setUp();
 
-        $this->cartService = $this->getContainer()->get(CartService::class);
+        $this->cartService = static::getContainer()->get(CartService::class);
 
-        $this->context = $this->getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), TestDefaults::SALES_CHANNEL);
+        $this->context = static::getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), TestDefaults::SALES_CHANNEL);
     }
 
     /**
@@ -44,8 +44,8 @@ class PromotionHandlingTest extends TestCase
         $productId = Uuid::randomHex();
         $code = 'BF19';
 
-        $this->createTestFixtureProduct($productId, 119, 19, $this->getContainer(), $this->context);
-        $this->createTestFixturePercentagePromotion(Uuid::randomHex(), $code, 100, null, $this->getContainer());
+        $this->createTestFixtureProduct($productId, 119, 19, static::getContainer(), $this->context);
+        $this->createTestFixturePercentagePromotion(Uuid::randomHex(), $code, 100, null, static::getContainer());
 
         $cart = $this->cartService->getCart($this->context->getToken(), $this->context);
 
@@ -65,8 +65,8 @@ class PromotionHandlingTest extends TestCase
         $productId = Uuid::randomHex();
         $code = 'BF19';
 
-        $this->createTestFixtureProduct($productId, 119, 19, $this->getContainer(), $this->context);
-        $this->createTestFixturePercentagePromotion(Uuid::randomHex(), $code, 100, null, $this->getContainer());
+        $this->createTestFixtureProduct($productId, 119, 19, static::getContainer(), $this->context);
+        $this->createTestFixturePercentagePromotion(Uuid::randomHex(), $code, 100, null, static::getContainer());
 
         $cart = $this->cartService->getCart($this->context->getToken(), $this->context);
 

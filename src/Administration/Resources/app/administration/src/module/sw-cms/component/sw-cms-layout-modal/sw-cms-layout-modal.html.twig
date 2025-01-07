@@ -113,6 +113,7 @@
                     <sw-cms-list-item
                         :page="cmsPage"
                         :is-default="[defaultProductId, defaultCategoryId].includes(cmsPage.id)"
+                        @element-click="selectItem(cmsPage)"
                         @item-click="selectItem(cmsPage)"
                     />
                     {% endblock %}
@@ -214,10 +215,11 @@
     {% block sw_cms_layout_modal_footer %}
     <template #modal-footer>
         <sw-button @click="closeModal">
-            {{ $tc('sw-cms.components.cmsLayoutModal.actionCancel') }}
+            {{ $tc('global.default.cancel') }}
         </sw-button>
         <sw-button
             variant="primary"
+            class="sw-cms-layout-modal__button-select-layout"
             @click="selectLayout"
         >
             {{ $tc('sw-cms.components.cmsLayoutModal.actionConfirm') }}

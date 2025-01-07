@@ -11,8 +11,6 @@ use Shopware\Core\Installer\Configuration\ShopConfigurationService;
 
 /**
  * @internal
- *
- * @package services-settings
  */
 class ShopConfigurationServiceTest extends TestCase
 {
@@ -20,9 +18,9 @@ class ShopConfigurationServiceTest extends TestCase
 
     public function testUpdateShop(): void
     {
-        $service = new ShopConfigurationService();
+        $service = new ShopConfigurationService($this->getContainer()->get('event_dispatcher'));
 
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $service->updateShop([
             'name' => 'test-shop',

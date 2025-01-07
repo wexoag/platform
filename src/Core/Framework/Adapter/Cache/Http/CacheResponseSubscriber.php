@@ -8,9 +8,9 @@ use Shopware\Core\Checkout\Customer\Event\CustomerLoginEvent;
 use Shopware\Core\Checkout\Customer\Event\CustomerLogoutEvent;
 use Shopware\Core\Framework\Adapter\Cache\CacheStateSubscriber;
 use Shopware\Core\Framework\Adapter\Cache\Event\HttpCacheCookieEvent;
-use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Routing\MaintenanceModeResolver;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextService;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -20,7 +20,6 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -31,21 +30,31 @@ use Symfony\Component\HttpKernel\KernelEvents;
 #[Package('core')]
 class CacheResponseSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @deprecated tag:v6.7.0 - Will be removed, use CacheStateSubscriber::STATE_LOGGED_IN instead
+     */
     final public const STATE_LOGGED_IN = CacheStateSubscriber::STATE_LOGGED_IN;
+    /**
+     * @deprecated tag:v6.7.0 - Will be removed, use CacheStateSubscriber::STATE_CART_FILLED instead
+     */
     final public const STATE_CART_FILLED = CacheStateSubscriber::STATE_CART_FILLED;
 
-    final public const CURRENCY_COOKIE = 'sw-currency';
-    final public const CONTEXT_CACHE_COOKIE = HttpCacheKeyGenerator::CONTEXT_CACHE_COOKIE;
-
-    final public const SYSTEM_STATE_COOKIE = 'sw-states';
     /**
-     * @deprecated tag:v6.7.0 - Will be removed
+     * @deprecated tag:v6.7.0 - Will be removed, use HttpCacheKeyGenerator::CURRENCY_COOKIE instead
      */
-    final public const INVALIDATION_STATES_HEADER = 'sw-invalidation-states';
-
-    private const CORE_HTTP_CACHED_ROUTES = [
-        'api.acl.privileges.get',
-    ];
+    final public const CURRENCY_COOKIE = HttpCacheKeyGenerator::CURRENCY_COOKIE;
+    /**
+     * @deprecated tag:v6.7.0 - Will be removed, use HttpCacheKeyGenerator::CONTEXT_CACHE_COOKIE instead
+     */
+    final public const CONTEXT_CACHE_COOKIE = HttpCacheKeyGenerator::CONTEXT_CACHE_COOKIE;
+    /**
+     * @deprecated tag:v6.7.0 - Will be removed, use HttpCacheKeyGenerator::SYSTEM_STATE_COOKIE instead
+     */
+    final public const SYSTEM_STATE_COOKIE = HttpCacheKeyGenerator::SYSTEM_STATE_COOKIE;
+    /**
+     * @deprecated tag:v6.7.0 - Will be removed, use HttpCacheKeyGenerator::INVALIDATION_STATES_HEADER instead
+     */
+    final public const INVALIDATION_STATES_HEADER = HttpCacheKeyGenerator::INVALIDATION_STATES_HEADER;
 
     /**
      * @param array<string> $cookies
@@ -71,7 +80,6 @@ class CacheResponseSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST => 'addHttpCacheToCoreRoutes',
             KernelEvents::RESPONSE => [
                 ['setResponseCache', -1500],
                 ['setResponseCacheHeader', 1500],
@@ -79,16 +87,6 @@ class CacheResponseSubscriber implements EventSubscriberInterface
             CustomerLoginEvent::class => 'onCustomerLogin',
             CustomerLogoutEvent::class => 'onCustomerLogout',
         ];
-    }
-
-    public function addHttpCacheToCoreRoutes(RequestEvent $event): void
-    {
-        $request = $event->getRequest();
-        $route = $request->attributes->get('_route');
-
-        if (\in_array($route, self::CORE_HTTP_CACHED_ROUTES, true)) {
-            $request->attributes->set(PlatformRequest::ATTRIBUTE_HTTP_CACHE, true);
-        }
     }
 
     public function setResponseCache(ResponseEvent $event): void
@@ -137,15 +135,15 @@ class CacheResponseSubscriber implements EventSubscriberInterface
         if ($context->getCustomer() || $cart->getLineItems()->count() > 0) {
             $newValue = $this->buildCacheHash($request, $context);
 
-            if ($request->cookies->get(self::CONTEXT_CACHE_COOKIE, '') !== $newValue) {
-                $cookie = Cookie::create(self::CONTEXT_CACHE_COOKIE, $newValue);
+            if ($request->cookies->get(HttpCacheKeyGenerator::CONTEXT_CACHE_COOKIE, '') !== $newValue) {
+                $cookie = Cookie::create(HttpCacheKeyGenerator::CONTEXT_CACHE_COOKIE, $newValue);
                 $cookie->setSecureDefault($request->isSecure());
 
                 $response->headers->setCookie($cookie);
             }
-        } elseif ($request->cookies->has(self::CONTEXT_CACHE_COOKIE)) {
-            $response->headers->removeCookie(self::CONTEXT_CACHE_COOKIE);
-            $response->headers->clearCookie(self::CONTEXT_CACHE_COOKIE);
+        } elseif ($request->cookies->has(HttpCacheKeyGenerator::CONTEXT_CACHE_COOKIE)) {
+            $response->headers->removeCookie(HttpCacheKeyGenerator::CONTEXT_CACHE_COOKIE);
+            $response->headers->clearCookie(HttpCacheKeyGenerator::CONTEXT_CACHE_COOKIE);
         }
 
         /** @var bool|array{maxAge?: int, states?: list<string>}|null $cache */
@@ -166,7 +164,7 @@ class CacheResponseSubscriber implements EventSubscriberInterface
 
         $response->setSharedMaxAge($maxAge);
         $response->headers->set(
-            self::INVALIDATION_STATES_HEADER,
+            HttpCacheKeyGenerator::INVALIDATION_STATES_HEADER,
             implode(',', $cache['states'] ?? [])
         );
 
@@ -198,21 +196,6 @@ class CacheResponseSubscriber implements EventSubscriberInterface
         $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, '1');
     }
 
-    /**
-     * @param list<string> $cacheStates
-     * @param list<string> $states
-     */
-    private function hasInvalidationState(array $cacheStates, array $states): bool
-    {
-        foreach ($states as $state) {
-            if (\in_array($state, $cacheStates, true)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public function onCustomerLogin(CustomerLoginEvent $event): void
     {
         $request = $this->requestStack->getCurrentRequest();
@@ -236,38 +219,43 @@ class CacheResponseSubscriber implements EventSubscriberInterface
         $request->attributes->set(PlatformRequest::ATTRIBUTE_SALES_CHANNEL_CONTEXT_OBJECT, $context);
     }
 
-    private function buildCacheHash(Request $request, SalesChannelContext $context): string
+    /**
+     * @param list<string> $cacheStates
+     * @param list<string> $states
+     */
+    private function hasInvalidationState(array $cacheStates, array $states): bool
     {
-        if (Feature::isActive('cache_rework')) {
-            $parts = [
-                HttpCacheCookieEvent::RULE_IDS => $context->getRuleIds(),
-                HttpCacheCookieEvent::VERSION_ID => $context->getVersionId(),
-                HttpCacheCookieEvent::CURRENCY_ID => $context->getCurrencyId(),
-                HttpCacheCookieEvent::TAX_STATE => $context->getTaxState(),
-                HttpCacheCookieEvent::LOGGED_IN_STATE => $context->getCustomer() ? 'logged-in' : 'not-logged-in',
-            ];
-
-            foreach ($this->cookies as $cookie) {
-                if (!$request->cookies->has($cookie)) {
-                    continue;
-                }
-
-                $parts[$cookie] = $request->cookies->get($cookie);
+        foreach ($states as $state) {
+            if (\in_array($state, $cacheStates, true)) {
+                return true;
             }
-
-            $event = new HttpCacheCookieEvent($request, $context, $parts);
-            $this->dispatcher->dispatch($event);
-
-            return md5(json_encode($event->getParts(), \JSON_THROW_ON_ERROR));
         }
 
-        return md5(json_encode([
-            $context->getRuleIds(),
-            $context->getContext()->getVersionId(),
-            $context->getCurrency()->getId(),
-            $context->getTaxState(),
-            $context->getCustomer() ? 'logged-in' : 'not-logged-in',
-        ], \JSON_THROW_ON_ERROR));
+        return false;
+    }
+
+    private function buildCacheHash(Request $request, SalesChannelContext $context): string
+    {
+        $parts = [
+            HttpCacheCookieEvent::RULE_IDS => $context->getRuleIds(),
+            HttpCacheCookieEvent::VERSION_ID => $context->getVersionId(),
+            HttpCacheCookieEvent::CURRENCY_ID => $context->getCurrencyId(),
+            HttpCacheCookieEvent::TAX_STATE => $context->getTaxState(),
+            HttpCacheCookieEvent::LOGGED_IN_STATE => $context->getCustomer() ? 'logged-in' : 'not-logged-in',
+        ];
+
+        foreach ($this->cookies as $cookie) {
+            if (!$request->cookies->has($cookie)) {
+                continue;
+            }
+
+            $parts[$cookie] = $request->cookies->get($cookie);
+        }
+
+        $event = new HttpCacheCookieEvent($request, $context, $parts);
+        $this->dispatcher->dispatch($event);
+
+        return Hasher::hash($event->getParts());
     }
 
     /**
@@ -281,9 +269,9 @@ class CacheResponseSubscriber implements EventSubscriberInterface
         $states = $this->getSystemStates($request, $context, $cart);
 
         if (empty($states)) {
-            if ($request->cookies->has(self::SYSTEM_STATE_COOKIE)) {
-                $response->headers->removeCookie(self::SYSTEM_STATE_COOKIE);
-                $response->headers->clearCookie(self::SYSTEM_STATE_COOKIE);
+            if ($request->cookies->has(HttpCacheKeyGenerator::SYSTEM_STATE_COOKIE)) {
+                $response->headers->removeCookie(HttpCacheKeyGenerator::SYSTEM_STATE_COOKIE);
+                $response->headers->clearCookie(HttpCacheKeyGenerator::SYSTEM_STATE_COOKIE);
             }
 
             return [];
@@ -291,8 +279,8 @@ class CacheResponseSubscriber implements EventSubscriberInterface
 
         $newStates = implode(',', $states);
 
-        if ($request->cookies->get(self::SYSTEM_STATE_COOKIE) !== $newStates) {
-            $cookie = Cookie::create(self::SYSTEM_STATE_COOKIE, $newStates);
+        if ($request->cookies->get(HttpCacheKeyGenerator::SYSTEM_STATE_COOKIE) !== $newStates) {
+            $cookie = Cookie::create(HttpCacheKeyGenerator::SYSTEM_STATE_COOKIE, $newStates);
             $cookie->setSecureDefault($request->isSecure());
 
             $response->headers->setCookie($cookie);
@@ -307,14 +295,14 @@ class CacheResponseSubscriber implements EventSubscriberInterface
     private function getSystemStates(Request $request, SalesChannelContext $context, Cart $cart): array
     {
         $states = [];
-        $swStates = (string) $request->cookies->get(self::SYSTEM_STATE_COOKIE);
+        $swStates = (string) $request->cookies->get(HttpCacheKeyGenerator::SYSTEM_STATE_COOKIE);
         if ($swStates !== '') {
             $states = array_flip(explode(',', $swStates));
         }
 
-        $states = $this->switchState($states, self::STATE_LOGGED_IN, $context->getCustomer() !== null);
+        $states = $this->switchState($states, CacheStateSubscriber::STATE_LOGGED_IN, $context->getCustomer() !== null);
 
-        $states = $this->switchState($states, self::STATE_CART_FILLED, $cart->getLineItems()->count() > 0);
+        $states = $this->switchState($states, CacheStateSubscriber::STATE_CART_FILLED, $cart->getLineItems()->count() > 0);
 
         return array_keys($states);
     }
@@ -345,7 +333,7 @@ class CacheResponseSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $cookie = Cookie::create(self::CURRENCY_COOKIE, $currencyId);
+        $cookie = Cookie::create(HttpCacheKeyGenerator::CURRENCY_COOKIE, $currencyId);
         $cookie->setSecureDefault($request->isSecure());
 
         $response->headers->setCookie($cookie);

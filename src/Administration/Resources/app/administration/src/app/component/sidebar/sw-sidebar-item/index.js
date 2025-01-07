@@ -59,7 +59,10 @@ Component.register('sw-sidebar-item', {
             required: false,
             default: 'top',
             validator(value) {
-                return ['top', 'bottom'].includes(value);
+                return [
+                    'top',
+                    'bottom',
+                ].includes(value);
             },
         },
 
@@ -93,6 +96,8 @@ Component.register('sw-sidebar-item', {
     data() {
         return {
             isActive: false,
+            toggleActiveListener: [],
+            closeContentListener: [],
         };
     },
 
@@ -131,7 +136,7 @@ Component.register('sw-sidebar-item', {
                 let parent = this.$parent;
 
                 while (parent) {
-                    if (parent.$options.name === 'sw-sidebar') {
+                    if (parent.$options.name === 'sw-sidebar' || parent.$options.name === 'sw-sidebar__wrapped') {
                         parent.registerSidebarItem(this);
                         return;
                     }
@@ -147,12 +152,23 @@ Component.register('sw-sidebar-item', {
             }
         },
 
+        registerToggleActiveListener(listener) {
+            this.toggleActiveListener.push(listener);
+        },
+
+        registerCloseContentListener(listener) {
+            this.closeContentListener.push(listener);
+        },
+
         openContent() {
             if (this.showContent) {
                 return;
             }
 
             this.$emit('toggle-active', this);
+            this.toggleActiveListener.forEach((listener) => {
+                listener(this);
+            });
         },
 
         closeContent() {
@@ -160,6 +176,9 @@ Component.register('sw-sidebar-item', {
                 this.isActive = false;
 
                 this.$emit('close-content');
+                this.closeContentListener.forEach((listener) => {
+                    listener(this);
+                });
             }
         },
 

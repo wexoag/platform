@@ -46,7 +46,6 @@ class TestBootstrapper
 
     public function bootstrap(): TestBootstrapper
     {
-        $_SERVER['TESTS_RUNNING'] = true;
         $_SERVER['PROJECT_ROOT'] = $_ENV['PROJECT_ROOT'] = $this->getProjectDir();
         if (!\defined('TEST_PROJECT_DIR')) {
             \define('TEST_PROJECT_DIR', $_SERVER['PROJECT_ROOT']);
@@ -81,7 +80,7 @@ class TestBootstrapper
 
     public function getStaticAnalyzeKernel(): StaticAnalyzeKernel
     {
-        $pluginLoader = new DbalKernelPluginLoader($this->getClassLoader(), null, $this->getContainer()->get(Connection::class));
+        $pluginLoader = new DbalKernelPluginLoader($this->getClassLoader(), null, $this->getKernelContainer()->get(Connection::class));
 
         KernelFactory::$kernelClass = StaticAnalyzeKernel::class;
 
@@ -305,6 +304,25 @@ class TestBootstrapper
         return $this->forceInstall = (bool) ($_SERVER['FORCE_INSTALL'] ?? false);
     }
 
+    public function getPluginPath(string $pluginName): ?string
+    {
+        $allPluginDirectories = \glob($this->getProjectDir() . '/custom/*plugins/*', \GLOB_ONLYDIR) ?: [];
+
+        foreach ($allPluginDirectories as $pluginDir) {
+            if (!is_file($pluginDir . '/composer.json')) {
+                continue;
+            }
+
+            if (!is_file($pluginDir . '/src/' . $pluginName . '.php')) {
+                continue;
+            }
+
+            return $pluginDir;
+        }
+
+        return null;
+    }
+
     private function addPluginAutoloadDev(ClassLoader $classLoader): void
     {
         foreach ($this->activePlugins as $pluginName) {
@@ -343,25 +361,6 @@ class TestBootstrapper
         }
     }
 
-    public function getPluginPath(string $pluginName): ?string
-    {
-        $allPluginDirectories = \glob($this->getProjectDir() . '/custom/*plugins/*', \GLOB_ONLYDIR) ?: [];
-
-        foreach ($allPluginDirectories as $pluginDir) {
-            if (!is_file($pluginDir . '/composer.json')) {
-                continue;
-            }
-
-            if (!is_file($pluginDir . '/src/' . $pluginName . '.php')) {
-                continue;
-            }
-
-            return $pluginDir;
-        }
-
-        return null;
-    }
-
     /**
      * @param list<string> $psr
      *
@@ -382,7 +381,7 @@ class TestBootstrapper
         return KernelLifecycleManager::getKernel();
     }
 
-    private function getContainer(): ContainerInterface
+    private function getKernelContainer(): ContainerInterface
     {
         return $this->getKernel()->getContainer();
     }
@@ -390,7 +389,7 @@ class TestBootstrapper
     private function dbExists(): bool
     {
         try {
-            $connection = $this->getContainer()->get(Connection::class);
+            $connection = $this->getKernelContainer()->get(Connection::class);
             $connection->executeQuery('SELECT 1 FROM `plugin`')->fetchAllAssociative();
 
             return true;

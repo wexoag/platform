@@ -11,7 +11,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\RuleAreas;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
-use Shopware\Core\Framework\Util\Json;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -49,7 +49,7 @@ class CachedProductCrossSellingRoute extends AbstractProductCrossSellingRoute
 
     public static function buildName(string $id): string
     {
-        return ProductCrossSellingRoute::buildName($id);
+        return 'cross-selling-route-' . $id;
     }
 
     #[Route(path: '/store-api/product/{productId}/cross-selling', name: 'store-api.product.cross-selling', methods: ['POST'], defaults: ['_entity' => 'product'])]
@@ -96,7 +96,7 @@ class CachedProductCrossSellingRoute extends AbstractProductCrossSellingRoute
             return null;
         }
 
-        return self::buildName($productId) . '-' . md5(Json::encode($event->getParts()));
+        return self::buildName($productId) . '-' . Hasher::hash($event->getParts());
     }
 
     /**
@@ -107,6 +107,7 @@ class CachedProductCrossSellingRoute extends AbstractProductCrossSellingRoute
         $tags = array_merge(
             $this->tracer->get(self::buildName($productId)),
             $this->extractStreamTags($response),
+            [EntityCacheKeyGenerator::buildProductTag($productId)],
             $this->extractProductIds($response),
             [self::buildName($productId)]
         );

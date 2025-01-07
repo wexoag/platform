@@ -2,7 +2,6 @@ import { mount } from '@vue/test-utils';
 
 /**
  * @package services-settings
- * @group disabledCompat
  */
 
 const { Context } = Shopware;
@@ -174,9 +173,12 @@ describe('module/sw-flow/view/listing/sw-flow-list-flow-templates', () => {
         });
         await flushPromises();
 
-        expect(wrapper.vm.flowTemplateRepository.search).toHaveBeenNthCalledWith(1, expect.objectContaining({
-            term: 'test-term',
-        }));
+        expect(wrapper.vm.flowTemplateRepository.search).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                term: 'test-term',
+            }),
+        );
     });
 
     it('should correctly align table columns', async () => {

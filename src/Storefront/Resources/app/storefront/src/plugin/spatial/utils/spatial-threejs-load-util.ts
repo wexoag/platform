@@ -10,7 +10,7 @@ export async function loadThreeJs(): Promise<void> {
             isLoaded: false,
             promise: null,
             promiseResolve: null,
-        }
+        };
     }
 
     /* eslint-disable */
@@ -62,6 +62,10 @@ export async function loadThreeJs(): Promise<void> {
 
     if (!window.threeJsAddons?.DRACOLibPath) {
         window.threeJsAddons.DRACOLibPath = 'three/examples/jsm/libs/draco/';
+    }
+
+    if (!window.threeJsAddons?.MathUtils) {
+        window.threeJsAddons.MathUtils = await import('three/src/math/MathUtils.js');
     }
 
     window.loadThreeJsUtil.promiseResolve();

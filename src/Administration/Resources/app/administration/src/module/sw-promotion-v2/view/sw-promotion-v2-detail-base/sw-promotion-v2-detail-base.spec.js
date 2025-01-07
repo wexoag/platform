@@ -1,6 +1,5 @@
 /**
- * @package buyers-experience
- * @group disabledCompat
+ * @package checkout
  */
 import { mount } from '@vue/test-utils';
 
@@ -108,7 +107,7 @@ describe('src/module/sw-promotion-v2/component/sw-promotion-v2-detail-base', () 
 
         const wrapper = await createWrapper();
 
-        wrapper.findAllComponents('.sw-field').forEach(el => {
+        wrapper.findAllComponents('.sw-field').forEach((el) => {
             expect(el.props('disabled')).toBe(true);
         });
         expect(wrapper.findComponent('.sw-button-process').props('disabled')).toBe(true);
@@ -119,7 +118,7 @@ describe('src/module/sw-promotion-v2/component/sw-promotion-v2-detail-base', () 
 
         const wrapper = await createWrapper();
 
-        wrapper.findAllComponents('.sw-field').forEach(el => expect(el.props('disabled')).toBeFalsy());
+        wrapper.findAllComponents('.sw-field').forEach((el) => expect(el.props('disabled')).toBeFalsy());
         expect(wrapper.findComponent('.sw-button-process').props('disabled')).toBe(false);
     });
 });

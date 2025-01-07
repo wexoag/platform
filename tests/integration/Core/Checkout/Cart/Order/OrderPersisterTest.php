@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\CartBehavior;
 use Shopware\Core\Checkout\Cart\CartException;
+use Shopware\Core\Checkout\Cart\CartSerializationCleaner;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\Order\OrderConverter;
 use Shopware\Core\Checkout\Cart\Order\OrderPersister;
@@ -46,11 +47,14 @@ class OrderPersisterTest extends TestCase
 
     private OrderConverter $orderConverter;
 
+    private CartSerializationCleaner $serializationCleaner;
+
     protected function setUp(): void
     {
-        $this->orderPersister = $this->getContainer()->get(OrderPersister::class);
-        $this->cartProcessor = $this->getContainer()->get(Processor::class);
-        $this->orderConverter = $this->getContainer()->get(OrderConverter::class);
+        $this->orderPersister = static::getContainer()->get(OrderPersister::class);
+        $this->cartProcessor = static::getContainer()->get(Processor::class);
+        $this->orderConverter = static::getContainer()->get(OrderConverter::class);
+        $this->serializationCleaner = static::getContainer()->get(CartSerializationCleaner::class);
     }
 
     public function testSave(): void
@@ -97,7 +101,7 @@ class OrderPersisterTest extends TestCase
             )
         );
 
-        $persister = new OrderPersister($repository, $this->orderConverter);
+        $persister = new OrderPersister($repository, $this->orderConverter, $this->serializationCleaner);
 
         $persister->persist($cart, $this->getSalesChannelContext());
     }
@@ -110,7 +114,7 @@ class OrderPersisterTest extends TestCase
                 ->setPriceDefinition(new AbsolutePriceDefinition(1))
         );
 
-        $context = $this->getContainer()->get(SalesChannelContextFactory::class)
+        $context = static::getContainer()->get(SalesChannelContextFactory::class)
             ->create(Uuid::randomHex(), TestDefaults::SALES_CHANNEL);
 
         $processedCart = $this->cartProcessor->process($cart, $context, new CartBehavior());
@@ -133,11 +137,11 @@ class OrderPersisterTest extends TestCase
         $billingAddress = new CustomerAddressEntity();
         $billingAddress->setId('SWAG-ADDRESS-ID-1');
         $billingAddress->setSalutationId($this->getValidSalutationId());
-        $billingAddress->setFirstName($faker->firstName);
-        $billingAddress->setLastName($faker->lastName);
-        $billingAddress->setStreet($faker->streetAddress);
-        $billingAddress->setZipcode($faker->postcode);
-        $billingAddress->setCity($faker->city);
+        $billingAddress->setFirstName($faker->firstName());
+        $billingAddress->setLastName($faker->lastName());
+        $billingAddress->setStreet($faker->streetAddress());
+        $billingAddress->setZipcode($faker->postcode());
+        $billingAddress->setCity($faker->city());
         $billingAddress->setCountryId('SWAG-AREA-COUNTRY-ID-1');
 
         $customer = new CustomerEntity();
@@ -145,8 +149,8 @@ class OrderPersisterTest extends TestCase
         $customer->setDefaultBillingAddress($billingAddress);
         $customer->setEmail('test@example.com');
         $customer->setSalutationId($this->getValidSalutationId());
-        $customer->setFirstName($faker->firstName);
-        $customer->setLastName($faker->lastName);
+        $customer->setFirstName($faker->firstName());
+        $customer->setLastName($faker->lastName());
         $customer->setCustomerNumber('Test');
 
         return $customer;

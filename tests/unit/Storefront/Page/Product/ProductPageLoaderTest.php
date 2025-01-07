@@ -4,11 +4,6 @@ namespace Shopware\Tests\Unit\Storefront\Page\Product;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Shopware\Core\Checkout\Cart\Delivery\Struct\ShippingLocation;
-use Shopware\Core\Checkout\Customer\Aggregate\CustomerGroup\CustomerGroupEntity;
-use Shopware\Core\Checkout\Customer\CustomerEntity;
-use Shopware\Core\Checkout\Payment\PaymentMethodEntity;
-use Shopware\Core\Checkout\Shipping\ShippingMethodEntity;
 use Shopware\Core\Content\Cms\Aggregate\CmsBlock\CmsBlockCollection;
 use Shopware\Core\Content\Cms\Aggregate\CmsBlock\CmsBlockEntity;
 use Shopware\Core\Content\Cms\Aggregate\CmsSection\CmsSectionCollection;
@@ -23,21 +18,20 @@ use Shopware\Core\Content\Product\Aggregate\ProductReview\ProductReviewDefinitio
 use Shopware\Core\Content\Product\Aggregate\ProductReview\ProductReviewEntity;
 use Shopware\Core\Content\Product\Cms\CrossSellingCmsElementResolver;
 use Shopware\Core\Content\Product\Cms\ProductDescriptionReviewsCmsElementResolver;
+use Shopware\Core\Content\Product\SalesChannel\CrossSelling\CrossSellingElementCollection;
 use Shopware\Core\Content\Product\SalesChannel\Detail\ProductDetailRoute;
 use Shopware\Core\Content\Product\SalesChannel\Detail\ProductDetailRouteResponse;
 use Shopware\Core\Content\Product\SalesChannel\Review\ProductReviewResult;
 use Shopware\Core\Content\Product\SalesChannel\Review\RatingMatrix;
 use Shopware\Core\Content\Product\SalesChannel\SalesChannelProductEntity;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\Pricing\CashRoundingConfig;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\Country\CountryEntity;
-use Shopware\Core\System\Currency\CurrencyEntity;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SalesChannel\SalesChannelEntity;
-use Shopware\Core\System\Tax\TaxCollection;
 use Shopware\Core\Test\Annotation\DisabledFeatures;
+use Shopware\Core\Test\Generator;
 use Shopware\Storefront\Page\GenericPageLoader;
 use Shopware\Storefront\Page\Product\ProductPageLoader;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -77,7 +71,7 @@ class ProductPageLoaderTest extends TestCase
         static::assertInstanceOf(ProductReviewEntity::class, $firstReview);
         static::assertSame('this product changed my life', $firstReview->getComment());
         $crossSellingDeprecated = $page->getCrossSellings();
-        static::assertNotNull($crossSellingDeprecated);
+        static::assertInstanceOf(CrossSellingElementCollection::class, $crossSellingDeprecated);
         static::assertCount(0, $crossSellingDeprecated);
 
         $page->assign([
@@ -106,6 +100,10 @@ class ProductPageLoaderTest extends TestCase
             ->addAssociation('properties.group')
             ->addAssociation('mainCategories.category')
             ->addAssociation('media');
+
+        $criteria->getAssociation('media')->addSorting(
+            new FieldSorting('position')
+        );
 
         $productDetailRouteMock = $this->createMock(ProductDetailRoute::class);
         $productDetailRouteMock
@@ -139,21 +137,8 @@ class ProductPageLoaderTest extends TestCase
         $salesChannelEntity = new SalesChannelEntity();
         $salesChannelEntity->setId('salesChannelId');
 
-        return new SalesChannelContext(
-            Context::createDefaultContext(),
-            'foo',
-            'bar',
-            $salesChannelEntity,
-            new CurrencyEntity(),
-            new CustomerGroupEntity(),
-            new TaxCollection(),
-            new PaymentMethodEntity(),
-            new ShippingMethodEntity(),
-            new ShippingLocation(new CountryEntity(), null, null),
-            new CustomerEntity(),
-            new CashRoundingConfig(2, 0.01, true),
-            new CashRoundingConfig(2, 0.01, true),
-            []
+        return Generator::createSalesChannelContext(
+            salesChannel: $salesChannelEntity,
         );
     }
 
@@ -162,12 +147,16 @@ class ProductPageLoaderTest extends TestCase
         $reviewBlock = $this->getReviewBlock($productEntity);
         $crossSellingBlock = $this->getCrossSellingBlock();
 
-        $cmsSectionEntity = new CmsSectionEntity();
-        $cmsSectionEntity->setId(Uuid::randomHex());
-        $cmsSectionEntity->setBlocks(new CmsBlockCollection([$reviewBlock, $crossSellingBlock]));
+        $firstCmsSectionEntity = new CmsSectionEntity();
+        $firstCmsSectionEntity->setId(Uuid::randomHex());
+        $firstCmsSectionEntity->setBlocks(new CmsBlockCollection([$reviewBlock]));
+
+        $secondCmsSectionEntity = new CmsSectionEntity();
+        $secondCmsSectionEntity->setId(Uuid::randomHex());
+        $secondCmsSectionEntity->setBlocks(new CmsBlockCollection([$crossSellingBlock]));
 
         $cmsPageEntity = new CmsPageEntity();
-        $cmsPageEntity->setSections(new CmsSectionCollection([$cmsSectionEntity]));
+        $cmsPageEntity->setSections(new CmsSectionCollection([$firstCmsSectionEntity, $secondCmsSectionEntity]));
 
         return $cmsPageEntity;
     }

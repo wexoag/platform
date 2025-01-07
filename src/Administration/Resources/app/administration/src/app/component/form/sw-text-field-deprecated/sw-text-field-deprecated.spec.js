@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -33,9 +32,7 @@ async function createWrapper(options = {}) {
 }
 
 async function createWrappedComponent() {
-    const wrapper = mount(await Shopware.Component.build(
-        'sw-text-field-mock',
-    ), {
+    const wrapper = mount(await Shopware.Component.build('sw-text-field-mock'), {
         global: {
             stubs: {
                 'sw-text-field': await wrapTestComponent('sw-text-field'),

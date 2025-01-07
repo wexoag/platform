@@ -23,10 +23,11 @@ class JsonRequestTransformerListener implements EventSubscriberInterface
 
     public function onRequest(RequestEvent $event): void
     {
-        if ($event->getRequest()->getContent() && mb_stripos($event->getRequest()->headers->get('Content-Type', ''), 'application/json') === 0) {
-            $data = json_decode($event->getRequest()->getContent(), true);
-
-            if (json_last_error() !== \JSON_ERROR_NONE) {
+        // It's important to check the content-type before, otherwise we read the content
+        if (str_starts_with($event->getRequest()->headers->get('Content-Type', ''), 'application/json') && $event->getRequest()->getContent()) {
+            try {
+                $data = json_decode($event->getRequest()->getContent(), true, flags: \JSON_THROW_ON_ERROR);
+            } catch (\JsonException $e) {
                 throw new BadRequestHttpException('The JSON payload is malformed.');
             }
 

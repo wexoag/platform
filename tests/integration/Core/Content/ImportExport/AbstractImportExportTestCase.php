@@ -17,6 +17,7 @@ use Shopware\Core\Content\ImportExport\Processing\Reader\CsvReaderFactory;
 use Shopware\Core\Content\ImportExport\Processing\Writer\CsvFileWriterFactory;
 use Shopware\Core\Content\ImportExport\Service\FileService;
 use Shopware\Core\Content\ImportExport\Service\ImportExportService;
+use Shopware\Core\Content\ImportExport\Strategy\Import\OneByOneImportStrategy;
 use Shopware\Core\Content\ImportExport\Struct\Config;
 use Shopware\Core\Content\ImportExport\Struct\Progress;
 use Shopware\Core\Content\Media\File\FileSaver;
@@ -71,9 +72,9 @@ abstract class AbstractImportExportTestCase extends TestCase
 
     protected function setUp(): void
     {
-        $this->productRepository = $this->getContainer()->get('product.repository');
+        $this->productRepository = static::getContainer()->get('product.repository');
 
-        $this->listener = $this->getContainer()->get(EventDispatcherInterface::class);
+        $this->listener = static::getContainer()->get(EventDispatcherInterface::class);
     }
 
     /**
@@ -97,7 +98,7 @@ abstract class AbstractImportExportTestCase extends TestCase
         $context = Context::createDefaultContext();
         $context->addState(EntityIndexerRegistry::DISABLE_INDEXING);
 
-        $importExportService = $this->getContainer()->get(ImportExportService::class);
+        $importExportService = static::getContainer()->get(ImportExportService::class);
         $expireDate = new \DateTimeImmutable('2099-01-01');
 
         // setup profile
@@ -115,23 +116,25 @@ abstract class AbstractImportExportTestCase extends TestCase
 
         $progress = new Progress($logEntity->getId(), Progress::STATE_PROGRESS, 0, null);
 
-        $pipeFactory = $this->getContainer()->get(PipeFactory::class);
-        $readerFactory = $this->getContainer()->get(CsvReaderFactory::class);
-        $writerFactory = $this->getContainer()->get(CsvFileWriterFactory::class);
+        $pipeFactory = static::getContainer()->get(PipeFactory::class);
+        $readerFactory = static::getContainer()->get(CsvReaderFactory::class);
+        $writerFactory = static::getContainer()->get(CsvFileWriterFactory::class);
+        $eventDispatcher = static::getContainer()->get(EventDispatcherInterface::class);
 
-        $mockRepository = new MockRepository($this->getContainer()->get(CustomerDefinition::class));
+        $mockRepository = new MockRepository(static::getContainer()->get(CustomerDefinition::class));
 
         $importExport = new ImportExport(
             $importExportService,
             $logEntity,
-            $this->getContainer()->get('shopware.filesystem.private'),
-            $this->getContainer()->get('event_dispatcher'),
-            $this->getContainer()->get(Connection::class),
+            static::getContainer()->get('shopware.filesystem.private'),
+            static::getContainer()->get('event_dispatcher'),
+            static::getContainer()->get(Connection::class),
             $mockRepository,
             $pipeFactory->create($logEntity),
             $readerFactory->create($logEntity),
             $writerFactory->create($logEntity),
-            $this->getContainer()->get(FileService::class),
+            static::getContainer()->get(FileService::class),
+            new OneByOneImportStrategy($eventDispatcher, $mockRepository),
             5,
             5
         );
@@ -160,7 +163,7 @@ abstract class AbstractImportExportTestCase extends TestCase
             'active' => true,
             'tax' => ['name' => 'test', 'taxRate' => 15],
         ];
-        $this->getContainer()->get('product.repository')->create([$data], Context::createDefaultContext());
+        static::getContainer()->get('product.repository')->create([$data], Context::createDefaultContext());
 
         return $productId;
     }
@@ -179,7 +182,7 @@ abstract class AbstractImportExportTestCase extends TestCase
             'useIndividualCodes' => true,
         ], $promotionOverride);
 
-        $this->getContainer()->get('promotion.repository')->upsert([$promotion], Context::createDefaultContext());
+        static::getContainer()->get('promotion.repository')->upsert([$promotion], Context::createDefaultContext());
 
         return $promotion;
     }
@@ -197,7 +200,7 @@ abstract class AbstractImportExportTestCase extends TestCase
             'code' => 'TestCode',
         ], $promotionCodeOverride);
 
-        $this->getContainer()->get('promotion_individual_code.repository')->upsert([$promotionCode], Context::createDefaultContext());
+        static::getContainer()->get('promotion_individual_code.repository')->upsert([$promotionCode], Context::createDefaultContext());
 
         return $promotionCode;
     }
@@ -205,7 +208,7 @@ abstract class AbstractImportExportTestCase extends TestCase
     protected function createRule(?string $ruleId = null): string
     {
         $ruleId ??= Uuid::randomHex();
-        $this->getContainer()->get('rule.repository')->create(
+        static::getContainer()->get('rule.repository')->create(
             [['id' => $ruleId, 'name' => 'Demo rule', 'priority' => 1]],
             Context::createDefaultContext()
         );
@@ -219,7 +222,7 @@ abstract class AbstractImportExportTestCase extends TestCase
         $criteria->addFilter(new EqualsFilter('systemDefault', true));
         $criteria->addFilter(new EqualsFilter('sourceEntity', $entity));
 
-        $id = $this->getContainer()->get('import_export_profile.repository')->searchIds($criteria, Context::createDefaultContext())->firstId();
+        $id = static::getContainer()->get('import_export_profile.repository')->searchIds($criteria, Context::createDefaultContext())->firstId();
         static::assertNotNull($id);
 
         return $id;
@@ -228,7 +231,7 @@ abstract class AbstractImportExportTestCase extends TestCase
     protected function cloneDefaultProfile(string $entity): ImportExportProfileEntity
     {
         /** @var EntityRepository<EntityCollection<ImportExportProfileEntity>> $profileRepository */
-        $profileRepository = $this->getContainer()->get('import_export_profile.repository');
+        $profileRepository = static::getContainer()->get('import_export_profile.repository');
 
         $systemDefaultProfileId = $this->getDefaultProfileId($entity);
         $newId = Uuid::randomHex();
@@ -252,7 +255,7 @@ abstract class AbstractImportExportTestCase extends TestCase
      */
     protected function updateProfileMapping(string $profileId, array $mappings): void
     {
-        $this->getContainer()->get('import_export_profile.repository')->update([
+        static::getContainer()->get('import_export_profile.repository')->update([
             [
                 'id' => $profileId,
                 'mapping' => $mappings,
@@ -265,7 +268,7 @@ abstract class AbstractImportExportTestCase extends TestCase
      */
     protected function updateProfileUpdateBy(string $profileId, array $updateBy): void
     {
-        $this->getContainer()->get('import_export_profile.repository')->update([
+        static::getContainer()->get('import_export_profile.repository')->update([
             [
                 'id' => $profileId,
                 'updateBy' => $updateBy,
@@ -278,7 +281,7 @@ abstract class AbstractImportExportTestCase extends TestCase
      */
     protected function updateProfileConfig(string $profileId, array $config): void
     {
-        $this->getContainer()->get('import_export_profile.repository')->update([
+        static::getContainer()->get('import_export_profile.repository')->update([
             [
                 'id' => $profileId,
                 'config' => $config,
@@ -296,16 +299,16 @@ abstract class AbstractImportExportTestCase extends TestCase
         $catId2 = Uuid::randomHex();
         $taxId = Uuid::randomHex();
 
-        $this->getContainer()->get('product_manufacturer.repository')->upsert([
+        static::getContainer()->get('product_manufacturer.repository')->upsert([
             ['id' => $manufacturerId, 'name' => 'test'],
         ], Context::createDefaultContext());
 
-        $this->getContainer()->get('category.repository')->upsert([
+        static::getContainer()->get('category.repository')->upsert([
             ['id' => $catId1, 'name' => 'test'],
             ['id' => $catId2, 'name' => 'bar'],
         ], Context::createDefaultContext());
 
-        $this->getContainer()->get('tax.repository')->upsert([
+        static::getContainer()->get('tax.repository')->upsert([
             ['id' => $taxId, 'name' => 'test', 'taxRate' => 15],
         ], Context::createDefaultContext());
 
@@ -320,7 +323,7 @@ abstract class AbstractImportExportTestCase extends TestCase
         $mediaId = Uuid::randomHex();
         $context = Context::createDefaultContext();
 
-        $this->getContainer()->get('media.repository')->create(
+        static::getContainer()->get('media.repository')->create(
             [
                 [
                     'id' => $mediaId,
@@ -330,7 +333,7 @@ abstract class AbstractImportExportTestCase extends TestCase
         );
 
         try {
-            $this->getContainer()->get(FileSaver::class)->persistFileToMedia(
+            static::getContainer()->get(FileSaver::class)->persistFileToMedia(
                 $mediaFile,
                 'test-file',
                 $mediaId,
@@ -452,12 +455,13 @@ abstract class AbstractImportExportTestCase extends TestCase
         string $path,
         string $originalName,
         ?string $profileId = null,
-        bool $dryrun = false,
-        bool $absolutePath = false
+        bool $dryRun = false,
+        bool $absolutePath = false,
+        bool $useBatchImport = false
     ): Progress {
-        $factory = $this->getContainer()->get(ImportExportFactory::class);
+        $factory = static::getContainer()->get(ImportExportFactory::class);
 
-        $importExportService = $this->getContainer()->get(ImportExportService::class);
+        $importExportService = static::getContainer()->get(ImportExportService::class);
 
         $profileId ??= $this->getDefaultProfileId($entityName);
 
@@ -470,13 +474,13 @@ abstract class AbstractImportExportTestCase extends TestCase
             $expireDate,
             $file,
             [],
-            $dryrun
+            $dryRun
         );
 
         $progress = new Progress($logEntity->getId(), Progress::STATE_PROGRESS, 0, null);
         do {
             $progress = $importExportService->getProgress($logEntity->getId(), $progress->getOffset());
-            $importExport = $factory->create($logEntity->getId(), 5, 5);
+            $importExport = $factory->create($logEntity->getId(), 5, 5, $useBatchImport);
             $progress = $importExport->import($context, $progress->getOffset());
         } while (!$progress->isFinished());
 
@@ -485,9 +489,9 @@ abstract class AbstractImportExportTestCase extends TestCase
 
     protected function export(Context $context, string $entityName, ?Criteria $criteria = null, ?int $groupSize = null, ?string $profileId = null): Progress
     {
-        $factory = $this->getContainer()->get(ImportExportFactory::class);
+        $factory = static::getContainer()->get(ImportExportFactory::class);
 
-        $importExportService = $this->getContainer()->get(ImportExportService::class);
+        $importExportService = static::getContainer()->get(ImportExportService::class);
 
         $profileId ??= $this->getDefaultProfileId($entityName);
 
@@ -512,7 +516,7 @@ abstract class AbstractImportExportTestCase extends TestCase
         $criteria->addAssociation('file');
 
         /** @var EntityRepository<ImportExportLogCollection> $importExportLogRepo */
-        $importExportLogRepo = $this->getContainer()->get('import_export_log.repository');
+        $importExportLogRepo = static::getContainer()->get('import_export_log.repository');
 
         $log = $importExportLogRepo->search($criteria, Context::createDefaultContext())->getEntities()->first();
         static::assertNotNull($log);
@@ -532,7 +536,7 @@ abstract class AbstractImportExportTestCase extends TestCase
         $logEntity = $this->getLogEntity($invalidLogId);
         $config = Config::fromLog($logEntity);
         $reader = new CsvReader();
-        $filesystem = $this->getContainer()->get('shopware.filesystem.private');
+        $filesystem = static::getContainer()->get('shopware.filesystem.private');
 
         $file = $logEntity->getFile();
         static::assertNotNull($file);
@@ -547,10 +551,10 @@ abstract class AbstractImportExportTestCase extends TestCase
      */
     protected function createCustomField(array $customFields, string $entityName): void
     {
-        $repo = $this->getContainer()->get('custom_field_set.repository');
+        $repo = static::getContainer()->get('custom_field_set.repository');
 
         $attributeSet = [
-            'name' => 'test set',
+            'name' => 'test_set',
             'config' => ['description' => 'test'],
             'customFields' => $customFields,
             'relations' => [

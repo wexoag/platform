@@ -1,20 +1,16 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
 
 async function createWrapper() {
-    return mount(
-        await wrapTestComponent('mt-tabs', { sync: true }),
-        {
-            props: {
-                items: [],
-                positionIdentifier: 'jest-test-component',
-            },
+    return mount(await wrapTestComponent('mt-tabs', { sync: true }), {
+        props: {
+            items: [],
+            positionIdentifier: 'jest-test-component',
         },
-    );
+    });
 }
 
 describe('src/app/component/meteor-wrapper/mt-tabs', () => {

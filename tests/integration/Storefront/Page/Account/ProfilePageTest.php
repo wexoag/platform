@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Storefront\Page\Account\Profile\AccountProfilePageLoadedEvent;
 use Shopware\Storefront\Page\Account\Profile\AccountProfilePageLoader;
-use Shopware\Tests\Integration\Storefront\Page\StorefrontPageTestBehaviour;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -32,6 +32,6 @@ class ProfilePageTest extends TestCase
 
     protected function getPageLoader(): AccountProfilePageLoader
     {
-        return $this->getContainer()->get(AccountProfilePageLoader::class);
+        return static::getContainer()->get(AccountProfilePageLoader::class);
     }
 }

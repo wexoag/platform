@@ -8,7 +8,12 @@ import './sw-settings-mailer-smtp.scss';
 export default {
     template,
 
-    emits: ['host-changed', 'port-changed'],
+    compatConfig: Shopware.compatConfig,
+
+    emits: [
+        'host-changed',
+        'port-changed',
+    ],
 
     props: {
         mailerSettings: {
@@ -28,11 +33,24 @@ export default {
     },
 
     computed: {
+        isOauth() {
+            return this.mailerSettings['core.mailerSettings.emailAgent'] === 'smtp+oauth';
+        },
+
         encryptionOptions() {
             return [
-                { value: 'null', label: this.$tc('sw-settings-mailer.encryption.no-encryption') },
-                { value: 'ssl', label: this.$tc('sw-settings-mailer.encryption.ssl') },
-                { value: 'tls', label: this.$tc('sw-settings-mailer.encryption.tls') },
+                {
+                    value: 'null',
+                    label: this.$tc('sw-settings-mailer.encryption.no-encryption'),
+                },
+                {
+                    value: 'ssl',
+                    label: this.$tc('sw-settings-mailer.encryption.ssl'),
+                },
+                {
+                    value: 'tls',
+                    label: this.$tc('sw-settings-mailer.encryption.tls'),
+                },
             ];
         },
     },

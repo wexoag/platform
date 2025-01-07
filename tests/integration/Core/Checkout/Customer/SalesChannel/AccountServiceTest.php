@@ -14,6 +14,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextService;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextServiceParameters;
@@ -31,7 +32,7 @@ class AccountServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->accountService = $this->getContainer()->get(AccountService::class);
+        $this->accountService = static::getContainer()->get(AccountService::class);
     }
 
     public function testLogin(): void
@@ -212,7 +213,7 @@ class AccountServiceTest extends TestCase
                 ],
             ],
         ]);
-        $this->createCustomerOfSalesChannel($context->getSalesChannel()->getId(), $email, true, true, $idCustomer, '2022-10-21 10:00:00', md5('shopware'), 'Md5');
+        $this->createCustomerOfSalesChannel($context->getSalesChannel()->getId(), $email, true, true, $idCustomer, '2022-10-21 10:00:00', Hasher::hash('shopware', 'md5'), 'Md5');
 
         $customer = $this->accountService->getCustomerByLogin($email, 'shopware', $context);
         static::assertEquals($email, $customer->getEmail());
@@ -244,7 +245,7 @@ class AccountServiceTest extends TestCase
                 ],
             ],
         ]);
-        $this->createCustomerOfSalesChannel($context->getSalesChannel()->getId(), $email, true, true, $idCustomer, '2022-10-21 10:00:00', md5('test'), 'Md5');
+        $this->createCustomerOfSalesChannel($context->getSalesChannel()->getId(), $email, true, true, $idCustomer, '2022-10-21 10:00:00', Hasher::hash('test', 'md5'), 'Md5');
 
         static::expectException(PasswordPoliciesUpdatedException::class);
         static::expectExceptionMessage('Password policies updated.');
@@ -253,7 +254,7 @@ class AccountServiceTest extends TestCase
 
     private function getCustomerFromToken(string $contextToken, string $salesChannelId): CustomerEntity
     {
-        $salesChannelContextService = $this->getContainer()->get(SalesChannelContextService::class);
+        $salesChannelContextService = static::getContainer()->get(SalesChannelContextService::class);
         $context = $salesChannelContextService->get(
             new SalesChannelContextServiceParameters($salesChannelId, $contextToken)
         );
@@ -314,7 +315,7 @@ class AccountServiceTest extends TestCase
             $customer['defaultPaymentMethodId'] = $this->getValidPaymentMethodId();
         }
 
-        $this->getContainer()
+        static::getContainer()
             ->get('customer.repository')
             ->upsert([$customer], Context::createDefaultContext());
 

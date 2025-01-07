@@ -1,8 +1,7 @@
 import { mount } from '@vue/test-utils';
 
 /**
- * @package customer-order
- * @group disabledCompat
+ * @package checkout
  */
 async function createWrapper() {
     const orderProp = {
@@ -13,8 +12,8 @@ async function createWrapper() {
     };
 
     orderProp.transactions.last = () => ({});
-    orderProp.transactions.getIds = () => ([]);
-    orderProp.deliveries.getIds = () => ([]);
+    orderProp.transactions.getIds = () => [];
+    orderProp.deliveries.getIds = () => [];
 
     return mount(await wrapTestComponent('sw-order-state-history-card', { sync: true }), {
         global: {
@@ -33,7 +32,9 @@ async function createWrapper() {
             provide: {
                 orderService: {},
                 stateMachineService: {
-                    getState: () => { return { data: { transactions: [] } }; },
+                    getState: () => {
+                        return { data: { transactions: [] } };
+                    },
                 },
                 orderStateMachineService: {},
                 repositoryFactory: {

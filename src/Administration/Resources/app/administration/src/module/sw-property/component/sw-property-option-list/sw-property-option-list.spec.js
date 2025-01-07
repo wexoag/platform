@@ -1,8 +1,6 @@
-/*
+/**
  * @package inventory
- * @group disabledCompat
  */
-
 import { mount } from '@vue/test-utils';
 
 function getOptions() {
@@ -90,10 +88,14 @@ async function createWrapper() {
                 searchRankingService: {},
             },
             stubs: {
-                'sw-card': await wrapTestComponent('sw-card', { sync: true }),
+                'sw-card': await wrapTestComponent('sw-card', {
+                    sync: true,
+                }),
                 'sw-card-deprecated': await wrapTestComponent('sw-card-deprecated', { sync: true }),
                 'sw-ignore-class': true,
-                'sw-container': await wrapTestComponent('sw-container', { sync: true }),
+                'sw-container': await wrapTestComponent('sw-container', {
+                    sync: true,
+                }),
                 'sw-button': {
                     template: '<button class="sw-button" @click="$emit(`click`)"></button>',
                 },
@@ -202,11 +204,13 @@ describe('module/sw-property/component/sw-property-option-list', () => {
         // waiting for the modal to disappear
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.vm.optionRepository.save).toHaveBeenCalledWith(expect.objectContaining({
-            name: 'new name',
-            position: '0',
-            colorHexCode: '#000000',
-        }));
+        expect(wrapper.vm.optionRepository.save).toHaveBeenCalledWith(
+            expect.objectContaining({
+                name: 'new name',
+                position: '0',
+                colorHexCode: '#000000',
+            }),
+        );
 
         expect(wrapper.find('.modal').exists()).toBe(false);
     });

@@ -23,8 +23,6 @@ use Symfony\Component\Translation\MessageCatalogueInterface;
 
 /**
  * @internal
- *
- * @package services-settings
  */
 class SnippetServiceTest extends TestCase
 {
@@ -67,7 +65,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -102,7 +100,7 @@ json
         $snippetFile2 = new MockSnippetFile('Admin', '{}');
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -161,7 +159,7 @@ json
         $snippetSetId = $this->getSnippetSetIdForLocale('en-GB');
         static::assertNotNull($snippetSetId);
 
-        $snippetRepository = $this->getContainer()->get('snippet.repository');
+        $snippetRepository = static::getContainer()->get('snippet.repository');
         $snippetRepository->create([
             [
                 'translationKey' => 'a',
@@ -255,7 +253,7 @@ json
     public function testGetAuthorsWithoutDBAuthors(): void
     {
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -320,7 +318,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -362,7 +360,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -404,7 +402,7 @@ json
 
         $fooId = Uuid::randomBytes();
         $barId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -454,7 +452,7 @@ json
 
         $fooId = Uuid::randomBytes();
         $barId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -518,7 +516,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -579,7 +577,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -638,7 +636,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -697,7 +695,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -758,7 +756,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -819,7 +817,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -877,7 +875,7 @@ json
         );
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -928,7 +926,7 @@ json
         $snippetFile = new MockSnippetFile('foo');
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -958,7 +956,7 @@ json
         $snippetFile = new MockSnippetFile('foo');
 
         $fooId = Uuid::randomBytes();
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $connection->insert('snippet_set', [
             'id' => $fooId,
@@ -1021,13 +1019,13 @@ json
         }
 
         return new SnippetService(
-            $this->getContainer()->get(Connection::class),
+            static::getContainer()->get(Connection::class),
             $collection,
-            $this->getContainer()->get('snippet.repository'),
-            $this->getContainer()->get('snippet_set.repository'),
-            $this->getContainer()->get(SnippetFilterFactory::class),
-            $this->getContainer(),
-            $this->getContainer()->has(DatabaseSalesChannelThemeLoader::class) ? $this->getContainer()->get(DatabaseSalesChannelThemeLoader::class) : null
+            static::getContainer()->get('snippet.repository'),
+            static::getContainer()->get('snippet_set.repository'),
+            static::getContainer()->get(SnippetFilterFactory::class),
+            static::getContainer(),
+            static::getContainer()->has(DatabaseSalesChannelThemeLoader::class) ? static::getContainer()->get(DatabaseSalesChannelThemeLoader::class) : null
         );
     }
 

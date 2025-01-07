@@ -10,10 +10,11 @@ use Shopware\Core\Checkout\Promotion\Cart\Discount\DiscountCalculatorResult;
 use Shopware\Core\Checkout\Promotion\Cart\Discount\DiscountLineItem;
 use Shopware\Core\Checkout\Promotion\Cart\Discount\DiscountPackageCollection;
 use Shopware\Core\Checkout\Promotion\Exception\InvalidPriceDefinitionException;
+use Shopware\Core\Checkout\Promotion\PromotionException;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
-#[Package('buyers-experience')]
+#[Package('checkout')]
 class DiscountPercentageCalculator
 {
     public function __construct(
@@ -33,7 +34,7 @@ class DiscountPercentageCalculator
         $definition = $discount->getPriceDefinition();
 
         if (!$definition instanceof PercentagePriceDefinition) {
-            throw new InvalidPriceDefinitionException($discount->getLabel(), $discount->getCode());
+            throw PromotionException::invalidPriceDefinition($discount->getLabel(), $discount->getCode());
         }
 
         $definedPercentage = -abs($definition->getPercentage());

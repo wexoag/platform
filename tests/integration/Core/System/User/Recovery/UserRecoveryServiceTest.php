@@ -12,6 +12,7 @@ use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseHelper\CallableClass;
 use Shopware\Core\Framework\Util\Random;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\Maintenance\User\Service\UserProvisioner;
 use Shopware\Core\System\User\Aggregate\UserRecovery\UserRecoveryCollection;
 use Shopware\Core\System\User\Aggregate\UserRecovery\UserRecoveryEntity;
 use Shopware\Core\System\User\Recovery\UserRecoveryRequestEvent;
@@ -27,7 +28,7 @@ class UserRecoveryServiceTest extends TestCase
 {
     use IntegrationTestBehaviour;
 
-    private const VALID_EMAIL = 'info@shopware.com';
+    private const VALID_EMAIL = UserProvisioner::USER_EMAIL_FALLBACK;
 
     private UserRecoveryService $userRecoveryService;
 
@@ -45,7 +46,7 @@ class UserRecoveryServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $container = $this->getContainer();
+        $container = static::getContainer();
         $this->userRepo = $container->get('user.repository');
         $this->userRecoveryRepo = $container->get('user_recovery.repository');
         $this->userRecoveryService = $container->get(UserRecoveryService::class);
@@ -61,7 +62,7 @@ class UserRecoveryServiceTest extends TestCase
         ]);
 
         $eventDispatched = false;
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = static::getContainer()->get('event_dispatcher');
         $this->addEventListener($dispatcher, UserRecoveryRequestEvent::EVENT_NAME, function (UserRecoveryRequestEvent $event) use (&$eventDispatched): void {
             $eventDispatched = true;
         });
@@ -192,7 +193,7 @@ class UserRecoveryServiceTest extends TestCase
     public function testReEvaluateRules(): void
     {
         $validator = new RuleValidator();
-        $this->getContainer()
+        static::getContainer()
             ->get('event_dispatcher')
             ->addListener(UserRecoveryRequestEvent::EVENT_NAME, $validator);
 
@@ -219,7 +220,7 @@ class UserRecoveryServiceTest extends TestCase
  */
 class RuleValidator extends CallableClass
 {
-    public ?UserRecoveryRequestEvent $event;
+    public ?UserRecoveryRequestEvent $event = null;
 
     public function __invoke(): void
     {

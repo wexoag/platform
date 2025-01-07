@@ -3,7 +3,6 @@ import { mount } from '@vue/test-utils';
 
 /**
  * @package admin
- * @group disabledCompat
  */
 async function createWrapper(routerPushImplementation = jest.fn(), loginByUsername = jest.fn()) {
     return mount(await wrapTestComponent('sw-inactivity-login', { sync: true }), {
@@ -58,10 +57,7 @@ async function createWrapper(routerPushImplementation = jest.fn(), loginByUserna
                             return;
                         }
 
-                        const duration = new Date();
-                        duration.setDate(duration.getDate() + 14);
-
-                        localStorage.setItem('rememberMe', `${+duration}`);
+                        localStorage.setItem('rememberMe', `true`);
                     },
                 },
                 shortcutService: {
@@ -90,12 +86,15 @@ describe('src/module/sw-inactivity-login/page/index/index.ts', () => {
     afterEach(() => {
         sessionStorage.removeItem('lastKnownUser');
         sessionStorage.removeItem('sw-admin-previous-route_foo');
-        localStorage.removeItem('inactivityBackground_foo');
+        sessionStorage.removeItem('inactivityBackground_foo');
         localStorage.removeItem('rememberMe');
     });
 
     afterAll(() => {
-        Object.defineProperty(window, 'location', { configurable: true, value: original });
+        Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: original,
+        });
     });
 
     it('should be a Vue.js component', async () => {
@@ -106,13 +105,13 @@ describe('src/module/sw-inactivity-login/page/index/index.ts', () => {
 
     it('should set data:url as background image', async () => {
         sessionStorage.setItem('lastKnownUser', 'admin');
-        localStorage.setItem('inactivityBackground_foo', 'data:urlFoOBaR');
+        sessionStorage.setItem('inactivityBackground_foo', 'data:urlFoOBaR');
         const wrapper = await createWrapper();
         await flushPromises();
 
         const container = wrapper.find('.sw-inactivity-login');
         expect(container.exists()).toBe(true);
-        expect((container.element).style.backgroundImage).toBe('url(data:urlFoOBaR)');
+        expect(container.element.style.backgroundImage).toBe('url(data:urlFoOBaR)');
     });
 
     it('should push to login without last known user', async () => {
@@ -222,11 +221,14 @@ describe('src/module/sw-inactivity-login/page/index/index.ts', () => {
         const push = jest.fn();
         sessionStorage.setItem('lastKnownUser', 'max');
         sessionStorage.setItem('sw-admin-previous-route_foo', '{ "fullPath": "sw.example.route.index" }');
-        const wrapper = await createWrapper(push, jest.fn(() => Promise.resolve()));
+        const wrapper = await createWrapper(
+            push,
+            jest.fn(() => Promise.resolve()),
+        );
         await flushPromises();
 
-        const rememberMe = wrapper.find('.sw-field--checkbox input');
-        await rememberMe.trigger('click');
+        const rememberMeInput = wrapper.find('.sw-field--checkbox input');
+        await rememberMeInput.trigger('click');
 
         const loginButton = wrapper.find('.sw-button');
         await loginButton.trigger('click');
@@ -234,10 +236,7 @@ describe('src/module/sw-inactivity-login/page/index/index.ts', () => {
         expect(push).toHaveBeenCalledTimes(1);
         expect(push).toHaveBeenCalledWith('sw.example.route.index');
 
-        const expectedDuration = new Date();
-        expectedDuration.setDate(expectedDuration.getDate() + 14);
-        const rememberMeDuration = Number(localStorage.getItem('rememberMe'));
-        expect(rememberMeDuration).toBeGreaterThan(1600000);
-        expect(rememberMeDuration).toBeLessThanOrEqual(+expectedDuration);
+        const rememberMe = Boolean(localStorage.getItem('rememberMe'));
+        expect(rememberMe).toBe(true);
     });
 });

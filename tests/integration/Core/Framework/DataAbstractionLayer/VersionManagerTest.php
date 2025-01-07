@@ -21,11 +21,10 @@ use Shopware\Core\Framework\Struct\ArrayEntity;
 use Shopware\Core\Framework\Test\DataAbstractionLayer\Field\DataAbstractionLayerFieldTestBehaviour;
 use Shopware\Core\Framework\Test\DataAbstractionLayer\Field\TestDefinition\ManyToOneProductDefinition;
 use Shopware\Core\Framework\Test\DataAbstractionLayer\Field\TestDefinition\ToOneProductExtension;
-use Shopware\Core\Framework\Test\IdsCollection;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelLifecycleManager;
-use Shopware\Core\Framework\Test\TestDataCollection;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 
 /**
  * @internal
@@ -51,17 +50,17 @@ class VersionManagerTest extends TestCase
 
     private Context $context;
 
-    private TestDataCollection $ids;
+    private IdsCollection $ids;
 
     protected function setUp(): void
     {
-        $this->connection = $this->getContainer()->get(Connection::class);
-        $this->versionManager = $this->getContainer()->get(VersionManager::class);
+        $this->connection = static::getContainer()->get(Connection::class);
+        $this->versionManager = static::getContainer()->get(VersionManager::class);
 
-        $this->productRepository = $this->getContainer()->get('product.repository');
+        $this->productRepository = static::getContainer()->get('product.repository');
         $this->registerEntityDefinitionAndInitDatabase();
         $this->context = Context::createDefaultContext();
-        $this->ids = new TestDataCollection();
+        $this->ids = new IdsCollection();
     }
 
     protected function tearDown(): void
@@ -130,21 +129,21 @@ class VersionManagerTest extends TestCase
 
         $context = Context::createDefaultContext();
 
-        $this->getContainer()->get('product.repository')->create([$product], $context);
+        static::getContainer()->get('product.repository')->create([$product], $context);
 
-        $versionId = $this->getContainer()->get('product.repository')
+        $versionId = static::getContainer()->get('product.repository')
             ->createVersion($ids->get('p1'), $context);
 
         $versionContext = $context->createWithVersionId($versionId);
 
-        $this->getContainer()->get('product.repository')
+        static::getContainer()->get('product.repository')
             ->update([['id' => $ids->get('p1'), 'name' => 'test']], $versionContext);
 
         // now ensure that we get a validate event for the merge request
         $called = false;
 
         $this->addEventListener(
-            $this->getContainer()->get('event_dispatcher'),
+            static::getContainer()->get('event_dispatcher'),
             PreWriteValidationEvent::class,
             function (PreWriteValidationEvent $event) use (&$called): void {
                 // we also get a validation event for the version tables
@@ -158,7 +157,7 @@ class VersionManagerTest extends TestCase
             }
         );
 
-        $this->getContainer()->get('product.repository')->merge($versionId, $context);
+        static::getContainer()->get('product.repository')->merge($versionId, $context);
 
         static::assertTrue($called);
     }
@@ -221,7 +220,7 @@ class VersionManagerTest extends TestCase
     private function getClone(string $productId): array
     {
         return $this->versionManager->clone(
-            $this->getContainer()->get(ProductDefinition::class),
+            static::getContainer()->get(ProductDefinition::class),
             $productId,
             Uuid::randomHex(),
             Uuid::randomHex(),

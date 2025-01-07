@@ -20,9 +20,9 @@ use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SystemConfig\Facade\SystemConfigFacadeHookFactory;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Shopware\Core\Test\AppSystemTestBehaviour;
 use Shopware\Core\Test\Generator;
 use Shopware\Core\Test\TestDefaults;
-use Shopware\Tests\Integration\Core\Framework\App\AppSystemTestBehaviour;
 
 /**
  * @internal
@@ -39,8 +39,8 @@ class SystemConfigFacadeTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->systemConfigService = $this->getContainer()->get(SystemConfigService::class);
-        $this->factory = $this->getContainer()->get(SystemConfigFacadeHookFactory::class);
+        $this->systemConfigService = static::getContainer()->get(SystemConfigService::class);
+        $this->factory = static::getContainer()->get(SystemConfigFacadeHookFactory::class);
     }
 
     #[DataProvider('getWithoutAppCases')]
@@ -178,7 +178,7 @@ class SystemConfigFacadeTest extends TestCase
             ]
         );
 
-        $this->getContainer()->get(ScriptExecutor::class)->execute($hook);
+        static::getContainer()->get(ScriptExecutor::class)->execute($hook);
 
         static::assertTrue($page->hasExtension('systemConfigExtension'));
         $extension = $page->getExtension('systemConfigExtension');
@@ -193,7 +193,7 @@ class SystemConfigFacadeTest extends TestCase
         $this->loadAppsFromDir($appDir);
 
         /** @var AppEntity $app */
-        $app = $this->getContainer()->get('app.repository')->search(new Criteria(), Context::createDefaultContext())->first();
+        $app = static::getContainer()->get('app.repository')->search(new Criteria(), Context::createDefaultContext())->first();
 
         return new ScriptAppInformation(
             $app->getId(),

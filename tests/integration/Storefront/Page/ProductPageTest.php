@@ -16,6 +16,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Shopware\Storefront\Page\Product\ProductPageLoadedEvent;
 use Shopware\Storefront\Page\Product\ProductPageLoader;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -89,7 +90,7 @@ class ProductPageTest extends TestCase
         $context = $this->createSalesChannelContextWithNavigation();
 
         // enable hideCloseoutProductsWhenOutOfStock filter
-        $this->getContainer()->get(SystemConfigService::class)
+        static::getContainer()->get(SystemConfigService::class)
             ->set('core.listing.hideCloseoutProductsWhenOutOfStock', true);
 
         $product = $this->getRandomProduct($context, 1, true);
@@ -110,7 +111,7 @@ class ProductPageTest extends TestCase
         $context = $this->createSalesChannelContextWithNavigation();
 
         // enable hideCloseoutProductsWhenOutOfStock filter
-        $this->getContainer()->get(SystemConfigService::class)
+        static::getContainer()->get(SystemConfigService::class)
             ->set('core.listing.hideCloseoutProductsWhenOutOfStock', true);
 
         $product = $this->getRandomProduct($context, 0, true);
@@ -130,7 +131,7 @@ class ProductPageTest extends TestCase
 
         $seoCategoryName = 'Fancy Category';
 
-        $catRepository = $this->getContainer()->get('category.repository');
+        $catRepository = static::getContainer()->get('category.repository');
 
         $seoCategoryId = Uuid::randomHex();
 
@@ -309,12 +310,12 @@ class ProductPageTest extends TestCase
 
     protected function getPageLoader(): ProductPageLoader
     {
-        return $this->getContainer()->get(ProductPageLoader::class);
+        return static::getContainer()->get(ProductPageLoader::class);
     }
 
     private function updateProductStream(string $productId, string $streamId): void
     {
-        $connection = $this->getContainer()->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
         $connection->executeStatement(
             'UPDATE `product` SET `stream_ids` = :streamIds WHERE `id` = :id',
             [

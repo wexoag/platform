@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -49,8 +48,7 @@ describe('components/base/sw-simple-search-field', () => {
     });
 
     it('should emit `input` event', async () => {
-        await wrapper.find('input[type="text"]')
-            .setValue('@input Sw Simple Search Field Typing');
+        await wrapper.find('input[type="text"]').setValue('@input Sw Simple Search Field Typing');
 
         /* wait for `$emit('input')` */
         await wrapper.vm.$nextTick();

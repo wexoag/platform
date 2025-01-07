@@ -14,15 +14,11 @@ export default {
 
     computed: {
         currentDeviceView() {
-            return Store.get('cmsPageState').currentCmsDeviceView;
+            return Store.get('cmsPage').currentCmsDeviceView;
         },
 
         currentDeviceViewClass() {
-            if (this.currentDeviceView) {
-                return `is--${this.currentDeviceView}`;
-            }
-
-            return null;
+            return `is--${this.currentDeviceView}`;
         },
     },
 };

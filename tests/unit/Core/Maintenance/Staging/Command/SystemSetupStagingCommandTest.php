@@ -30,7 +30,7 @@ class SystemSetupStagingCommandTest extends TestCase
 
         $tester->setInputs(['no']);
         $tester->execute([]);
-        static::assertEquals(Command::FAILURE, $tester->getStatusCode());
+        static::assertSame(Command::FAILURE, $tester->getStatusCode());
     }
 
     public function testRun(): void
@@ -54,5 +54,40 @@ class SystemSetupStagingCommandTest extends TestCase
         $event = $eventDispatcher->getEvents()[0];
 
         static::assertInstanceOf(SetupStagingEvent::class, $event);
+    }
+
+    public function testRunNoInteractionWithForce(): void
+    {
+        $configService = new StaticSystemConfigService();
+        $eventDispatcher = new CollectingEventDispatcher();
+
+        $command = new SystemSetupStagingCommand(
+            $eventDispatcher,
+            $configService
+        );
+
+        $tester = new CommandTester($command);
+        $tester->execute(['--force' => null], ['interactive' => false]);
+        $tester->assertCommandIsSuccessful();
+
+        static::assertTrue($configService->get('core.staging'));
+        static::assertCount(1, $eventDispatcher->getEvents());
+
+        $event = $eventDispatcher->getEvents()[0];
+
+        static::assertInstanceOf(SetupStagingEvent::class, $event);
+    }
+
+    public function testRunNoInteractionWithoutForce(): void
+    {
+        $command = new SystemSetupStagingCommand(
+            $this->createMock(EventDispatcherInterface::class),
+            $this->createMock(SystemConfigService::class)
+        );
+
+        $tester = new CommandTester($command);
+
+        $tester->execute([], ['interactive' => false]);
+        static::assertSame(Command::FAILURE, $tester->getStatusCode());
     }
 }

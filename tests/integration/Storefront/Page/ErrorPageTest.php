@@ -13,6 +13,7 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Shopware\Core\Test\TestDefaults;
 use Shopware\Storefront\Page\Navigation\Error\ErrorPageLoadedEvent;
 use Shopware\Storefront\Page\Navigation\Error\ErrorPageLoader;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -33,13 +34,13 @@ class ErrorPageTest extends TestCase
     {
         parent::setUp();
 
-        $contextFactory = $this->getContainer()->get(SalesChannelContextFactory::class);
+        $contextFactory = static::getContainer()->get(SalesChannelContextFactory::class);
 
-        $this->cmsPageRepository = $this->getContainer()->get('cms_page.repository');
+        $this->cmsPageRepository = static::getContainer()->get('cms_page.repository');
         $this->salesChannelContext = $contextFactory->create(Uuid::randomHex(), TestDefaults::SALES_CHANNEL);
 
         $this->errorLayoutId = $this->createPage();
-        $this->getContainer()->get(SystemConfigService::class)->set('core.basicInformation.http404Page', $this->errorLayoutId);
+        static::getContainer()->get(SystemConfigService::class)->set('core.basicInformation.http404Page', $this->errorLayoutId);
     }
 
     public function testItDoesLoad404CmsLayoutPageIn404Case(): void
@@ -58,7 +59,7 @@ class ErrorPageTest extends TestCase
 
     protected function getPageLoader(): ErrorPageLoader
     {
-        return $this->getContainer()->get(ErrorPageLoader::class);
+        return static::getContainer()->get(ErrorPageLoader::class);
     }
 
     private function createPage(): string

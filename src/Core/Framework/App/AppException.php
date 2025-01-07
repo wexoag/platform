@@ -2,12 +2,17 @@
 
 namespace Shopware\Core\Framework\App;
 
+use Shopware\Administration\Controller\Exception\AppByNameNotFoundException;
+use Shopware\Administration\Controller\Exception\MissingAppSecretException;
+use Shopware\Core\Framework\App\Exception\ActionNotFoundException;
 use Shopware\Core\Framework\App\Exception\AppAlreadyInstalledException;
 use Shopware\Core\Framework\App\Exception\AppFlowException;
 use Shopware\Core\Framework\App\Exception\AppNotFoundException;
 use Shopware\Core\Framework\App\Exception\AppRegistrationException;
 use Shopware\Core\Framework\App\Exception\AppXmlParsingException;
 use Shopware\Core\Framework\App\Exception\InvalidAppFlowActionVariableException;
+use Shopware\Core\Framework\App\Exception\UserAbortedCommandException;
+use Shopware\Core\Framework\App\Manifest\Exception\UnallowedHostException;
 use Shopware\Core\Framework\App\Validation\Error\Error;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\HttpException;
@@ -34,8 +39,15 @@ class AppException extends HttpException
     public const MISSING_REQUEST_PARAMETER_CODE = 'FRAMEWORK__APP_MISSING_REQUEST_PARAMETER';
     final public const APP_PAYMENT_INVALID_TRANSACTION_ID = 'APP_PAYMENT__INVALID_TRANSACTION_ID';
     final public const APP_PAYMENT_INTERRUPTED = 'APP_PAYMENT__INTERRUPTED';
-
+    public const NO_SOURCE_SUPPORTS = 'FRAMEWORK__APP_NO_SOURCE_SUPPORTS';
+    public const CANNOT_MOUNT_APP_FILESYSTEM = 'FRAMEWORK__CANNOT_MOUNT_APP_FILESYSTEM';
     public const CHECKOUT_GATEWAY_PAYLOAD_INVALID_CODE = 'FRAMEWORK__APP_CHECKOUT_GATEWAY_PAYLOAD_INVALID';
+    public const USER_ABORTED = 'FRAMEWORK__APP_USER_ABORTED';
+    public const CANNOT_READ_FILE = 'FRAMEWORK__APP_CANNOT_READ_FILE';
+    public const APP_ACTION_NOT_FOUND = 'FRAMEWORK__APP_ACTION_NOT_FOUND';
+    public const JWKS_KEY_NOT_FOUND = 'FRAMEWORK__APP_JWKS_KEY_NOT_FOUND';
+    final public const APP_UNALLOWED_HOST = 'APP__UNALLOWED_HOST';
+    final public const INVALID_ARGUMENT = 'APP__INVALID_ARGUMENT';
 
     /**
      * @internal will be removed once store extensions are installed over composer
@@ -84,11 +96,16 @@ class AppException extends HttpException
 
     public static function notFound(string $identifier): self
     {
+        return static::notFoundByField($identifier);
+    }
+
+    public static function notFoundByField(string $value, string $field = 'identifier'): self
+    {
         return new AppNotFoundException(
             Response::HTTP_NOT_FOUND,
             self::NOT_FOUND,
             self::$couldNotFindMessage,
-            ['entity' => 'app', 'field' => 'identifier', 'value' => $identifier]
+            ['entity' => 'app', 'field' => $field, 'value' => $value]
         );
     }
 
@@ -171,6 +188,19 @@ class AppException extends HttpException
         );
     }
 
+    /**
+     * @deprecated tag:v6.7.0 - Will be removed, use AppException::appSecretMissing instead
+     */
+    public static function secretMissing(): MissingAppSecretException
+    {
+        Feature::triggerDeprecationOrThrow(
+            'v6.7.0.0',
+            Feature::deprecatedClassMessage(self::class, 'v6.7.0.0', AppException::class . '::appSecretMissing')
+        );
+
+        return new MissingAppSecretException();
+    }
+
     public static function actionButtonProcessException(string $actionId, string $message, ?\Throwable $e = null): self
     {
         return new self(
@@ -219,7 +249,7 @@ class AppException extends HttpException
             return new XmlParsingException($file, $message);
         }
 
-        return new AppXmlParsingException($file, $message);
+        return AppXmlParsingException::cannotParseFile($file, $message);
     }
 
     public static function missingRequestParameter(string $parameterName): self
@@ -262,6 +292,137 @@ class AppException extends HttpException
             'The transaction with id {{ transactionId }} is invalid or could not be found.',
             ['transactionId' => $transactionId],
             $e
+        );
+    }
+
+    public static function inAppPurchaseGatewayUrlEmpty(): self
+    {
+        return new self(
+            Response::HTTP_BAD_REQUEST,
+            self::INVALID_CONFIGURATION,
+            'No In-App Purchases gateway url set. Please update your manifest file.',
+        );
+    }
+
+    public static function noSourceSupports(): self
+    {
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::NO_SOURCE_SUPPORTS,
+            'App is not supported by any source.',
+        );
+    }
+
+    public static function sourceDoesNotExist(string $sourceClassName): self
+    {
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::NO_SOURCE_SUPPORTS,
+            'The source "{{ sourceClassName }}" does not exist',
+            [
+                'sourceClassName' => $sourceClassName,
+            ]
+        );
+    }
+
+    public static function cannotMountAppFilesystem(string $appName, HttpException $exception): self
+    {
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::CANNOT_MOUNT_APP_FILESYSTEM,
+            'Cannot mount a filesystem for App "{{ app }}". Error: "{{ error }}"',
+            ['app' => $appName, 'error' => $exception->getMessage()],
+            $exception
+        );
+    }
+
+    public static function userAborted(): self
+    {
+        return new UserAbortedCommandException(
+            Response::HTTP_BAD_REQUEST,
+            self::USER_ABORTED,
+            'User aborted operation'
+        );
+    }
+
+    public static function cannotReadFile(string $file): self
+    {
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::CANNOT_READ_FILE,
+            'Unable to read file: "{{ file }}"',
+            ['file' => $file]
+        );
+    }
+
+    /**
+     * @deprecated tag:v6.7.0 - reason:return-type-change - Will only return `self` in the future
+     */
+    public static function actionNotFound(): self|ActionNotFoundException
+    {
+        if (!Feature::isActive('v6.7.0.0')) {
+            return new ActionNotFoundException();
+        }
+
+        return new self(
+            Response::HTTP_NOT_FOUND,
+            self::APP_ACTION_NOT_FOUND,
+            'The requested app action does not exist',
+        );
+    }
+
+    public static function jwksNotFound(?\Throwable $e = null): self
+    {
+        return new self(
+            statusCode: Response::HTTP_INTERNAL_SERVER_ERROR,
+            errorCode: self::JWKS_KEY_NOT_FOUND,
+            message: 'Unable to retrieve JWKS key',
+            previous: $e
+        );
+    }
+
+    /**
+     * @deprecated tag:v6.7.0 - reason:return-type-change - Will only return 'self' in the future
+     */
+    public static function hostNotAllowed(string $host, string $appName): self|UnallowedHostException
+    {
+        if (!Feature::isActive('v6.7.0.0')) {
+            return new UnallowedHostException($host, [], $appName);
+        }
+
+        return new self(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            self::APP_UNALLOWED_HOST,
+            'The host "{{ host }}" you tried to call is not listed in the allowed hosts in the manifest file for app "{{ appName }}".',
+            ['host' => $host, 'appName' => $appName]
+        );
+    }
+
+    /**
+     * @deprecated tag:v6.7.0 - reason:return-type-change - Will only return `self` in the future
+     */
+    public static function appNotFoundByName(mixed $appName): self|AppByNameNotFoundException
+    {
+        if (!Feature::isActive('v6.7.0.0')) {
+            return new AppByNameNotFoundException($appName);
+        }
+
+        return self::notFoundByField($appName, 'name');
+    }
+
+    /**
+     * @deprecated tag:v6.7.0 - reason:return-type-change - Will only return `self` in the future
+     */
+    public static function invalidArgument(string $string): self|\InvalidArgumentException
+    {
+        if (!Feature::isActive('v6.7.0.0')) {
+            return new \InvalidArgumentException('Ids must be an array');
+        }
+
+        return new self(
+            Response::HTTP_BAD_REQUEST,
+            self::INVALID_ARGUMENT,
+            $string
         );
     }
 }

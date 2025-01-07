@@ -30,7 +30,9 @@ import initMainModules from './main-module.init';
 import initializeActionButtons from './action-button.init';
 import initializeActions from './actions.init';
 import initializeExtensionDataHandling from './extension-data-handling.init';
+import initializeInAppPurchaseCheckout from './in-app-purchase-checkout.init';
 import initializeTopBarButtons from './topbar-button.init';
+import initializeTeaserPopovers from './teaser-popover.init';
 
 // eslint-disable-next-line sw-deprecation-rules/private-feature-declarations
 export default {
@@ -60,5 +62,7 @@ export default {
     actionButton: initializeActionButtons,
     actions: initializeActions,
     extensionDataHandling: initializeExtensionDataHandling,
+    inAppPurchaseCheckout: initializeInAppPurchaseCheckout,
     topbarButton: initializeTopBarButtons,
+    teaserPopover: initializeTeaserPopovers,
 };

@@ -13,36 +13,50 @@ class LicenseStruct extends Struct
 {
     /**
      * @var int
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $id;
 
     /**
      * @var \DateTimeImmutable
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $creationDate;
 
     /**
      * @var string
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $variant;
 
     /**
      * @var string
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $paymentText;
 
     /**
      * @var float
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $netPrice;
 
     /**
      * @var \DateTimeImmutable|null null for free extensions
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $nextBookingDate;
 
     /**
      * @var ExtensionStruct
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $licensedExtension;
 
@@ -70,6 +84,10 @@ class LicenseStruct extends Struct
 
         if (isset($data['nextBookingDate']) && \is_string($data['nextBookingDate'])) {
             $license->setNextBookingDate(new \DateTimeImmutable($data['nextBookingDate']));
+        }
+
+        if (isset($data['expirationDate']) && \is_string($data['expirationDate'])) {
+            $license->setExpirationDate(new \DateTimeImmutable($data['expirationDate']));
         }
 
         return $license;

@@ -1,7 +1,10 @@
 {% block cms_form_newsletter %}
+    {% set formPrefix = 'cms-form-newsletter' %}
     <form action="{{ path(action) }}"
           method="post"
-          data-form-validation="true">
+          data-form-validation="true"
+          id="{{ formPrefix }}"
+          aria-label="{{ element.config.title.value ? element.config.title.value : 'newsletter.headline'|trans }}">
 
         <div class="form-content">
         <div class="row g-2">
@@ -52,7 +55,9 @@
                 <div class="row g-2">
                     {% block cms_form_newsletter_select_salutation %}
                         {% sw_include '@Storefront/storefront/element/cms-element-form/form-components/cms-element-form-select-salutation.html.twig'
-                            with { additionalClass: 'col-md-4' }
+                            with {
+                            additionalClass: 'col-md-4'
+                        }
                         %}
                     {% endblock %}
 
@@ -84,7 +89,10 @@
         {% endblock %}
 
         {% block cms_form_newsletter_captcha %}
-            {% sw_include '@Storefront/storefront/component/captcha/base.html.twig' with { additionalClass : 'col-md-4' } %}
+            {% sw_include '@Storefront/storefront/component/captcha/base.html.twig'
+                with {
+                additionalClass : 'col-md-4'
+            } %}
         {% endblock %}
 
         {% block cms_form_newsletter_privacy %}

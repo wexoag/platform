@@ -1,6 +1,5 @@
 /**
  * @package buyers-experience
- * @group disabledCompat
  */
 import { config, mount } from '@vue/test-utils';
 import { createRouter, createWebHashHistory } from 'vue-router';
@@ -38,7 +37,9 @@ async function createWrapper() {
                 'sw-extension-component-section': true,
                 'sw-icon': true,
                 'sw-external-link': true,
-                'sw-button': await wrapTestComponent('sw-button', { sync: true }),
+                'sw-button': await wrapTestComponent('sw-button', {
+                    sync: true,
+                }),
                 'sw-button-deprecated': await wrapTestComponent('sw-button-deprecated', { sync: true }),
                 'mt-button': MtButton,
                 'sw-loader': true,

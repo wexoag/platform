@@ -3,21 +3,27 @@
 namespace Shopware\Core\Maintenance\System\Service;
 
 use Doctrine\DBAL\Connection;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\DataAbstractionLayer\Doctrine\RetryableTransaction;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\Maintenance\System\Exception\ShopConfigurationException;
+use Shopware\Core\Maintenance\MaintenanceException;
 use Symfony\Component\Intl\Currencies;
 
+/**
+ * @deprecated tag:v6.7.0 - reason:becomes-internal
+ */
 #[Package('core')]
 class ShopConfigurator
 {
     /**
      * @internal
      */
-    public function __construct(private readonly Connection $connection)
-    {
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly EventDispatcherInterface $eventDispatcher
+    ) {
     }
 
     public function updateBasicInformation(?string $shopName, ?string $email): void
@@ -36,9 +42,8 @@ class ShopConfigurator
         $locale = str_replace('_', '-', $locale);
 
         $currentLocale = $this->getCurrentSystemLocale();
-
         if (!$currentLocale) {
-            throw new ShopConfigurationException('Default language locale not found');
+            throw MaintenanceException::shopConfigurationNotValid('Default language locale not found');
         }
 
         $currentLocaleId = $currentLocale['id'];
@@ -97,6 +102,8 @@ class ShopConfigurator
         } else {
             $this->changeDefaultLanguageData($newDefaultLanguageId, $currentLocale, $locale);
         }
+
+        $this->eventDispatcher->dispatch(new SystemLanguageChangeEvent($newDefaultLanguageId));
     }
 
     public function setDefaultCurrency(string $currencyCode): void
@@ -107,10 +114,10 @@ class ShopConfigurator
         );
 
         if (!$currentCurrencyIso) {
-            throw new ShopConfigurationException('Default currency not found');
+            throw MaintenanceException::shopConfigurationNotValid('Default currency not found');
         }
 
-        if (\mb_strtoupper((string) $currentCurrencyIso) === \mb_strtoupper($currencyCode)) {
+        if (\mb_strtoupper($currentCurrencyIso) === \mb_strtoupper($currencyCode)) {
             return;
         }
 
@@ -119,7 +126,7 @@ class ShopConfigurator
             $newDefaultCurrencyId = $this->createNewCurrency($currencyCode);
         }
 
-        RetryableTransaction::retryable($this->connection, function (Connection $conn) use ($newDefaultCurrencyId, $currencyCode): void {
+        RetryableTransaction::retryable($this->connection, static function (Connection $conn) use ($newDefaultCurrencyId, $currencyCode): void {
             $stmt = $conn->prepare('UPDATE currency SET id = :newId WHERE id = :oldId');
 
             // assign new uuid to old DEFAULT
@@ -178,7 +185,7 @@ class ShopConfigurator
 
     private function setSystemConfig(string $key, string $value): void
     {
-        $value = json_encode(['_value' => $value], \JSON_UNESCAPED_UNICODE | \JSON_PRESERVE_ZERO_FRACTION);
+        $value = json_encode(['_value' => $value], \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_UNICODE | \JSON_PRESERVE_ZERO_FRACTION);
 
         // Fetch id for config key, as the unique key on config_key and salesChannelId will not work when salesChannelId is null
         $id = $this->connection->fetchOne('
@@ -305,10 +312,10 @@ class ShopConfigurator
         );
 
         if (!$id) {
-            throw new ShopConfigurationException('Locale with iso-code ' . $iso . ' not found');
+            throw MaintenanceException::shopConfigurationNotValid(\sprintf('Locale with iso-code "%s" not found', $iso));
         }
 
-        return (string) $id;
+        return $id;
     }
 
     private function createNewLanguageEntry(string $iso): string
@@ -341,7 +348,7 @@ class ShopConfigurator
         );
 
         if (!$name) {
-            throw new ShopConfigurationException('locale_translation.name for iso: \'' . $iso . '\', localeId: \'' . $localeId . '\' not found!');
+            throw MaintenanceException::shopConfigurationNotValid(\sprintf('locale_translation.name for iso "%s" and localeId "%s" not found', $iso, $localeId));
         }
 
         $this->connection->executeStatement(
@@ -358,7 +365,7 @@ class ShopConfigurator
 
     private function swapDefaultLanguageId(string $newLanguageId): void
     {
-        RetryableTransaction::retryable($this->connection, function (Connection $connection) use ($newLanguageId): void {
+        RetryableTransaction::retryable($this->connection, static function (Connection $connection) use ($newLanguageId): void {
             $stmt = $connection->prepare(
                 'UPDATE language
              SET id = :newId
@@ -393,7 +400,7 @@ class ShopConfigurator
         $currencyCode = \mb_strtoupper($currencyCode);
 
         if (!Currencies::exists($currencyCode)) {
-            throw new ShopConfigurationException(\sprintf('Currency with iso code "%s" not found', $currencyCode));
+            throw MaintenanceException::shopConfigurationNotValid(\sprintf('Currency with iso code "%s" not found', $currencyCode));
         }
 
         $fractionDigits = Currencies::getFractionDigits($currencyCode);

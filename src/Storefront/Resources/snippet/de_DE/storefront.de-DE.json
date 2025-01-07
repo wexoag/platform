@@ -34,6 +34,8 @@
     "mainMenu": "Zeige alle Kategorien",
     "closeMenu": "Menü schließen",
     "back": "Zurück",
+    "expand": "Ausklappen",
+    "collapse": "Einklappen",
     "categories": "Kategorien",
     "showCategory": "%category% anzeigen",
     "required": "*",
@@ -54,6 +56,10 @@
     "formSubmit": "Absenden",
     "listPricePreviously": "vorher %price%",
     "skipToContentLink": "Zum Hauptinhalt springen",
+    "skipToNavigation": "Zur Hauptnavigation springen",
+    "skipToSearch": "Zur Suche springen",
+    "skipThisElement": "Überspringe dieses Element",
+    "scrollUpBtn": "Zurück zum Anfang der Seite springen",
     "pagination": {
       "first": "Erste Seite",
       "prev": "Vorherige Seite",
@@ -75,7 +81,12 @@
     "indexLinkService": "Service/Hilfe",
     "searchNoResult": "Keine Suchergebnisse gefunden.",
     "wishlist": "Merkzettel",
-    "navigationAriaLabel": "Hauptnavigation"
+    "navigationAriaLabel": "Hauptnavigation",
+    "topBarAriaLabel": "Shop-Einstellungen",
+    "languageTrigger": "Sprache ändern (%lang% ist die aktuelle Sprache)",
+    "languageList": "Verfügbare Sprachen",
+    "currencyTrigger": "Währung ändern (%currency% ist die aktuelle Währung)",
+    "currencyList": "Verfügbare Währungen"
   },
   "error": {
     "VIOLATION::IS_BLANK_ERROR": "Die Eingabe darf nicht leer sein.",
@@ -87,7 +98,21 @@
     "VIOLATION::VAT_ID_FORMAT_NOT_CORRECT": "Die eingegebene USt-IdNr. entspricht nicht der erwarteten Struktur.",
     "VIOLATION::ZIP_CODE_INVALID": "Die eingegebene Postleitzahl hat nicht das richtige Format.",
     "VIOLATION::INVALID_FORMAT_ERROR": "Die Eingabe entspricht nicht der erwarteten Struktur.",
-    "VIOLATION::NOT_EQUAL_ERROR": "Die Eingabe ist nicht identisch.",
+    "VIOLATION::INVALID_EMAIL_FORMAT_ERROR": "Keine gültige E-Mail-Adresse eingetragen. Bitte nutzen Sie das folgende Format `nutzer@beispiel.de` und achten Sie darauf, dass die Adresse ein `@` und einen `.` enthält.",
+    "VIOLATION::NOT_EQUAL_ERROR": "Ihre Eingaben sind nicht identisch. Bitte versuchen Sie es erneut.",
+    "VIOLATION::FIRST_NAME_IS_BLANK_ERROR": "Nichts eingegeben. Bitte tragen Sie Ihren Vornamen in dieses Feld ein.",
+    "VIOLATION::LAST_NAME_IS_BLANK_ERROR": "Nichts eingegeben. Bitte tragen Sie Ihren Nachnamen in dieses Feld ein.",
+    "VIOLATION::STREET_IS_BLANK_ERROR": "Nichts eingegeben. Bitte tragen Sie die Straße aus Ihrer Adresse in dieses Feld ein.",
+    "VIOLATION::CITY_IS_BLANK_ERROR": "Nichts eingegeben. Bitte tragen Sie die Stadt aus Ihrer Adresse in dieses Feld ein.",
+    "VIOLATION::COUNTRY_IS_BLANK_ERROR": "Nichts eingegeben. Bitte tragen Sie Ihr Wohnland in dieses Feld ein.",
+    "VIOLATION::ADDITIONAL_ADDR1_IS_BLANK_ERROR": "Nichts eingegeben. Bitte tragen Sie zusätzliche Adressinformationen in dieses Feld ein.",
+    "VIOLATION::ADDITIONAL_ADDR2_IS_BLANK_ERROR": "Nichts eingegeben. Bitte tragen Sie zusätzliche Adressinformationen in dieses Feld ein.",
+    "VIOLATION::PHONE_NUMBER_IS_BLANK_ERROR": "Nichts eingegeben. Bitte tragen Sie Ihre Telefonnummmer in dieses Feld ein.",
+    "VIOLATION::PHONE_NUMBER_IS_TOO_LONG": "Eingabe zu lang. Bitte geben Sie ein gültige Telefonnummer ein.",
+    "VIOLATION::FIRST_NAME_IS_TOO_LONG": "Eingabe zu lang. Bitte geben Sie nur Ihren Rufnamen oder eine Kurzform davon ein.",
+    "VIOLATION::LAST_NAME_IS_TOO_LONG": "Eingabe zu lang. Bitte geben Sie Ihren Namen in abgekürzter Form ein.",
+    "VIOLATION::TITLE_IS_TOO_LONG": "Eingabe zu lang. Bitte geben Sie nur Ihren Haupttitel ein oder verwenden Sie Abkürzungen.",
+    "VIOLATION::ZIPCODE_IS_TOO_LONG": "Eingabe zu lang. Bitte geben Sie eine gültige Postleitzahl ein.",
     "message-default": "Leider ist etwas schief gelaufen",
     "message-404": "Die angeforderte Seite kann nicht gefunden werden.",
     "addToCartError": "Beim Hinzufügen zum Warenkorb ist ein Fehler aufgetreten.",
@@ -105,6 +130,7 @@
       "basic-captcha-invalid": "Eingabe ungültig. Bitte versuchen Sie es erneut."
     },
     "CHECKOUT__ORDER_ORDER_ALREADY_PAID": "Die Bestellung mit der Bestellnummer \"%orderNumber%\" wurde bereits bezahlt und kann nicht nachträglich bearbeitet werden.",
+    "CHECKOUT__ORDER_ORDER_CANCELLED": "Die Bestellung mit der Bestellnummer \"%orderNumber%\" wurde storniert und kann nicht nachträglich bearbeitet werden.",
     "CHECKOUT__ORDER_ORDER_NOT_FOUND": "Diese Bestellung konnte nicht gefunden werden.",
     "CHECKOUT__CART_HASH_MISMATCH": "Produkte oder Preise in Deinem Warenkorb haben sich möglicherweise geändert. Bitte überprüfe den Warenkorb, bevor Du die Bestellung aufgibst.",
     "CHECKOUT__CART_INVALID_LINE_ITEM_QUANTITY": "Die angegebene Menge (%quantity%) ist ungültig."
@@ -126,6 +152,7 @@
     "loginPasswordLabel": "Ihr Passwort",
     "loginPasswordPlaceholder": "Passwort eingeben ...",
     "loginPasswordRecover": "Ich habe mein Passwort vergessen.",
+    "loginRegistrationHeader": "Anmelden oder Konto erstellen",
     "loginSubmit": "Anmelden",
     "loginBadCredentials": "Es konnte kein Account mit den angegebenen Zugangsdaten gefunden werden.",
     "loginThrottled": "Zu viele Anmeldeversuche. Bitte warten Sie %seconds% Sekunden, bevor Sie erneut versuchen, sich anzumelden.",
@@ -323,12 +350,12 @@
     "orderItemInfoContent": "Inhalt:",
     "orderItemInfoCurrentPrice": "Aktueller Stückpreis",
     "orderItemInfoNotAvailable": "Das Produkt ist für eine Folgebestellung nicht mehr verfügbar",
-    "orderActionView": "Ausklappen",
-    "orderActionHide": "Einklappen",
+    "orderActionView": "Details anzeigen",
+    "orderActionHide": "Details ausblenden",
     "orderInfoNoDispatch": "Nicht angegeben",
     "orderLinkRepeat": "Bestellung wiederholen",
     "documentItemColumnTitle": "Dokument",
-    "documentItemColumnDate": "Datum",
+    "documentItemColumnDate": "Erstellungsdatum",
     "documentItemViewFileButton": "Datei ansehen",
     "downloadFileButton": "Datei herunterladen",
     "downloadItemColumnTitle": "Datei",
@@ -341,7 +368,13 @@
     "colonCharacter": ":",
     "orderGuestLoginTitle": "Authentifizierung",
     "orderGuestLoginDescription": "Um Ihre Bestellung einsehen zu können, geben Sie bitte zuerst Ihre E-Mail-Adresse sowie die Postleitzahl aus Ihrer verwendeten Rechnungsadresse ein.",
-    "orderGuestLoginWrongCredentials": "Die eingegebenen Daten konnten leider keiner Bestellung zugeordnet werden."
+    "orderGuestLoginWrongCredentials": "Die eingegebenen Daten konnten leider keiner Bestellung zugeordnet werden.",
+    "orderLineItemsListAriaLabel": "Bestellpositionen",
+    "orderItemAriaLabel": "Bestellnummer %order_number%",
+    "orderDocumentsAriaLabel": "Dokumente von dieser Bestellung",
+    "orderSummaryAriaLabel": "Zusammenfassung der Bestellung",
+    "orderInfoAriaLabel": "Informationen zur Bestellung",
+    "orderTrackingNotAvailable": "Nicht verfügbar"
   },
   "address": {
     "streetLabel": "Straße und Hausnummer",
@@ -403,8 +436,8 @@
     "cartHeaderTaxIncludeVat": "inkl. MwSt.",
     "cartHeaderTaxExcludeVat": "exkl. MwSt.",
     "cartItemInfoId": "Produkt-Nr.:",
-    "addPromotionLabel": "Gutschein-Code",
-    "addPromotionPlaceholder": "Gutschein-Code eingeben ...",
+    "addPromotionLabel": "Gutscheincode",
+    "addPromotionPlaceholder": "Gutscheincode eingeben ...",
     "addProductLabel": "Produktnummer",
     "addProductPlaceholder": "Produktnummer eingeben ...",
     "summaryPositionPrice": "Zwischensumme",
@@ -450,9 +483,9 @@
     "finishButtonBackToShop": "Zurück zum Shop",
     "finishChangePayment": "Zahlungsart ändern",
     "finishPaymentFailed": "Leider ist der Zahlungsprozess fehlgeschlagen. Bitte ändern Sie die Zahlungsart um Ihre Bestellung abzuschließen. <a href=\"%editOrderUrl%\">Zahlung ändern</a>",
-    "codeAddedSuccessful": "Gutschein-Code erfolgreich hinzugefügt.",
+    "codeAddedSuccessful": "Gutscheincode erfolgreich hinzugefügt.",
     "addToCartSuccess": "{1} 1 Produkt zum Warenkorb hinzugefügt.|]1,Inf[ %count% Produkte zum Warenkorb hinzugefügt.",
-    "shippingCosts": "Versanddetails",
+    "shippingCosts": "Versanddetails öffnen",
     "shippingCountry": "Lieferland",
     "paymentMethod": "Zahlungsart",
     "shippingMethod": "Versandart",
@@ -468,7 +501,7 @@
     "lineItemDeliveryDate": "Lieferzeitraum: %earliest% - %latest%",
     "promotion-discount-deleted": "Rabatt \"%name%\" wurde aus dem Warenkorb gelöscht",
     "promotion-discount-added": "Rabatt \"%name%\" wurde dem Warenkorb hinzugefügt",
-    "promotion-not-found": "Der Gutschein-Code \"%code%\" existiert nicht.",
+    "promotion-not-found": "Gutscheincode \"%code%\" existiert nicht.",
     "auto-promotion-not-found": "Die Rabattaktion \"%name%\" ist nicht länger gültig!",
     "promotion-not-eligible": "Der Gutschein-Code wurde gespeichert, aber nicht auf den Warenkorb angewendet, da die Voraussetzungen dafür nicht zutreffen. Sobald die Voraussetzungen zutreffen, wird er automatisch hinzugefügt.",
     "promotion-excluded": "Mindestens ein Rabatt wurde wegen Konflikten mit anderen Rabatten aus dem Warenkorb entfernt. Sobald die Bedingungen wieder zutreffen, wird der Rabatt automatisch hinzugefügt.",
@@ -493,7 +526,7 @@
     "checkout-gateway-error": "%reason%"
   },
   "listing": {
-    "filterTitleText": "Filter",
+    "filterTitleText": "Produkte filtern",
     "showResults": "Ergebnisse anzeigen",
     "boxUnitLabel": "Inhalt:",
     "boxLabelTopseller": "Tipp",
@@ -533,6 +566,7 @@
     "filterByManufacturerAriaLabel": "Filtern nach Hersteller",
     "filterByPriceAriaLabel": "Filtern nach Preis",
     "filterByRatingAriaLabel": "Filtern nach Mindestbewertung",
+    "filterClose": "Filter schließen",
     "defaultProductSortingLabel": "Name A-Z",
     "disabledFilterTooltip": "Dieser Filter zeigt in Kombination mit den ausgewählten Filtern keine weiteren Ergebnisse an.",
     "beforeListPrice": "",
@@ -648,7 +682,9 @@
     "moveTheDeviceToStart": "Bewegen Sie das Gerät, um zu beginnen",
     "tapToPlaceTheObject": "Tippen Sie, um das Objekt zu platzieren",
     "openAugmentedRealityView": "Augmented-Reality-Ansicht öffnen",
-    "openArView": "AR-Ansicht öffnen"
+    "augmentedRealityView": "Augmented-Reality-Ansicht",
+    "openArView": "AR-Ansicht öffnen",
+    "openArViewDescription": "Augmented-Reality-Ansicht öffnen"
   },
   "wishlist": {
     "cartTitle": "Ihr Merkzettel",
@@ -664,7 +700,8 @@
     "wishlistEmptyHeader": "Ihr Merkzettel ist leer",
     "wishlistEmptyDescription": "Behalten Sie interessante Produkte im Auge, indem Sie sie zu Ihrem Merkzettel hinzufügen.",
     "deliveryTimeRestock": "{1} Versandfertig in 1 Tag, Lieferzeit %name% |]1,Inf[ Versandfertig in %restockTime% Tagen, Lieferzeit %name% ",
-    "deliveryShipping": "Dieses Produkt erscheint am"
+    "deliveryShipping": "Dieses Produkt erscheint am",
+    "remove": "%product_name% vom Merkzettel entfernen"
   },
   "footer": {
     "serviceHotlineHeadline": "Service-Hotline",
@@ -732,20 +769,32 @@
         }
       },
       "quantitySelect": {
+        "legend": "Produkt Anzahl: Gib den gewünschten Wert ein oder benutze die Schaltflächen um die Anzahl zu erhöhen oder zu reduzieren.",
+        "areaLiveText": "Anzahl für %product% ist %quantity%.",
         "label": "Anzahl",
+        "labelWithProduct": "Anzahl von %product%",
         "increase": "Anzahl erhöhen",
-        "decrease": "Anzahl verringern"
+        "increaseOfProduct": "Erhöhe die Anzahl von %product%",
+        "decrease": "Anzahl verringern",
+        "decreaseOfProduct": "Verringere die Anzahl %product%"
       }
     },
     "cms": {
       "vimeo": {
         "privacyNoticeText": "Mit dem Aufruf des Videos erklären Sie sich einverstanden, dass Ihre Daten an %platform% übermittelt werden und das Sie die <a data-ajax-modal=\"true\" data-url=\"%url%\" href=\"%url%\" title=\"Datenschutzbestimmungen\">Datenschutzbestimmungen</a> gelesen haben.",
-        "acceptButtonLabel": "Akzeptieren"
+        "acceptButtonLabel": "Akzeptieren",
+        "watchUrlLabel": "Auf Vimeo ansehen"
       },
       "imageGallery": {
+        "ariaLabel": "Bildergalerie mit %total% Elementen",
         "touchMove": "Drücken und drehen",
         "clickMove": "Klicken und drehen",
-        "sliderDotLabel": "Zeige Bild %index% von %total%"
+        "sliderDotLabel": "Zeige Bild %index% von %total%",
+        "skipImageGallery": "Bildergalerie überspringen"
+      },
+      "productGallery": {
+        "ariaLabel": "Produktgalerie mit %total% Elementen",
+        "skipProductGallery": "Produktgalerie überspringen"
       },
       "defaultMedia": {
         "preview_camera_large": {

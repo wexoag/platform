@@ -3,7 +3,6 @@ import flowState from 'src/module/sw-flow/state/flow.state';
 
 /**
  * @package services-settings
- * @group disabledCompat
  */
 
 const recipientEmailInputClass = '.sw-flow-mail-send-modal__recipient-email #sw-field--item-email';
@@ -92,7 +91,9 @@ async function createWrapper(sequence = {}) {
                 'sw-block-field': await wrapTestComponent('sw-block-field'),
                 'sw-base-field': await wrapTestComponent('sw-base-field'),
                 'sw-select-result-list': await wrapTestComponent('sw-select-result-list'),
-                'sw-data-grid': await wrapTestComponent('sw-data-grid', { sync: true }),
+                'sw-data-grid': await wrapTestComponent('sw-data-grid', {
+                    sync: true,
+                }),
                 'sw-text-field': await wrapTestComponent('sw-text-field'),
                 'sw-text-field-deprecated': await wrapTestComponent('sw-text-field-deprecated', { sync: true }),
                 'sw-contextual-field': await wrapTestComponent('sw-contextual-field'),
@@ -104,7 +105,10 @@ async function createWrapper(sequence = {}) {
                 },
                 'sw-highlight-text': true,
                 'sw-select-result': {
-                    props: ['item', 'index'],
+                    props: [
+                        'item',
+                        'index',
+                    ],
                     template: `
                         <li class="sw-select-result" @click.stop="onClickResult">
                             <slot></slot>
@@ -322,7 +326,7 @@ describe('module/sw-flow/component/sw-flow-mail-send-modal', () => {
         await wrapper.find('.sw-flow-mail-send-modal__save-button').trigger('click');
         await flushPromises();
 
-        recipientFieldsClasses.forEach(elementClass => {
+        recipientFieldsClasses.forEach((elementClass) => {
             expect(wrapper.find(elementClass).classes()).toContain('has--error');
         });
     });
@@ -358,8 +362,7 @@ describe('module/sw-flow/component/sw-flow-mail-send-modal', () => {
         expect(row1.find('.sw-data-grid__cell--email').text()).toContain('test@example.com');
         expect(row1.find('.sw-data-grid__cell--name').text()).toContain('John Doe');
 
-        await row1.find('.sw-flow-mail-send-modal__grid-action-delete')
-            .trigger('click');
+        await row1.find('.sw-flow-mail-send-modal__grid-action-delete').trigger('click');
         await flushPromises();
 
         recipientRows = wrapper.findAll('.sw-data-grid__body .sw-data-grid__row');
@@ -545,7 +548,10 @@ describe('module/sw-flow/component/sw-flow-mail-send-modal', () => {
     });
 
     it('should validate reply to field', async () => {
-        const sequence = { ...sequenceFixture, ...{ config: { replyTo: 'test@example.com' } } };
+        const sequence = {
+            ...sequenceFixture,
+            ...{ config: { replyTo: 'test@example.com' } },
+        };
         const wrapper = await createWrapper(sequence);
         await flushPromises();
 
@@ -622,7 +628,9 @@ describe('module/sw-flow/component/sw-flow-mail-send-modal', () => {
         };
         wrapper.vm.buildReplyToTooltip('foo');
 
-        expect(wrapper.vm.$tc).toHaveBeenCalledWith('foo', 0, { settingsLink: 'bar' });
+        expect(wrapper.vm.$tc).toHaveBeenCalledWith('foo', 0, {
+            settingsLink: 'bar',
+        });
     });
 
     it('should be able to close modal', async () => {

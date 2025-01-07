@@ -97,6 +97,12 @@ Component.register('sw-checkbox-field-deprecated', {
             required: false,
             default: false,
         },
+
+        ariaLabel: {
+            type: String,
+            required: false,
+            default: null,
+        },
     },
 
     data() {
@@ -172,7 +178,9 @@ Component.register('sw-checkbox-field-deprecated', {
     },
 
     watch: {
-        value() { this.currentValue = this.value; },
+        value() {
+            this.currentValue = this.value;
+        },
     },
 
     methods: {

@@ -1,6 +1,5 @@
 /**
  * @package services-settings
- * @group disabledCompat
  */
 import { reactive } from 'vue';
 import { mount } from '@vue/test-utils';
@@ -8,35 +7,38 @@ import PrivilegesService from 'src/app/service/privileges.service';
 
 async function createWrapper({ privilegesMappings = [], rolePrivileges = [] } = {}) {
     const privilegesService = new PrivilegesService();
-    privilegesMappings.forEach(mapping => {
+    privilegesMappings.forEach((mapping) => {
         privilegesService.addPrivilegeMappingEntry(mapping);
     });
 
-    const wrapper = mount(await wrapTestComponent('sw-users-permissions-permissions-grid', {
-        sync: true,
-    }), {
-        global: {
-            renderStubDefaultSlot: true,
-            stubs: {
-                'sw-card': true,
-                'sw-checkbox-field': await wrapTestComponent('sw-checkbox-field', {
-                    sync: true,
-                }),
-                'sw-checkbox-field-deprecated': await wrapTestComponent('sw-checkbox-field-deprecated', {
-                    sync: true,
-                }),
-                'sw-icon': true,
-                'sw-field-error': true,
-                'sw-base-field': true,
-            },
-            provide: {
-                privileges: privilegesService,
-            },
-        },
-        props: reactive({
-            role: { privileges: rolePrivileges },
+    const wrapper = mount(
+        await wrapTestComponent('sw-users-permissions-permissions-grid', {
+            sync: true,
         }),
-    });
+        {
+            global: {
+                renderStubDefaultSlot: true,
+                stubs: {
+                    'sw-card': true,
+                    'sw-checkbox-field': await wrapTestComponent('sw-checkbox-field', {
+                        sync: true,
+                    }),
+                    'sw-checkbox-field-deprecated': await wrapTestComponent('sw-checkbox-field-deprecated', {
+                        sync: true,
+                    }),
+                    'sw-icon': true,
+                    'sw-field-error': true,
+                    'sw-base-field': true,
+                },
+                provide: {
+                    privileges: privilegesService,
+                },
+            },
+            props: reactive({
+                role: { privileges: rolePrivileges },
+            }),
+        },
+    );
 
     await flushPromises();
 
@@ -115,10 +117,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
 
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const productAll = productRow.find('.sw-users-permissions-permissions-grid__all .sw-field--checkbox');
 
         expect(productRow.exists()).toBeTruthy();
@@ -152,10 +162,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
 
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const productAll = productRow.find('.sw-users-permissions-permissions-grid__all .sw-field--checkbox');
 
         expect(productRow.exists()).toBeTruthy();
@@ -255,7 +273,13 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         expect(wrapper.vm.role.privileges).toHaveLength(1);
         expect(wrapper.vm.role.privileges[0]).toBe('product.viewer');
-        expect(productViewer.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
+        expect(
+            productViewer
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
     });
 
     it('should have selected the viewer role directly', async () => {
@@ -292,8 +316,20 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer');
         const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor');
 
-        expect(productViewer.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
-        expect(productEditor.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(false);
+        expect(
+            productViewer
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
+        expect(
+            productEditor
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(false);
     });
 
     it('should select the creator role', async () => {
@@ -334,7 +370,13 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         expect(wrapper.vm.role.privileges.length).toBeGreaterThan(0);
         expect(wrapper.vm.role.privileges).toContain('product.creator');
-        expect(productCreator.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
+        expect(
+            productCreator
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
     });
 
     it('should select a role and all its dependencies in the same row', async () => {
@@ -384,9 +426,27 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         expect(wrapper.vm.role.privileges).toContain('product.editor');
         expect(wrapper.vm.role.privileges).toContain('product.viewer');
 
-        expect(productViewer.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
-        expect(productEditor.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
-        expect(productCreator.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
+        expect(
+            productViewer
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
+        expect(
+            productEditor
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
+        expect(
+            productCreator
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
     });
 
     it('should have enabled checkboxes when selecting a role with its dependencies', async () => {
@@ -422,9 +482,15 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         expect(productCreator.props().value).toBe(false);
         expect(productEditor.props().value).toBe(false);
@@ -497,8 +563,12 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_category');
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
         const categoryCreator = categoryRow.find('.sw-users-permissions-permissions-grid__role_creator');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         expect(wrapper.vm.role.privileges).toHaveLength(0);
 
@@ -510,9 +580,27 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         expect(wrapper.vm.role.privileges).toContain('product.editor');
         expect(wrapper.vm.role.privileges).toContain('product.viewer');
 
-        expect(categoryCreator.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
-        expect(productViewer.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
-        expect(productEditor.findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' }).props().value).toBe(true);
+        expect(
+            categoryCreator
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
+        expect(
+            productViewer
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
+        expect(
+            productEditor
+                .findComponent({
+                    name: 'sw-checkbox-field-deprecated__wrapped',
+                })
+                .props().value,
+        ).toBe(true);
     });
 
     it('should select a role and add it to the role privileges prop', async () => {
@@ -669,10 +757,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const productAll = productRow.find('.sw-users-permissions-permissions-grid__all');
 
         expect(productViewer.props().value).toBe(false);
@@ -741,16 +837,32 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_category');
-        const categoryViewer = categoryRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const categoryEditor = categoryRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const categoryCreator = categoryRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const categoryDeleter = categoryRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const categoryViewer = categoryRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const categoryEditor = categoryRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const categoryCreator = categoryRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const categoryDeleter = categoryRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productAll = productRow.find('.sw-users-permissions-permissions-grid__all');
 
@@ -808,10 +920,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productAll = productRow.find('.sw-users-permissions-permissions-grid__all');
 
@@ -862,12 +982,22 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
-        const productAll = productRow.find('.sw-users-permissions-permissions-grid__all').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productAll = productRow
+            .find('.sw-users-permissions-permissions-grid__all')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         expect(productAll.props().value).toBe(false);
 
@@ -902,11 +1032,21 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productAll = productRow.find('.sw-users-permissions-permissions-grid__all').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productAll = productRow
+            .find('.sw-users-permissions-permissions-grid__all')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         // prove that creator and deleter checkbox do not exist
         expect(productCreator.exists()).toBe(false);
@@ -957,10 +1097,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productAll = productRow.find('.sw-users-permissions-permissions-grid__all .sw-field--checkbox');
 
@@ -1022,10 +1170,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         await productViewer.find('input').setChecked();
 
@@ -1079,10 +1235,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         await productEditor.find('input').setChecked();
 
@@ -1136,10 +1300,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         await productCreator.find('input').setChecked();
 
@@ -1193,10 +1365,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         await productDeleter.find('input').setChecked();
 
@@ -1230,7 +1410,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['product.viewer', 'product.editor'],
+                            dependencies: [
+                                'product.viewer',
+                                'product.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1253,7 +1436,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1276,7 +1462,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1299,7 +1488,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1340,7 +1532,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['product.viewer', 'product.editor'],
+                            dependencies: [
+                                'product.viewer',
+                                'product.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1363,7 +1558,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1386,7 +1584,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1409,7 +1610,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1568,7 +1772,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1591,7 +1798,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1614,7 +1824,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1628,16 +1841,19 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const cataloguesRow = wrapper.find('.sw-users-permissions-permissions-grid__parent_catalogues');
         const catalogueViewerCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const catalogueEditorCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         expect(catalogueViewerCheckbox.props().ghostValue).toBe(false);
         expect(catalogueEditorCheckbox.props().ghostValue).toBe(false);
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productEditorCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_editor .sw-field--checkbox');
+        const productEditorCheckbox = productRow.find(
+            '.sw-users-permissions-permissions-grid__role_editor .sw-field--checkbox',
+        );
 
         await productEditorCheckbox.find('input').setChecked();
 
@@ -1692,7 +1908,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1715,7 +1934,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1738,7 +1960,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1758,8 +1983,7 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         expect(catalogueAllCheckbox.props().ghostValue).toBe(false);
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productAllCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_all .sw-field--checkbox');
+        const productAllCheckbox = productRow.find('.sw-users-permissions-permissions-grid__role_all .sw-field--checkbox');
 
         await productAllCheckbox.find('input').setChecked();
 
@@ -1813,7 +2037,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1836,7 +2063,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1859,7 +2089,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1873,14 +2106,17 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const cataloguesRow = wrapper.find('.sw-users-permissions-permissions-grid__parent_catalogues');
         const catalogueEditorCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_categories');
         const productEditorCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const categoryEditorCheckbox = categoryRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         expect(catalogueEditorCheckbox.props().value).toBe(false);
         expect(productEditorCheckbox.props().value).toBe(false);
@@ -1944,7 +2180,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1967,7 +2206,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -1990,7 +2232,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2004,15 +2249,18 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const cataloguesRow = wrapper.find('.sw-users-permissions-permissions-grid__parent_catalogues');
         const catalogueViewerCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_categories');
         const productEditorCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const categoryEditorCheckbox = categoryRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         expect(catalogueViewerCheckbox.props().disabled).toBe(false);
 
@@ -2072,7 +2320,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2095,7 +2346,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2118,7 +2372,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2132,14 +2389,17 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const cataloguesRow = wrapper.find('.sw-users-permissions-permissions-grid__parent_catalogues');
         const catalogueEditorCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_categories');
         const productEditorCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const categoryEditorCheckbox = categoryRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         expect(catalogueEditorCheckbox.props().value).toBe(false);
         expect(productEditorCheckbox.props().value).toBe(false);
@@ -2196,7 +2456,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                         },
                         // Missing editor role for categories
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2219,7 +2482,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2242,7 +2508,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2256,14 +2525,17 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const cataloguesRow = wrapper.find('.sw-users-permissions-permissions-grid__parent_catalogues');
         const catalogueEditorCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_categories');
         const productEditorCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const categoryEditorCheckbox = categoryRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         expect(catalogueEditorCheckbox.props().value).toBe(false);
         expect(productEditorCheckbox.props().value).toBe(false);
@@ -2326,7 +2598,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2349,7 +2624,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2372,7 +2650,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2386,14 +2667,17 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const cataloguesRow = wrapper.find('.sw-users-permissions-permissions-grid__parent_catalogues');
         const catalogueEditorCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_categories');
         const productEditorCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const categoryEditorCheckbox = categoryRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         await productEditorCheckbox.find('input').setChecked();
 
@@ -2455,7 +2739,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2478,7 +2765,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2501,7 +2791,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2515,14 +2808,17 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const cataloguesRow = wrapper.find('.sw-users-permissions-permissions-grid__parent_catalogues');
         const catalogueEditorCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_categories');
         const productEditorCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const categoryEditorCheckbox = categoryRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         await productEditorCheckbox.find('input').setChecked();
         await categoryEditorCheckbox.find('input').setChecked();
@@ -2585,7 +2881,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2608,7 +2907,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2631,7 +2933,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2645,18 +2950,23 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         const cataloguesRow = wrapper.find('.sw-users-permissions-permissions-grid__parent_catalogues');
         const catalogueViewerCheckbox = cataloguesRow
-            .find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
         const categoryRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_categories');
         const productViewerCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const productEditorCheckbox = productRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const categoryEditorCheckbox = categoryRow
-            .find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
         const categoryViewerCheckbox = categoryRow
-            .find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         // check product.editor
         await productEditorCheckbox.find('input').setChecked();
@@ -2728,7 +3038,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['categories.viewer', 'categories.editor'],
+                            dependencies: [
+                                'categories.viewer',
+                                'categories.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2751,7 +3064,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['currencies.viewer', 'currencies.editor'],
+                            dependencies: [
+                                'currencies.viewer',
+                                'currencies.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2774,7 +3090,10 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
                             privileges: [],
                         },
                         creator: {
-                            dependencies: ['sales_channel.viewer', 'sales_channel.editor'],
+                            dependencies: [
+                                'sales_channel.viewer',
+                                'sales_channel.editor',
+                            ],
                             privileges: [],
                         },
                         deleter: {
@@ -2786,15 +3105,17 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
             ],
         });
 
-        const checkboxes = wrapper.findAllComponents({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const checkboxes = wrapper.findAllComponents({
+            name: 'sw-checkbox-field-deprecated__wrapped',
+        });
 
-        checkboxes.forEach(checkbox => {
+        checkboxes.forEach((checkbox) => {
             expect(checkbox.props().disabled).toBe(false);
         });
 
         await wrapper.setProps({ disabled: true });
 
-        checkboxes.forEach(checkbox => {
+        checkboxes.forEach((checkbox) => {
             expect(checkbox.props().disabled).toBe(true);
         });
     });
@@ -2830,7 +3151,9 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         // get product viewer checkbox
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         // assert that catalogue parent does not exist
         expect(catalogueViewer.exists()).toBe(false);
@@ -2893,7 +3216,9 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
 
         // get product viewer checkbox
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         // get property viewer checkbox
         const propertyRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_property');
@@ -2965,11 +3290,21 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         });
 
         const productRow = wrapper.find('.sw-users-permissions-permissions-grid__entry_product');
-        const productViewer = productRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productEditor = productRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productCreator = productRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productDeleter = productRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const productAll = productRow.find('.sw-users-permissions-permissions-grid__all').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productViewer = productRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productEditor = productRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productCreator = productRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productDeleter = productRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const productAll = productRow
+            .find('.sw-users-permissions-permissions-grid__all')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         // check that product viewer box does not exist
         expect(productViewer.exists()).toBe(false);
@@ -2988,11 +3323,21 @@ describe('src/module/sw-users-permissions/components/sw-users-permissions-permis
         expect(productAll.props('value')).toBe(true);
 
         const headerRow = wrapper.find('.sw-users-permissions-permissions-grid__parent');
-        const headerViewer = headerRow.find('.sw-users-permissions-permissions-grid__role_viewer').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const headerEditor = headerRow.find('.sw-users-permissions-permissions-grid__role_editor').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const headerCreator = headerRow.find('.sw-users-permissions-permissions-grid__role_creator').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const headerDeleter = headerRow.find('.sw-users-permissions-permissions-grid__role_deleter').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
-        const headerAll = headerRow.find('.sw-users-permissions-permissions-grid__all').findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const headerViewer = headerRow
+            .find('.sw-users-permissions-permissions-grid__role_viewer')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const headerEditor = headerRow
+            .find('.sw-users-permissions-permissions-grid__role_editor')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const headerCreator = headerRow
+            .find('.sw-users-permissions-permissions-grid__role_creator')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const headerDeleter = headerRow
+            .find('.sw-users-permissions-permissions-grid__role_deleter')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
+        const headerAll = headerRow
+            .find('.sw-users-permissions-permissions-grid__all')
+            .findComponent({ name: 'sw-checkbox-field-deprecated__wrapped' });
 
         // assert that viewer header checkbox as not value and no ghost value
         expect(headerViewer.props('ghostValue')).toBe(false);

@@ -14,7 +14,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Test\TestCaseBase\AdminApiTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Tests\Integration\Core\Checkout\Customer\Rule\OrderFixture;
+use Shopware\Core\Test\Integration\Traits\OrderFixture;
 
 /**
  * @internal
@@ -34,10 +34,10 @@ class OrderAddressServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->orderRepository = $this->getContainer()->get('order.repository');
-        $this->customerAddressRepository = $this->getContainer()->get('customer_address.repository');
-        $orderDeliveryRepository = $this->getContainer()->get('order_delivery.repository');
-        $orderAddressRepository = $this->getContainer()->get('order_address.repository');
+        $this->orderRepository = static::getContainer()->get('order.repository');
+        $this->customerAddressRepository = static::getContainer()->get('customer_address.repository');
+        $orderDeliveryRepository = static::getContainer()->get('order_delivery.repository');
+        $orderAddressRepository = static::getContainer()->get('order_address.repository');
 
         $this->orderAddressService = new OrderAddressService(
             $this->orderRepository,

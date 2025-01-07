@@ -1,6 +1,5 @@
 /**
  * @package admin
- * @group disabledCompat
  */
 
 import { config, mount } from '@vue/test-utils';
@@ -105,7 +104,9 @@ describe('sw-app-actions', () => {
     });
 
     beforeEach(async () => {
-        Shopware.State.commit('shopwareApps/setSelectedIds', [Shopware.Utils.createId()]);
+        Shopware.State.commit('shopwareApps/setSelectedIds', [
+            Shopware.Utils.createId(),
+        ]);
     });
 
     afterEach(() => {
@@ -122,9 +123,11 @@ describe('sw-app-actions', () => {
 
         expect(wrapper.vm).toBeTruthy();
 
-        expect(wrapper.classes()).toEqual(expect.arrayContaining([
-            'sw-app-actions',
-        ]));
+        expect(wrapper.classes()).toEqual(
+            expect.arrayContaining([
+                'sw-app-actions',
+            ]),
+        );
     });
 
     it('creates an sw-app-action-button per action', async () => {
@@ -154,7 +157,7 @@ describe('sw-app-actions', () => {
         expect(emptyState.exists()).toBe(true);
     });
 
-    it('throws an error if appActionButtonService.appActionButtonService throws an error', async () => {
+    it('should throw a notification if appActionButtonService.appActionButtonService throws an error', async () => {
         wrapper = await createWrapper(router);
         wrapper.vm.createNotificationError = jest.fn();
 

@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Storefront\Page\Wishlist\GuestWishlistPageLoadedEvent;
 use Shopware\Storefront\Page\Wishlist\GuestWishlistPageLoader;
+use Shopware\Storefront\Test\Page\StorefrontPageTestBehaviour;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -31,6 +32,6 @@ class GuestWishlistPageTest extends TestCase
 
     protected function getPageLoader(): GuestWishlistPageLoader
     {
-        return $this->getContainer()->get(GuestWishlistPageLoader::class);
+        return static::getContainer()->get(GuestWishlistPageLoader::class);
     }
 }

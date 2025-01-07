@@ -15,6 +15,8 @@ final class ThumbnailTokenParser extends AbstractTokenParser
 {
     /**
      * @var Parser
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $parser;
 
@@ -39,7 +41,7 @@ final class ThumbnailTokenParser extends AbstractTokenParser
             new ConstantExpression('name', $token->getLine())
         );
 
-        return new SwInclude($expr, $variables, false, false, $token->getLine(), $this->getTag());
+        return new SwInclude($expr, $variables, false, false, $token->getLine());
     }
 
     public function getTag(): string

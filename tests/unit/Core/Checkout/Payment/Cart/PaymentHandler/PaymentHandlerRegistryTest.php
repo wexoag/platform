@@ -23,15 +23,14 @@ use Shopware\Core\Checkout\Payment\Cart\PreparedPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\RecurringPaymentTransactionStruct;
 use Shopware\Core\Checkout\Payment\Cart\SyncPaymentTransactionStruct;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Struct\ArrayStruct;
 use Shopware\Core\Framework\Struct\Struct;
-use Shopware\Core\Framework\Test\IdsCollection;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\Test\Annotation\DisabledFeatures;
+use Shopware\Core\Test\Stub\Framework\IdsCollection;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -119,6 +118,7 @@ class PaymentHandlerRegistryTest extends TestCase
     /**
      * @deprecated tag:v6.7.0 - will be removed with old interfaces
      */
+    #[DisabledFeatures(['v6.7.0.0'])]
     public function testOldPaymentRegistry(): void
     {
         $registry = new PaymentHandlerRegistry(
@@ -136,10 +136,6 @@ class PaymentHandlerRegistryTest extends TestCase
 
         $foo = $registry->getPaymentMethodHandler(Uuid::randomHex());
         static::assertNull($foo);
-
-        if (Feature::isActive('v6.7.0.0')) {
-            return;
-        }
 
         $sync = $registry->getSyncPaymentHandler($this->ids->get(SynchronousPaymentHandlerInterface::class));
         static::assertInstanceOf(SynchronousPaymentHandlerInterface::class, $sync);

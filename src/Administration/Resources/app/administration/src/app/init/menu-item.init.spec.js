@@ -1,3 +1,6 @@
+/**
+ * @package admin
+ */
 import initMenuItems from 'src/app/init/menu-item.init';
 import { ui } from '@shopware-ag/meteor-admin-sdk';
 
@@ -74,9 +77,9 @@ describe('src/app/init/menu-item.init.ts', () => {
 
     it('should handle incoming menuCollapse/menuExpand requests', async () => {
         await ui.menu.collapseMenu();
-        expect(Shopware.State.get('adminMenu').isExpanded).toBe(false);
+        expect(Shopware.Store.get('adminMenu').isExpanded).toBe(false);
 
         await ui.menu.expandMenu();
-        expect(Shopware.State.get('adminMenu').isExpanded).toBe(true);
+        expect(Shopware.Store.get('adminMenu').isExpanded).toBe(true);
     });
 });

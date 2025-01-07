@@ -31,6 +31,7 @@
     },
     "card": {
       "buttonImitateCustomer": "Log in as customer",
+      "tooltipImitateCustomerGuest": "Guest accounts cannot be imitated.",
       "placeholderTitle": "Title",
       "placeholderFirstName": "First name",
       "placeholderLastName": "Last name",
@@ -53,6 +54,7 @@
       "textCustomers": "Customers",
       "textCustomersTotal": "No customer | One customer | {count} customers",
       "buttonAddCustomer": "Add customer",
+      "columnCompany": "Company",
       "columnCustomerNumber": "Customer number",
       "columnName": "Name",
       "columnGroup": "Customer group",
@@ -78,7 +80,6 @@
       "contextMenuEdit": "Edit",
       "messageEmpty": "No customers yet",
       "textDeleteConfirm": "Are you sure you want to delete the customer \"{name}\"?",
-      "buttonCancel": "Cancel",
       "buttonDelete": "Delete",
       "titleSidebarItemRefresh": "Refresh",
       "titleSidebarItemFilter": "Filter",
@@ -155,10 +156,7 @@
     },
     "detailAddresses": {
       "buttonAddAddress": "Add address",
-      "buttonAdd": "Add",
-      "buttonCancel": "Cancel",
       "buttonClose": "Close",
-      "buttonApply": "Apply",
       "buttonDelete": "Delete",
       "buttonSelect": "Select",
       "buttonSaveAndSelect": "Save and select",
@@ -235,7 +233,6 @@
     },
     "detail": {
       "buttonSave": "Save",
-      "buttonCancel": "Cancel",
       "buttonEdit": "Edit",
       "tabGeneral": "General",
       "tabAddresses": "Addresses",

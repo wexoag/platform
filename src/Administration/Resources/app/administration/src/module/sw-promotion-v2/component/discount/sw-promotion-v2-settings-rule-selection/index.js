@@ -1,5 +1,5 @@
 /**
- * @package buyers-experience
+ * @package checkout
  */
 import template from './sw-promotion-v2-settings-rule-selection.html.twig';
 
@@ -24,8 +24,7 @@ export default {
 
     computed: {
         ruleCriteria() {
-            return (new Criteria(1, 25))
-                .addSorting(Criteria.sort('name', 'ASC', false));
+            return new Criteria(1, 25).addSorting(Criteria.sort('name', 'ASC', false));
         },
     },
 };

@@ -41,78 +41,110 @@ class Criteria extends Struct implements \Stringable
      */
     final public const TOTAL_COUNT_MODE_NEXT_PAGES = 2;
 
+    final public const ROOT_NESTING_LEVEL = 0;
+
     /**
      * @var list<FieldSorting>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $sorting = [];
 
     /**
      * @var array<array-key, Filter>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $filters = [];
 
     /**
      * @var list<Filter>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $postFilters = [];
 
     /**
      * @var array<string, Aggregation>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $aggregations = [];
 
     /**
      * @var list<ScoreQuery>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $queries = [];
 
     /**
      * @var list<FieldGrouping>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $groupFields = [];
 
     /**
      * @var int|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $offset;
 
     /**
      * @var int|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $limit;
 
     /**
      * @var int
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $totalCountMode = self::TOTAL_COUNT_MODE_NONE;
 
     /**
      * @var array<string, Criteria>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $associations = [];
 
     /**
      * @var array<string>|array<int, array<string>>
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $ids = [];
 
     /**
      * @var bool
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $inherited = false;
 
     /**
      * @var string|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $term;
 
     /**
      * @var array<string, array<string, string>>|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $includes;
 
     /**
      * @var string|null
+     *
+     * @deprecated tag:v6.7.0 - Will be natively typed
      */
     protected $title;
 
@@ -124,7 +156,7 @@ class Criteria extends Struct implements \Stringable
     /**
      * @param array<string>|array<array<string, string>>|null $ids
      */
-    public function __construct(?array $ids = null)
+    public function __construct(?array $ids = null, protected int $nestingLevel = 0)
     {
         if ($ids === null) {
             return;
@@ -246,7 +278,7 @@ class Criteria extends Struct implements \Stringable
             }
 
             if (!$criteria->hasAssociation($part)) {
-                $criteria->associations[$part] = new Criteria();
+                $criteria->associations[$part] = new Criteria(nestingLevel: $this->nestingLevel + 1);
             }
 
             $criteria = $criteria->associations[$part];
@@ -595,9 +627,11 @@ class Criteria extends Struct implements \Stringable
         return $this->title;
     }
 
-    public function setTitle(?string $title): void
+    public function setTitle(?string $title): self
     {
         $this->title = $title;
+
+        return $this;
     }
 
     /**
@@ -616,6 +650,14 @@ class Criteria extends Struct implements \Stringable
     public function getFields(): array
     {
         return $this->fields;
+    }
+
+    /**
+     * Returns the nesting level of the criteria inside a criteria
+     */
+    public function getNestingLevel(): int
+    {
+        return $this->nestingLevel;
     }
 
     /**

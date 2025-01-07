@@ -1,6 +1,5 @@
 /**
  * @package inventory
- * @group compatConfig
  */
 import { mount } from '@vue/test-utils';
 
@@ -11,7 +10,9 @@ async function createWrapper() {
     return mount(await wrapTestComponent('sw-category-layout-card', { sync: true }), {
         global: {
             stubs: {
-                'sw-button': await wrapTestComponent('sw-button', { sync: true }),
+                'sw-button': await wrapTestComponent('sw-button', {
+                    sync: true,
+                }),
                 'sw-button-deprecated': await wrapTestComponent('sw-button-deprecated', { sync: true }),
                 'router-link': true,
                 'sw-loader': true,
@@ -80,7 +81,7 @@ describe('src/module/sw-category/component/sw-category-layout-card', () => {
         const buttons = wrapper.findAllComponents({
             name: 'sw-button-deprecated__wrapped',
         });
-        const changeLayoutButton = buttons.find(b => b.classes('sw-category-detail-layout__change-layout-action'));
+        const changeLayoutButton = buttons.find((b) => b.classes('sw-category-detail-layout__change-layout-action'));
 
         expect(changeLayoutButton.props('disabled')).toBe(false);
     });
@@ -91,7 +92,7 @@ describe('src/module/sw-category/component/sw-category-layout-card', () => {
         const buttons = wrapper.findAllComponents({
             name: 'sw-button-deprecated__wrapped',
         });
-        const changeLayoutButton = buttons.find(b => b.classes('sw-category-detail-layout__change-layout-action'));
+        const changeLayoutButton = buttons.find((b) => b.classes('sw-category-detail-layout__change-layout-action'));
 
         expect(changeLayoutButton.props('disabled')).toBe(true);
     });
@@ -104,7 +105,7 @@ describe('src/module/sw-category/component/sw-category-layout-card', () => {
         const buttons = wrapper.findAllComponents({
             name: 'sw-button-deprecated__wrapped',
         });
-        const pageBuilderButton = buttons.find(b => b.classes('sw-category-detail-layout__open-in-pagebuilder'));
+        const pageBuilderButton = buttons.find((b) => b.classes('sw-category-detail-layout__open-in-pagebuilder'));
 
         expect(pageBuilderButton.props('disabled')).toBe(false);
     });
@@ -115,7 +116,7 @@ describe('src/module/sw-category/component/sw-category-layout-card', () => {
         const buttons = wrapper.findAllComponents({
             name: 'sw-button-deprecated__wrapped',
         });
-        const pageBuilderButton = buttons.find(b => b.classes('sw-category-detail-layout__open-in-pagebuilder'));
+        const pageBuilderButton = buttons.find((b) => b.classes('sw-category-detail-layout__open-in-pagebuilder'));
 
         expect(pageBuilderButton.props('disabled')).toBe(true);
     });
@@ -135,7 +136,7 @@ describe('src/module/sw-category/component/sw-category-layout-card', () => {
         const buttons = wrapper.findAllComponents({
             name: 'sw-button-deprecated__wrapped',
         });
-        const resetLayoutButton = buttons.find(b => b.classes('sw-category-detail-layout__layout-reset'));
+        const resetLayoutButton = buttons.find((b) => b.classes('sw-category-detail-layout__layout-reset'));
 
         expect(resetLayoutButton.props('disabled')).toBe(false);
     });
@@ -153,7 +154,7 @@ describe('src/module/sw-category/component/sw-category-layout-card', () => {
         const buttons = wrapper.findAllComponents({
             name: 'sw-button-deprecated__wrapped',
         });
-        const resetLayoutButton = buttons.find(b => b.classes('sw-category-detail-layout__layout-reset'));
+        const resetLayoutButton = buttons.find((b) => b.classes('sw-category-detail-layout__layout-reset'));
 
         expect(resetLayoutButton.props('disabled')).toBe(true);
     });
@@ -192,6 +193,9 @@ describe('src/module/sw-category/component/sw-category-layout-card', () => {
         const routerPush = wrapper.vm.$router.push;
 
         expect(routerPush).toHaveBeenCalledTimes(1);
-        expect(routerPush).toHaveBeenLastCalledWith({ name: 'sw.cms.detail', params: { id: cmsPageId } });
+        expect(routerPush).toHaveBeenLastCalledWith({
+            name: 'sw.cms.detail',
+            params: { id: cmsPageId },
+        });
     });
 });

@@ -1,3 +1,6 @@
+/**
+ * @package admin
+ */
 describe('src/app/main.ts', () => {
     let VueAdapter;
 
@@ -85,7 +88,7 @@ describe('src/app/main.ts', () => {
             return jest.fn(() => {
                 return {
                     addCondition: jest.fn(() => {}),
-                    getRestrictionsByGroup: jest.fn(() => ([])),
+                    getRestrictionsByGroup: jest.fn(() => []),
                     addAwarenessConfiguration: jest.fn(() => {}),
                 };
             });
@@ -93,7 +96,9 @@ describe('src/app/main.ts', () => {
         serviceMocks.RuleConditionService = (await import('src/app/service/rule-condition.service')).default;
 
         jest.mock('src/app/service/product-stream-condition.service');
-        serviceMocks.ProductStreamConditionService = (await import('src/app/service/product-stream-condition.service')).default;
+        serviceMocks.ProductStreamConditionService = (
+            await import('src/app/service/product-stream-condition.service')
+        ).default;
 
         jest.mock('src/app/service/state-style.service');
         serviceMocks.StateStyleService = (await import('src/app/service/state-style.service')).default;
@@ -126,7 +131,9 @@ describe('src/app/main.ts', () => {
         serviceMocks.ShopwareUpdatesListener = (await import('src/core/service/shopware-updates-listener.service')).default;
 
         jest.mock('src/core/service/customer-group-registration-listener.service');
-        serviceMocks.CustomerGroupRegistrationListener = (await import('src/core/service/customer-group-registration-listener.service')).default;
+        serviceMocks.CustomerGroupRegistrationListener = (
+            await import('src/core/service/customer-group-registration-listener.service')
+        ).default;
 
         jest.mock('src/app/service/locale-helper.service');
         serviceMocks.LocaleHelperService = (await import('src/app/service/locale-helper.service')).default;
@@ -162,10 +169,14 @@ describe('src/app/main.ts', () => {
         serviceMocks.EntityValidationService = (await import('src/app/service/entity-validation.service')).default;
 
         jest.mock('src/app/service/custom-entity-definition.service');
-        serviceMocks.CustomEntityDefinitionService = (await import('src/app/service/custom-entity-definition.service')).default;
+        serviceMocks.CustomEntityDefinitionService = (
+            await import('src/app/service/custom-entity-definition.service')
+        ).default;
 
         jest.mock('src/core/service/usage-data-consent-listener.service');
-        serviceMocks.addUsageDataConsentListener = (await import('src/core/service/usage-data-consent-listener.service')).default;
+        serviceMocks.addUsageDataConsentListener = (
+            await import('src/core/service/usage-data-consent-listener.service')
+        ).default;
 
         jest.mock('src/app/service/file-validation.service');
         serviceMocks.FileValidationService = (await import('src/app/service/file-validation.service')).default;
@@ -196,43 +207,52 @@ describe('src/app/main.ts', () => {
     });
 
     it('should add all initializer to Application', () => {
+        const expectedInitializers = [
+            'apiServices',
+            'state',
+            'coreMixin',
+            'coreDirectives',
+            'coreFilter',
+            'baseComponents',
+            'coreModuleRoutes',
+            'login',
+            'router',
+            'locale',
+            'repositoryFactory',
+            'shortcut',
+            'httpClient',
+            'componentHelper',
+            'filterFactory',
+            'notification',
+            'context',
+            'window',
+            'extensionComponentSections',
+            'tabs',
+            'cms',
+            'menu',
+            'settingItems',
+            'modals',
+            'mainModules',
+            'actionButton',
+            'actions',
+            'extensionDataHandling',
+            'language',
+            'userInformation',
+            'worker',
+            'usageData',
+            'inAppPurchaseCheckout',
+            'store',
+            'topbarButton',
+            'teaserPopover',
+        ];
+
         const initializers = Shopware.Application.getContainer('init').$list();
 
-        expect(initializers).toHaveLength(34);
-        expect(initializers).toContain('apiServices');
-        expect(initializers).toContain('state');
-        expect(initializers).toContain('store');
-        expect(initializers).toContain('coreMixin');
-        expect(initializers).toContain('coreDirectives');
-        expect(initializers).toContain('coreFilter');
-        expect(initializers).toContain('baseComponents');
-        expect(initializers).toContain('coreModuleRoutes');
-        expect(initializers).toContain('login');
-        expect(initializers).toContain('router');
-        expect(initializers).toContain('locale');
-        expect(initializers).toContain('repositoryFactory');
-        expect(initializers).toContain('shortcut');
-        expect(initializers).toContain('httpClient');
-        expect(initializers).toContain('componentHelper');
-        expect(initializers).toContain('filterFactory');
-        expect(initializers).toContain('notification');
-        expect(initializers).toContain('context');
-        expect(initializers).toContain('window');
-        expect(initializers).toContain('extensionComponentSections');
-        expect(initializers).toContain('tabs');
-        expect(initializers).toContain('cms');
-        expect(initializers).toContain('menu');
-        expect(initializers).toContain('settingItems');
-        expect(initializers).toContain('modals');
-        expect(initializers).toContain('mainModules');
-        expect(initializers).toContain('actionButton');
-        expect(initializers).toContain('actions');
-        expect(initializers).toContain('extensionDataHandling');
-        expect(initializers).toContain('language');
-        expect(initializers).toContain('userInformation');
-        expect(initializers).toContain('worker');
-        expect(initializers).toContain('usageData');
-        expect(initializers).toContain('topbarButton');
+        expect(initializers).toHaveLength(expectedInitializers.length);
+
+        expectedInitializers.forEach((initializer) => {
+            expect(initializers).toContain(initializer);
+        });
     });
 
     it('should add all services to Application', () => {

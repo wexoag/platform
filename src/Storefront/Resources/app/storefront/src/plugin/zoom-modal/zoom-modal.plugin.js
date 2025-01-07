@@ -276,7 +276,7 @@ export default class ZoomModalPlugin extends Plugin {
 
         const hideModalListener = () => {
             window.focusHandler.resumeFocusState('zoom-modal');
-        }
+        };
 
         modal.removeEventListener('shown.bs.modal', this._showModalListener);
         modal.addEventListener('shown.bs.modal', this._showModalListener);
@@ -303,9 +303,8 @@ export default class ZoomModalPlugin extends Plugin {
         const galleryImages =  modal.querySelectorAll(this.options.imgGallerySelector);
 
         if (this.gallerySliderPlugin && this.gallerySliderPlugin._slider) {
-
-            this.gallerySliderPlugin._slider.goTo(parentSliderIndex + 1);
-            window.focusHandler.setFocus(galleryImages.item(parentSliderIndex + 1));
+            this.gallerySliderPlugin._slider.goTo(parentSliderIndex);
+            window.focusHandler.setFocus(galleryImages.item(parentSliderIndex));
 
             return;
         }
@@ -333,6 +332,7 @@ export default class ZoomModalPlugin extends Plugin {
             },
         }).then(() => {
             this.gallerySliderPlugin = window.PluginManager.getPluginInstanceFromElement(slider, 'GallerySlider');
+            this.gallerySliderPlugin._slider.goTo(parentSliderIndex);
             window.focusHandler.setFocus(galleryImages.item(parentSliderIndex));
 
             this.$emitter.publish('initSlider');

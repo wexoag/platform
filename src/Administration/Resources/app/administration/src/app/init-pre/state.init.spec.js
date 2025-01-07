@@ -1,3 +1,6 @@
+/**
+ * @package admin
+ */
 import initState from 'src/app/init-pre/state.init';
 
 describe('src/app/init-pre/state.init.ts', () => {
@@ -18,12 +21,11 @@ describe('src/app/init-pre/state.init.ts', () => {
     });
 
     it('should initialized all state modules', () => {
-        expect(Shopware.State.list()).toHaveLength(23);
+        expect(Shopware.State.list()).toHaveLength(22);
 
         expect(Shopware.State.get('notification')).toBeDefined();
         expect(Shopware.State.get('session')).toBeDefined();
         expect(Shopware.State.get('system')).toBeDefined();
-        expect(Shopware.State.get('adminMenu')).toBeDefined();
         expect(Shopware.State.get('licenseViolation')).toBeDefined();
         expect(Shopware.State.get('context')).toBeDefined();
         expect(Shopware.State.get('error')).toBeDefined();
@@ -46,20 +48,44 @@ describe('src/app/init-pre/state.init.ts', () => {
     });
 
     it('should be able to get cmsPageState backwards compatible', () => {
+        // The cmsPageState is deprecated and causes a warning, therefore ignore it
+        global.allowedErrors.push({
+            method: 'warn',
+            msgCheck: (_, msg) => {
+                if (typeof msg !== 'string') {
+                    return false;
+                }
+
+                return msg === 'Shopware.State.get("cmsPageState") is deprecated! Use Shopware.Store.get instead.';
+            },
+        });
+
         Shopware.Store.register({
-            id: 'cmsPageState',
+            id: 'cmsPage',
             state: () => ({
                 foo: 'bar',
             }),
         });
 
-        expect(Shopware.State.get('cmsPageState').foo).toBe('bar');
-        Shopware.Store.unregister('cmsPageState');
+        expect(Shopware.Store.get('cmsPage').foo).toBe('bar');
+        Shopware.Store.unregister('cmsPage');
     });
 
     it('should be able to commit cmsPageState backwards compatible', () => {
+        // The cmsPageState is deprecated and causes a warning, therefore ignore it
+        global.allowedErrors.push({
+            method: 'warn',
+            msgCheck: (_, msg) => {
+                if (typeof msg !== 'string') {
+                    return false;
+                }
+
+                return msg === 'Shopware.State.get("cmsPageState") is deprecated! Use Shopware.Store.get instead.';
+            },
+        });
+
         Shopware.Store.register({
-            id: 'cmsPageState',
+            id: 'cmsPage',
             state: () => ({
                 foo: 'bar',
             }),
@@ -70,12 +96,12 @@ describe('src/app/init-pre/state.init.ts', () => {
             },
         });
 
-        const store = Shopware.Store.get('cmsPageState');
+        const store = Shopware.Store.get('cmsPage');
         expect(store.foo).toBe('bar');
 
-        Shopware.State.commit('cmsPageState/setFoo', 'jest');
+        store.setFoo('jest');
         expect(store.foo).toBe('jest');
 
-        Shopware.Store.unregister('cmsPageState');
+        Shopware.Store.unregister('cmsPage');
     });
 });

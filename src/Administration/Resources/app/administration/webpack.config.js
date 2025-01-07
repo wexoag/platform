@@ -19,6 +19,7 @@ const fs = require('fs');
 const chalk = require('chalk');
 const WebpackBar = require('webpackbar');
 const { default: InjectPlugin, ENTRY_ORDER } = require('webpack-inject-plugin');
+const { VueLoaderPlugin } = require('vue-loader')
 
 if (process.env.IPV4FIRST) {
     require('dns').setDefaultResultOrder('ipv4first');
@@ -48,6 +49,7 @@ const isProd = process.env.mode !== 'development';
 const buildOnlyExtensions = process.env.SHOPWARE_ADMIN_BUILD_ONLY_EXTENSIONS === '1';
 const openBrowserForWatch = process.env.DISABLE_DEVSERVER_OPEN !== '1';
 const useSourceMap = isDev && process.env.SHOPWARE_ADMIN_SKIP_SOURCEMAP_GENERATION !== '1';
+const disableAdminImportsFromPlugins = process.env.DISABLE_ADMIN_IMPORTS_FROM_PLUGINS === '1' || process.env.DISABLE_ADMIN_IMPORTS_FROM_PLUGINS === 'true';
 
 if (isDev) {
     console.log(chalk.yellow('# Development mode is activated \u{1F6E0}'));
@@ -181,9 +183,17 @@ const assetsPluginInstance = new AssetsPlugin({
     fileTypes: ['js', 'css'],
     includeAllFileTypes: false,
     fullPath: true,
-    path: path.resolve(__dirname, 'v_dist'),
     prettyPrint: true,
+
+    // The path is virtual as the file only exists in memory (virtual dist)
+    path: path.resolve(__dirname, 'v_dist'),
     keepInMemory: true,
+
+    // Fix: Admin watch failed without Storefront due to missing "sw-plugin-dev.json".
+    // Writing metadata even for empty plugins resolves this.
+    // @see application.ts@688
+    metadata: 'shopware',
+
     processOutput: function filterAssetsOutput(output) {
         const filteredOutput = { ...output };
 
@@ -263,6 +273,20 @@ const baseConfig = ({ pluginPath, pluginFilepath }) => ({
     module: {
         rules: [
             {
+                test: /\.vue$/,
+                loader: 'vue-loader',
+                include: [
+                    /**
+                     * Only needed for unit tests in plugins. It throws an ESLint error
+                     * in production build
+                     */
+                    path.resolve(__dirname, 'src'),
+                    fs.realpathSync(path.resolve(pluginPath, '..', 'src')),
+                    path.resolve(pluginPath, '..', 'test'),
+                ],
+                options: {},
+            },
+            {
                 test: /\.(html|twig)$/,
                 use: [
                     {
@@ -284,7 +308,7 @@ const baseConfig = ({ pluginPath, pluginFilepath }) => ({
                 ],
             },
             {
-                test: /\.(js|ts|tsx?|vue)$/,
+                test: /\.(js|ts|tsx?)$/,
                 loader: 'swc-loader',
                 include: [
                     /**
@@ -531,6 +555,8 @@ const baseConfig = ({ pluginPath, pluginFilepath }) => ({
         new webpack.ProvidePlugin({
             process: 'process/browser',
         }),
+
+        new VueLoaderPlugin(),
 
         ...(() => {
             if (isDev) {
@@ -790,7 +816,9 @@ const configsForPlugins = pluginEntries.map((plugin) => {
                 return {
                     resolve: {
                         alias: {
-                            '@administration': path.join(__dirname, 'src'),
+                            ...disableAdminImportsFromPlugins ? {} : {
+                                '@administration': path.join(__dirname, 'src'),
+                            }
                         },
                     },
                 };
@@ -807,7 +835,8 @@ const configsForPlugins = pluginEntries.map((plugin) => {
                 filename: isDev ? 'js/[name].js' : 'static/js/[name].js',
                 chunkFilename: isDev ? 'js/[chunkhash].js' : 'static/js/[chunkhash].js',
                 globalObject: 'window',
-                chunkLoadingGlobal: `webpackJsonpPlugin${plugin.technicalName}`
+                chunkLoadingGlobal: `webpackJsonpPlugin${plugin.technicalName}`,
+                uniqueName: plugin.technicalName,
             },
 
             plugins: [

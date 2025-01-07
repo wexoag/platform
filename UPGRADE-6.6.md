@@ -1,3 +1,447 @@
+# 6.6.8.0
+## Search server now provides OpenSearch/Elasticsearch shards and replicas
+
+Previously we had an default configuration of three shards and three replicas. With 6.7 we removed this default configuration and now the search server is responsible for providing the correct configuration.
+This allows that the indices automatically scale based on your nodes available in the cluster.
+
+You can revert to the old behavior by setting the following configuration in your `config/packages/shopware.yml`:
+
+```yaml
+elasticsearch:
+    index_settings:
+        number_of_shards: 3
+        number_of_replicas: 3
+```
+## Redis configuration
+
+Now you can define multiple redis connections in the `config/packages/shopware.yaml` file under the `shopware` section:
+```yaml
+shopware:
+    # ...
+    redis:
+        connections:
+            connection_1:
+                dsn: 'redis://host:port/database_index'
+            connection_2:
+                dsn: 'redis://host:port/database_index'
+```
+Connection names should reflect the actual connection purpose/type and be unique, for example `ephemeral`, `persistent`. Also they are used as a part of service names in the container, so they should follow the service naming conventions. After defining connections, you can reference them by name in configuration of different subsystems.
+
+### Cache invalidation
+
+Replace `shopware.cache.invalidation.delay_options.dsn` with `shopware.cache.invalidation.delay_options.connection` in the configuration files:
+
+```yaml
+shopware:
+    # ...
+    cache:
+        invalidation:
+            delay: 1
+            delay_options:
+                storage: redis
+                # dsn: 'redis://host:port/database_index' # deprecated
+                connection: 'connection_1' # new way
+```
+
+### Increment storage
+
+Replace `shopware.increment.<increment_name>.config.url` with `shopware.increment.<increment_name>.config.connection` in the configuration files:
+
+```yaml
+shopware:
+    # ...
+    increment:
+        increment_name:
+            type: 'redis'
+            config:
+                # url: 'redis://host:port/database_index' # deprecated
+                connection: 'connection_2' # new way
+```
+
+### Number ranges
+
+Replace `shopware.number_range.config.dsn` with `shopware.number_range.config.connection` in the configuration files:
+
+```yaml
+shopware:
+    # ...
+    number_range:
+        increment_storage: "redis"
+        config:
+            # dsn: 'redis://host:port/dbindex' # deprecated
+            connection: 'connection_2' # new way
+```
+
+### Cart storage
+
+Replace `cart.storage.config.dsn` with `cart.storage.config.connection` in the configuration files:
+
+```yaml
+shopware:
+    # ...
+    cart:
+        storage:
+            type: 'redis'
+            config:
+                #dsn: 'redis://host:port/dbindex' # deprecated
+                connection: 'connection_2' # new way
+```
+
+### Custom services
+
+If you have custom services that use redis connection, you have next options for the upgrade:
+
+1. Inject `Shopware\Core\Framework\Adapter\Redis\RedisConnectionProvider` and use it to get the connection by name:
+
+    ```xml
+    <service id="MyCustomService">
+        <argument type="service" id="Shopware\Core\Framework\Adapter\Redis\RedisConnectionProvider" />
+        <argument>%myservice.redis_connection_name%</argument>
+    </service>
+    ```
+
+    ```php
+    class MyCustomService
+    { 
+        public function __construct (
+            private RedisConnectionProvider $redisConnectionProvider,
+            string $connectionName,
+        ) { }
+
+        public function doSomething()
+        {
+            if ($this->redisConnectionProvider->hasConnection($this->connectionName)) {
+                $connection = $this->redisConnectionProvider->getConnection($this->connectionName);
+                // use connection
+            }
+        }
+    }
+    ```
+
+2. Use `Shopware\Core\Framework\Adapter\Redis\RedisConnectionProvider` as factory to define custom services:
+
+    ```xml
+    <service id="my.custom.redis_connection" class="Redis">
+        <factory service="Shopware\Core\Framework\Adapter\Redis\RedisConnectionProvider" method="getConnection" />
+        <argument>%myservice.redis_connection_name%</argument>
+    </service>
+
+    <service id="MyCustomService">
+        <argument type="service" id="my.custom.redis_connection" />
+    </service>
+    ```
+
+    ```php
+    class MyCustomService
+    { 
+        public function __construct (
+            private Redis $redisConnection,
+        ) { }
+
+        public function doSomething()
+        {
+            // use connection
+        }
+    }
+    ```
+    This approach is especially useful if you need multiple services to share the same connection.
+
+3. Inject connection by name directly:
+    ```xml
+    <service id="MyCustomService">
+        <argument type="service" id="shopware.redis.connection.connection_name" />
+    </service>
+    ```
+   Be cautious with this approach—if you change the Redis connection names in your configuration, it will cause container build errors.
+
+Please beware that redis connections with the **same DSNs** are shared over the system, so closing the connection in one service will affect all other services that use the same connection.
+## "adminMenu" Vuex store moved to Pinia
+
+The `adminMenu` store has been migrated from Vuex to Pinia. The store is now available as a Pinia store and can be accessed via `Shopware.Store.get('adminMenu')`.
+
+### Before:
+```js
+Shopware.State.get('adminMenu');
+```
+
+### After:
+```js
+Shopware.Store.get('adminMenu');
+```
+If you use a TLS proxy in your setup, you can now start the hot reloading with https without setting certificate files.
+
+**_Example .env file for a DDEV setup:_**
+```
+IPV4FIRST=1
+APP_ENV=dev
+ESLINT_DISABLE=true
+HOST=0.0.0.0
+STOREFRONT_ASSETS_PORT=9999
+STOREFRONT_PROXY_PORT=9998
+APP_URL=https://shopware-ddev-new.ddev.site/
+PROXY_URL=https://shopware-ddev-new.ddev.site:9998/
+```
+## Deprecation of obsolete method in DefinitionValidator
+The method `\Shopware\Core\Framework\DataAbstractionLayer\DefinitionValidator::getNotices` is deprecated and will be removed without replacement.
+It always returns an empty array, so it has no real purpose.
+
+# 6.6.7.0
+## Shortened filenames with hashes for async JS built files
+When building the Storefront JS-files for production using `composer run build:js:storefront`, the async bundle filenames no longer contain the filepath.
+Instead, only the filename is used with a chunkhash / dynamic version number. This also helps to identify which files have changed after build. Similar to the main entry file like e.g. `cms-extensions.js?1720776107`.
+
+**JS Filename before change in dist:**
+```
+└── custom/apps/
+    └── ExampleCmsExtensions/src/Resources/app/storefront/dist/storefront/js/
+        └── cms-extensions/           
+            ├── cms-extensions.js <-- The main entry pint JS-bundle
+            └── custom_plugins_CmsExtensions_src_Resources_app_storefront_src_cms-extensions-quickview.js  <-- Complete path in filename
+```
+
+**JS Filename after change in dist:**
+```
+└── custom/apps/
+    └── ExampleCmsExtensions/src/Resources/app/storefront/dist/storefront/js/
+        └── cms-extensions/           
+            ├── cms-extensions.js <-- The main entry pint JS-bundle
+            └── cms-extensions-quickview.plugin.423fc1.js <-- Filename and chunkhash
+```
+## Persistent mode for `focusHandler`
+The `window.focusHandler` now supports a persistent mode that can be used in case the current focus is lost after a page reload.
+When using methods `saveFocusStatePersistent` and `resumeFocusStatePersistent` the focus element will be saved inside the `sessionStorage` instead of the window object / memory.
+
+The persistent mode requires a key name for the `sessionStorage` as well as a unique selector as string. It is not possible to save element references into the `sessionStorage`.
+The unique selector will be used to find the DOM element during `resumeFocusStatePersistent` and re-focus it.
+```js
+// Save the current focus state
+window.focusHandler.saveFocusStatePersistent('special-form', '#unique-id-on-this-page');
+
+// Something happens and the page reloads
+window.location.reload();
+
+// Resume the focus state for the key `special-form`. The unique selector will be retrieved from the `sessionStorage` 
+window.focusHandler.resumeFocusStatePersistent('special-form');
+```
+
+By default, the storage keys are prefixed with `sw-last-focus`. The above example will save the following to the `sessionStorage`:
+
+| key                          | value                     |
+|------------------------------|---------------------------|
+| `sw-last-focus-special-form` | `#unique-id-on-this-page` |
+
+## Automatic focus for `FormAutoSubmitPlugin`
+The `FormAutoSubmitPlugin` can now try to re-focus elements after AJAX submits or full page reloads using the `window.focusHandler`.
+This works automatically for all form input elements inside an auto submit form that have a `[data-focus-id]` attribute that is unique.
+
+The automatic focus is activated by default and be modified by the new JS-plugin options:
+
+```js
+export default class FormAutoSubmitPlugin extends Plugin {
+    static options = {
+        autoFocus: true,
+        focusHandlerKey: 'form-auto-submit'
+    }
+}
+```
+
+```diff
+<form action="/example/action" data-form-auto-submit="true">
+    <!-- FormAutoSubmitPlugin will try to restore previous focus on all elements with da focus-id -->
+    <input 
+        class="form-control"
++        data-focus-id="unique-id"
+    >
+</form>
+```
+## Improved formating behaviour of the text editor
+The text editor in the administration was changed to produce paragraph `<p>` elements for new lines instead of `<div>` elements. This leads to a more consistent text formatting. You can still create `<div>` elements on purpose via using the code editor.
+
+In addition, loose text nodes will be wrapped in a paragraph `<p>` element on initializing a new line via the enter key. In the past it could happen that when starting to write in an empty text editor, that text is not wrapped in a proper section element. Now this is automatically fixed when you add a first new line to your text. From then on everything is wrapped in paragraph elements and every new line will also create a new paragraph instead of `<div>` elements.
+## Change Storefront language and currency dropdown items to buttons
+The "top-bar" dropdown items inside `views/storefront/layout/header/top-bar.html.twig` will use `<button>` elements instead of hidden `<input type="radio">` when the `ACCESSIBILITY_TWEAKS` flag is `1`.
+This will improve the keyboard navigation because the user can navigate through all options first before submitting the form.
+
+Currently, every radio input change results in a form submit and thus in a page reload. Using button elements is also more aligned with Bootstraps dropdown HTML structure: [Bootstrap dropdown documentation](https://getbootstrap.com/docs/5.3/components/dropdowns/#menu-items)
+## Change Storefront order items and cart line-items from `<div>` to `<ul>` and `<li>`:
+* We want to change several list views that are currently using generic `<div>` elements to proper `<ul>` and `<li>`. This will not only improve the semantics but also the screen reader accessibility. 
+* To avoid breaking changes in the HTML and the styling, the change to `<ul>` and `<li>` is done behind the `ACCESSIBILITY_TWEAKS` feature flag.
+* With the next major version the `<ul>` and `<li>` will become the default. In the meantime, the `<div>` elements get `role="list"` and `role="listitem"`.
+* All `<ul>` will get a Bootstrap `list-unstyled` class to avoid the list bullet points and have the same appearance as `<div>`.
+* The general HTML structure and Twig blocks remain the same.
+
+### Affected templates:
+* Account order overview
+    * `src/Storefront/Resources/views/storefront/page/account/order-history/index.html.twig`
+    * `src/Storefront/Resources/views/storefront/page/account/order-history/order-detail-document-item.html.twig`
+    * `src/Storefront/Resources/views/storefront/page/account/order-history/order-detail-document.html.twig`
+* Cart table header (Root element changed to `<li>`)
+    * `src/Storefront/Resources/views/storefront/component/checkout/cart-header.html.twig`
+* Line-items wrapper (List wrapper element changed to `<ul>`)
+    * `src/Storefront/Resources/views/storefront/page/checkout/cart/index.html.twig`
+    * `src/Storefront/Resources/views/storefront/page/checkout/confirm/index.html.twig`
+    * `src/Storefront/Resources/views/storefront/page/checkout/finish/index.html.twig`
+    * `src/Storefront/Resources/views/storefront/page/checkout/address/index.html.twig`
+    * `src/Storefront/Resources/views/storefront/page/account/order-history/order-detail-list.html.twig`
+    * `src/Storefront/Resources/views/storefront/component/checkout/offcanvas-cart.html.twig`
+* Line-items (Root element changed to `<li>`)
+    * `src/Storefront/Resources/views/storefront/component/line-item/type/product.html.twig`
+    * `src/Storefront/Resources/views/storefront/component/line-item/type/discount.html.twig`
+    * `src/Storefront/Resources/views/storefront/component/line-item/type/generic.html.twig`
+    * `src/Storefront/Resources/views/storefront/component/line-item/type/container.html.twig`
+## Correct order of app-cms blocks via xml files
+The order of app CMS blocks is now correctly applied when using XML files to define the blocks. This is achieved by using a position attribute in the JSON generated from the XML file, which reflects the order of the CMS slots within the file. Since it's not possible to determine the correct order of CMS blocks that have already been loaded into the database, this change will only affect newly loaded blocks.
+
+To ensure the correct order is applied, you should consider to reinstall apps that provide app CMS blocks.
+
+# 6.6.6.0
+## Rework Storefront pagination to use anchor links and improve accessibility
+We want to change the Storefront pagination component (`Resources/views/storefront/component/pagination.html.twig`) to use anchor links `<a href="#"></a>` instead of radio inputs with styled labels.
+This will improve the accessibility and keyboard operation, as well as the HTML semantics. The pagination with anchor links will also be more aligned with the Bootstrap pagination semantics.
+
+To avoid breaking changes, the updated pagination can only be activated by setting the `ACCESSIBILITY_TWEAKS` feature flag to `1`. With the next major version `v6.7.0` the updated pagination will become the default.
+The pagination will also be more simple because the hidden radio input and the label are no longer there. We only use a single anchor link element instead.
+
+### Pagination item markup before:
+```html
+<li class="page-item">
+  <input type="radio" name="p" id="p2" value="2" class="d-none" title="pagination">
+  <label class="page-link" for="p2">2</label>
+</li>
+```
+
+### Pagination item markup after:
+```html
+<li class="page-item">
+    <a href="?p=2" class="page-link" data-page="2" data-focus-id="2">2</a>
+</li>
+```
+
+## New `ariaHidden` option for `sw_icon`
+When rendering an icon using the `{% sw_icon %}` function, it is now possible to pass an `ariaHidden` option to hide the icon from the screen reader.
+This can be helpful if the icon is only decorative or the purpose is already explained in a parent elements aria-label or title.
+
+```diff
+{# Twig implementation #}
+<a href="#" aria-label="Go to first page">
+-    {% sw_icon 'arrow-medium-double-left' style { pack: 'solid' } %}
++    {% sw_icon 'arrow-medium-double-left' style { pack: 'solid', ariaHidden: true } %}
+</a>
+
+<!-- HTML result -->
+<a href="#" aria-label="Go to first page">
+-    <span class="icon icon-arrow-medium-double-left icon-fluid"><svg></svg></span>
++    <span aria-hidden="true" class="icon icon-arrow-medium-double-left icon-fluid"><svg></svg></span>
+</a>
+```
+## Accessibility improvements for listing filters
+### Additional aria-label and alt texts for screen readers to explain listing filter components
+The listing filter components (dropdown buttons, e.g. "Manufacturer") now support additional `ariaLabel` parameters.
+Those will render an `aria-label` attribute for screen readers that explain the filter buttons purpose without altering the appearance of the filter toggle button.
+
+For example: The `filter-multi-select.html.twig` template now supports an additional `ariaLabel` parameter.
+```diff
+{% sw_include '@Storefront/storefront/component/listing/filter/filter-multi-select.html.twig' with {
+    elements: manufacturersSorted,
+    sidebar: sidebar,
+    name: 'manufacturer',
+    displayName: 'Manufacturer',
++    ariaLabel: 'Filter by manufacturer'
+} %}
+```
+
+This will render the `aria-label` on the filter toggle button. When focusing the button, the screen reader will read "Filter by manufacturer" instead of just "Manufacturer".
+```diff
+<button 
+    class="filter-panel-item-toggle btn"
++    aria-label="Filter by manufacturer"
+    aria-expanded="false"
+    data-bs-toggle="dropdown"
+    data-boundary="viewport"
+    aria-haspopup="true">
+    Manufacturer
+</button>    
+```
+
+### Aria-live updates for listing filters
+When a listing filter is applied and the products results are updated, the screen reader should announce that the product results have been changed.
+To achieve this, the filter panel template `Resources/views/storefront/component/listing/filter-panel.html.twig` now has an `aria-live` region. 
+The live region will be updated when a listing filter is applied or removed. Whenever a live region is updated, it will be announced by the screen reader.
+
+The live region is not visible for the user and can be switched on or off via the include parameter `ariaLiveUpdates` of `Resources/views/storefront/component/listing/filter-panel.html.twig`.
+
+```diff
+{% sw_include '@Storefront/storefront/component/listing/filter-panel.html.twig' with {
+    listing: listing,
+    sidebar: sidebar,
++    ariaLiveUpdates: true
+} %}
+```
+
+```diff
+<div class="filter-panel">
+    <div class="filter-panel-items-container" role="list" aria-label="Filter">
+        <!-- Available filters are shown here. -->
+    </div>
+
+    <div class="filter-panel-active-container">
+        <!-- Active filters are shown here. -->
+    </div>
+
++    <!-- Aria live region to tell the screen reader how many product results are shown after a filter was selected or deselected. -->
++    <div class="filter-panel-aria-live visually-hidden" aria-live="polite" aria-atomic="true">
++        <!-- The live region content is generated by the `ListingPlugin` -->
++        <!-- For example: "Showing 6 products" -->
++    </div>
+</div>
+```
+## Storefront focus handler helper
+To improve accessibility while navigating via keyboard you can use the `window.focusHandler` to save and resume focus states. This is helpful if an element opens new content in a modal or offcanvas menu. While the modal is open the users should navigate through the content of the modal. If the modal closes the focus state should resume to the element which opened the modal, so users can continue at the position where they left. The default Shopware plugins `ajax-modal`, `offcanvas` and `address-editor` will use this behaviour by default. If you want to implement this behaviour in your own plugin, you can use the `saveFocusState` and `resumeFocusState` methods. Have a look at the class `Resources/app/storefront/src/helper/focus-handler.helper.js` to see additional options.
+## New `DomAccessHelper` methods to find focusable elements
+
+The `DomAccessHelper` now supports new methods to find DOM elements that can have keyboard focus.
+Optionally, an element can be provided as a parameter to only search within this given element. By default, the document body will be used.
+
+```js
+import DomAccess from 'src/helper/dom-access.helper';
+
+// Find all focusable elements
+DomAccess.getFocusableElements();
+
+// Return the first focusable element
+DomAccess.getFirstFocusableElement();
+
+// Return the last focusable element
+DomAccess.getLastFocusableElement();
+
+// Only search for focus-able elements inside the given DOM node
+const element = document.querySelector('.special-modal-container');
+DomAccess.getFirstFocusableElement(element);
+```
+## Native typehints of properties
+The properties of the following classes will be typed natively in v6.7.0.0.
+If you have extended from those classes and overwritten the properties, you can already set the correct type.
+* `\Shopware\Core\Content\Media\Aggregate\MediaThumbnailSize\MediaThumbnailSizeEntity`
+* `\Shopware\Core\Framework\DataAbstractionLayer\Entity`
+* `\Shopware\Core\Framework\DataAbstractionLayer\Field\FkField`
+* `\Shopware\Core\Framework\DataAbstractionLayer\Field\ReferenceVersionField`
+## Deprecated exceptions
+The following exceptions were deprecated and will be removed in v6.7.0.0.
+You can already catch the replacement exceptions additionally to the deprecated ones.
+* `\Shopware\Core\Framework\Api\Exception\UnsupportedEncoderInputException`. Also catch `\Shopware\Core\Framework\Api\ApiException`.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Exception\CanNotFindParentStorageFieldException`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException`.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Exception\InternalFieldAccessNotAllowedException`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException`.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Exception\InvalidParentAssociationException`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException`.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Exception\ParentFieldNotFoundException`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException`.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Exception\PrimaryKeyNotProvidedException`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException`.
+## Deprecated methods
+The following methods of the `\Shopware\Core\Framework\DataAbstractionLayer\Entity` class were deprecated and will throw different exceptions in v6.7.0.0.
+You can already catch the replacement exceptions additionally to the deprecated ones.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Entity::__get`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException` in addition to `\Shopware\Core\Framework\DataAbstractionLayer\Exception\InternalFieldAccessNotAllowedException`.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Entity::get`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException` in addition to `\Shopware\Core\Framework\DataAbstractionLayer\Exception\InternalFieldAccessNotAllowedException`.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Entity::checkIfPropertyAccessIsAllowed`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException` in addition to `\Shopware\Core\Framework\DataAbstractionLayer\Exception\InternalFieldAccessNotAllowedException`.
+* `\Shopware\Core\Framework\DataAbstractionLayer\Entity::get`. Also catch `\Shopware\Core\Framework\DataAbstractionLayer\Exception\PropertyNotFoundException` in addition to `\InvalidArgumentException`.
+
 # 6.6.5.0
 ## Elasticsearch with special chars
 * To apply searching by Elasticsearch with special chars, you would need to update your ES index mapping by running: `es:index`
@@ -321,9 +765,11 @@ shopware:
     cache:
         invalidation:
             delay_options:
-                storage: cache
+                storage: redis
                 dsn: 'redis://localhost'
 ```
+
+Since 6.6.10.0 we also have a MySQL implementation available: `\Shopware\Core\Framework\Adapter\Cache\InvalidatorStorage\MySQLInvalidatorStorage`. Use it via `mysql`
 
 # General Core Breaking Changes
 
@@ -847,7 +1293,7 @@ Also use the `Resources/flow.xml` file path instead of `Resources/flow-action.xm
 
 ## Old Elasticsearch data mapping structure is deprecated, introduce new data mapping structure:
 
-* For the full reference, please read the [adr](../../adr/2023-04-11-new-language-inheritance-mechanism-for-opensearch.md)
+* For the full reference, please read the [adr](/adr/2023-04-11-new-language-inheritance-mechanism-for-opensearch.md)
 * If you've defined your own Elasticsearch definitions, please prepare for the new structure by update your definition's `getMapping` and `fetch` methods:
 
 ```php
@@ -1535,9 +1981,11 @@ shopware:
     cache:
         invalidation:
             delay_options:
-                storage: cache
+                storage: redis
                 dsn: 'redis://localhost'
 ```
+
+Since 6.6.10.0 we also have a MySQL implementation available: `\Shopware\Core\Framework\Adapter\Cache\InvalidatorStorage\MySQLInvalidatorStorage`. Use it via `mysql`
 
 ## Introduced in 6.5.5.0
 ## New stock handling implementation is now the default
@@ -1772,7 +2220,7 @@ The selector to initialize the `AjaxModal` plugin will be changed to not interfe
 
 The `generateNewPath()` and `saveSeed()` methods  in `\Shopware\Storefront\Theme\AbstractThemePathBuilder` are now abstract, this means you should implement those methods to allow atomic theme compilations.
 
-For more details refer to the corresponding [ADR](../../adr/storefront/2023-01-10-atomic-theme-compilation.md).
+For more details refer to the corresponding [ADR](/adr/2023-01-10-atomic-theme-compilation.md).
 
 ## Removal of `blacklistIds` and `whitelistIds` in  `\Shopware\Core\Content\Product\ProductEntity`
 Two properties `blacklistIds` and `whitelistIds` were removed without replacement

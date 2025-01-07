@@ -65,7 +65,34 @@ Component.register('sw-select-base', {
         },
     },
 
+    mounted() {
+        this.onMounted();
+    },
+
+    beforeUnmount() {
+        this.onBeforeUnmount();
+    },
+
     methods: {
+        onMounted() {
+            document.addEventListener('keydown', this.handleKeydown);
+        },
+
+        onBeforeUnmount() {
+            document.removeEventListener('keydown', this.handleKeydown);
+        },
+
+        handleKeydown(event) {
+            if (!this.expanded) {
+                return;
+            }
+
+            // Handle escape key
+            if (event.key === 'Escape' || event.key === 'Esc') {
+                this.collapse();
+            }
+        },
+
         toggleExpand() {
             if (!this.expanded) {
                 this.expand();
@@ -109,7 +136,7 @@ Component.register('sw-select-base', {
             const myFocusable = this.$el.querySelector(focusableSelector);
             const keyboardFocusable = [
                 ...document.querySelectorAll(focusableSelector),
-            ].filter(el => !el.hasAttribute('disabled') && el.dataset.clearableButton === undefined);
+            ].filter((el) => !el.hasAttribute('disabled') && el.dataset.clearableButton === undefined);
 
             keyboardFocusable.forEach((element, index) => {
                 if (index > 0 && element === myFocusable) {
@@ -126,9 +153,11 @@ Component.register('sw-select-base', {
                 path = this.computePath(event);
             }
 
-            if (!path.find((element) => {
-                return element === this.$el;
-            })) {
+            if (
+                !path.find((element) => {
+                    return element === this.$el;
+                })
+            ) {
                 this.collapse();
             }
         },

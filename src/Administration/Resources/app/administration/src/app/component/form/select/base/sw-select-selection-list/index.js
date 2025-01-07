@@ -93,6 +93,11 @@ Component.register('sw-select-selection-list', {
             required: false,
             default: false,
         },
+        inputLabel: {
+            type: String,
+            required: false,
+            default: undefined,
+        },
     },
 
     data() {
@@ -104,27 +109,22 @@ Component.register('sw-select-selection-list', {
         };
     },
 
-
     computed: {
         showPlaceholder() {
-            return (this.alwaysShowPlaceholder || this.selections.length === 0 || this.hideLabels)
-                ? this.placeholder
-                : '';
+            return this.alwaysShowPlaceholder || this.selections.length === 0 || this.hideLabels ? this.placeholder : '';
         },
 
         /**
          * @deprecated tag:v6.7.0 - Will be removed
          */
         // eslint-disable-next-line vue/return-in-computed-property
-        visibleTags() {
-        },
+        visibleTags() {},
 
         /**
          * @deprecated tag:v6.7.0 - Will be removed
          */
         // eslint-disable-next-line vue/return-in-computed-property
-        numberOfHiddenTags() {
-        },
+        numberOfHiddenTags() {},
     },
 
     methods: {
@@ -177,7 +177,6 @@ Component.register('sw-select-selection-list', {
         /**
          * @deprecated tag:v6.7.0 - Will be removed
          */
-        removeTagLimit() {
-        },
+        removeTagLimit() {},
     },
 });

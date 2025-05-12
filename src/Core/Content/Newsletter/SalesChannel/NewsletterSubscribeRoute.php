@@ -157,6 +157,11 @@ class NewsletterSubscribeRoute extends AbstractNewsletterSubscribeRoute
                 NewsletterRecipientDefinition::ENTITY_NAME,
                 $dataBag->get('customFields')
             );
+
+            if (empty($data['customFields'])) {
+                // Avoid resetting customFields if empty
+                unset($data['customFields']);
+            }
         }
 
         $this->newsletterRecipientRepository->upsert([$data], $context->getContext());
